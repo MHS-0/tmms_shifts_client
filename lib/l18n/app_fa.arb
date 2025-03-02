@@ -20,5 +20,14 @@
   "language": "زبان",
   "languageDialogTitle": "زبان مورد نظر خود را انتخاب کنید :",
   "english": "English",
-  "persian": "فارسی"
+  "persian": "فارسی",
+  "sign_in": "ورود",
+  "sign_up": "ثبت نام",
+  "username": "نام کاربری",
+  "password": "رمز عبور",
+  "mainStuff": "چیزای اصلی",
+  "usernameTextFieldHint": "نام کاربری",
+  "usernameTextFieldLabel": "نام کاربری",
+  "passwordTextFieldHint": "رمز عبور",
+  "passwordTextFieldLabel": "رمز عبور"
 }

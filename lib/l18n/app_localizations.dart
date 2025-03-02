@@ -202,6 +202,60 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'فارسی'**
   String get persian;
+
+  /// No description provided for @sign_in.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign In'**
+  String get sign_in;
+
+  /// No description provided for @sign_up.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign Up'**
+  String get sign_up;
+
+  /// No description provided for @username.
+  ///
+  /// In en, this message translates to:
+  /// **'Username'**
+  String get username;
+
+  /// No description provided for @password.
+  ///
+  /// In en, this message translates to:
+  /// **'Password'**
+  String get password;
+
+  /// No description provided for @mainStuff.
+  ///
+  /// In en, this message translates to:
+  /// **'Main stuff'**
+  String get mainStuff;
+
+  /// No description provided for @usernameTextFieldHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Username'**
+  String get usernameTextFieldHint;
+
+  /// No description provided for @usernameTextFieldLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Username'**
+  String get usernameTextFieldLabel;
+
+  /// No description provided for @passwordTextFieldHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Password'**
+  String get passwordTextFieldHint;
+
+  /// No description provided for @passwordTextFieldLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Password'**
+  String get passwordTextFieldLabel;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

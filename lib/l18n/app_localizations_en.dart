@@ -61,4 +61,31 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get persian => 'فارسی';
+
+  @override
+  String get sign_in => 'Sign In';
+
+  @override
+  String get sign_up => 'Sign Up';
+
+  @override
+  String get username => 'Username';
+
+  @override
+  String get password => 'Password';
+
+  @override
+  String get mainStuff => 'Main stuff';
+
+  @override
+  String get usernameTextFieldHint => 'Username';
+
+  @override
+  String get usernameTextFieldLabel => 'Username';
+
+  @override
+  String get passwordTextFieldHint => 'Password';
+
+  @override
+  String get passwordTextFieldLabel => 'Password';
 }

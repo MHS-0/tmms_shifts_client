@@ -61,4 +61,31 @@ class AppLocalizationsFa extends AppLocalizations {
 
   @override
   String get persian => 'فارسی';
+
+  @override
+  String get sign_in => 'ورود';
+
+  @override
+  String get sign_up => 'ثبت نام';
+
+  @override
+  String get username => 'نام کاربری';
+
+  @override
+  String get password => 'رمز عبور';
+
+  @override
+  String get mainStuff => 'چیزای اصلی';
+
+  @override
+  String get usernameTextFieldHint => 'نام کاربری';
+
+  @override
+  String get usernameTextFieldLabel => 'نام کاربری';
+
+  @override
+  String get passwordTextFieldHint => 'رمز عبور';
+
+  @override
+  String get passwordTextFieldLabel => 'رمز عبور';
 }
