@@ -1,0 +1,24 @@
+{
+  "@@locale": "en",
+  "title": "tmms-shifts-client",
+  "@title": {
+    "description": "The title of the app"
+  },
+  "settings": "Settings",
+  "about": "About",
+  "aboutDescription": "A client for tmms-shifts",
+  "appVersion": "1.0.0",
+  "cancelButtonText": "Cancel",
+  "saveButtonText": "Save",
+  "okButtonText": "OK",
+  "searchFieldLabel": "Search",
+  "theme": "Theme",
+  "themeDialogTitle": "Choose your preferred theme mode :",
+  "lightTheme": "Light Theme",
+  "darkTheme": "Dark Theme",
+  "systemTheme": "System Theme",
+  "language": "Language",
+  "languageDialogTitle": "Choose your preferred language :",
+  "english": "English",
+  "persian": "فارسی"
+}

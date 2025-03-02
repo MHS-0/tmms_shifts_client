@@ -1,0 +1,24 @@
+{
+  "@@locale": "fa",
+  "title": "tmms-shifts-client",
+  "@title": {
+    "description": "The title of the app"
+  },
+  "settings": "تنظیمات",
+  "about": "درباره",
+  "aboutDescription": "A client for tmms-shifts",
+  "appVersion": "1.0.0",
+  "cancelButtonText": "لغو",
+  "saveButtonText": "ذخیره",
+  "okButtonText": "تایید",
+  "searchFieldLabel": "جستجو",
+  "theme": "تم",
+  "themeDialogTitle": "تو مورد نظر خود را انتخاب کنید :",
+  "lightTheme": "تم روشن",
+  "darkTheme": "تم تیره",
+  "systemTheme": "تم سیستم",
+  "language": "زبان",
+  "languageDialogTitle": "زبان مورد نظر خود را انتخاب کنید :",
+  "english": "English",
+  "persian": "فارسی"
+}
