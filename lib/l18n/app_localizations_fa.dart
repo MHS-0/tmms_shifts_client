@@ -12,6 +12,9 @@ class AppLocalizationsFa extends AppLocalizations {
   String get title => 'tmms-shifts-client';
 
   @override
+  String get longTitle => 'سامانه ثبت مقادیر tmms';
+
+  @override
   String get settings => 'تنظیمات';
 
   @override
@@ -88,4 +91,55 @@ class AppLocalizationsFa extends AppLocalizations {
 
   @override
   String get passwordTextFieldLabel => 'رمز عبور';
+
+  @override
+  String get errorDialogTitle => 'مشکلی پیش آمده است!';
+
+  @override
+  String get errorDialogDescBegin => 'خطای پیش آمده:';
+
+  @override
+  String get errorDialogDescEnd => 'لطفا بعدا دوباره امتحان کنید';
+
+  @override
+  String get fieldShouldBeFilled => 'این فیلد باید پر شود';
+
+  @override
+  String get reports => 'گزارش ها';
+
+  @override
+  String get reportPressureAndTemp => 'گزارش ثبت فشار و دما';
+
+  @override
+  String get reportCorrectorNumbers => 'گزارش ثبت ارقام تصحیح کننده';
+
+  @override
+  String get dataEntry => 'ثبت مقادیر';
+
+  @override
+  String get dataPressureAndTempEntry => 'ثبت مقادیر فشار و دما';
+
+  @override
+  String get dataCorrectorNumberEntry => 'ثبت تصحیح کننده';
+
+  @override
+  String get dataCorrectorReplacementEventEntry => 'ثبت رویداد تعویض تصحیح کننده';
+
+  @override
+  String get dataCounterEntry => 'ثبت ارقام کنتور';
+
+  @override
+  String get dataCounterReplacementEventEntry => 'ثبت رویداد تعویض کنتور';
+
+  @override
+  String get station => 'ایستگاه';
+
+  @override
+  String get invalidUsernameOrPassword => 'نام کاربری یا کلمه عبور اشتباه می باشد';
+
+  @override
+  String get chooseStation => 'انتخاب ایستگاه';
+
+  @override
+  String get finalll => 'final';
 }

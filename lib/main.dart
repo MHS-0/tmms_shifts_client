@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_web_plugins/url_strategy.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
+import 'package:tmms_shifts_client/routes/corrector_replacement_event_register.dart';
 import 'package:tmms_shifts_client/routes/login.dart';
 import 'package:tmms_shifts_client/routes/main_route.dart';
 import 'package:tmms_shifts_client/routes/page_not_found_route.dart';
@@ -29,16 +30,36 @@ final GoRouter _router = GoRouter(
       builder: (_, __) {
         return const MainRoute();
       },
-      routes: <RouteBase>[
-        GoRoute(
-          path: 'login',
-          builder: (_, __) {
-            return const LoginRoute();
-          },
-        ),
-      ],
+    ),
+    GoRoute(
+      path: '/login',
+      builder: (_, __) {
+        return const LoginRoute();
+      },
+    ),
+    GoRoute(
+      path: '/corrector-replacement-event-register',
+      builder: (_, __) {
+        return const CorrectorReplacementEventRegisterRoute();
+      },
+    ),
+    GoRoute(
+      path: '/counter-replacement-event-register',
+      builder: (_, __) {
+        return const CorrectorReplacementEventRegisterRoute();
+      },
     ),
   ],
+  redirect: (context, state) {
+    final loggedIn = context.read<Preferences>().activeUser != null;
+    if (!loggedIn) {
+      return "/login";
+    }
+    if (loggedIn && state.uri.path.contains("login")) {
+      return "/";
+    }
+    return null;
+  },
   errorPageBuilder: (_, __) {
     return MaterialPage(child: PageNotFoundRoute());
   },

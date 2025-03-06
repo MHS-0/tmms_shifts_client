@@ -3,17 +3,17 @@ import 'package:provider/provider.dart';
 import 'package:tmms_shifts_client/l18n/app_localizations.dart';
 import 'package:tmms_shifts_client/providers/preferences.dart';
 import 'package:tmms_shifts_client/widgets/drawer.dart';
-import 'package:tmms_shifts_client/widgets/stations_dropdown.dart';
 
-class MainRoute extends StatefulWidget {
-  /// Creates a new Main route for the app.
-  const MainRoute({super.key});
+class CounterReplacementEventRegisterRoute extends StatefulWidget {
+  const CounterReplacementEventRegisterRoute({super.key});
 
   @override
-  State<MainRoute> createState() => _MainRouteState();
+  State<CounterReplacementEventRegisterRoute> createState() =>
+      _CounterReplacementEventRegisterRouteState();
 }
 
-class _MainRouteState extends State<MainRoute> {
+class _CounterReplacementEventRegisterRouteState
+    extends State<CounterReplacementEventRegisterRoute> {
   @override
   Widget build(BuildContext context) {
     final localizations = AppLocalizations.of(context)!;
@@ -24,12 +24,15 @@ class _MainRouteState extends State<MainRoute> {
       builder: (_, preferences, __) {
         return SelectionArea(
           child: Scaffold(
-            appBar: AppBar(title: Text(localizations.title), centerTitle: true),
+            appBar: AppBar(
+              title: Text(localizations.dataCounterReplacementEventEntry),
+              centerTitle: true,
+            ),
             drawer: MyDrawer(),
             body: SingleChildScrollView(
               child: Column(
+                mainAxisSize: MainAxisSize.min,
                 children: [
-                  StationsDropDown(),
                   Center(
                     child: Text(
                       localizations.mainStuff,

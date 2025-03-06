@@ -101,6 +101,12 @@ abstract class AppLocalizations {
   /// **'tmms-shifts-client'**
   String get title;
 
+  /// No description provided for @longTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'tmms data control panel'**
+  String get longTitle;
+
   /// No description provided for @settings.
   ///
   /// In en, this message translates to:
@@ -256,6 +262,108 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Password'**
   String get passwordTextFieldLabel;
+
+  /// No description provided for @errorDialogTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'There was an error!'**
+  String get errorDialogTitle;
+
+  /// No description provided for @errorDialogDescBegin.
+  ///
+  /// In en, this message translates to:
+  /// **'The error was:'**
+  String get errorDialogDescBegin;
+
+  /// No description provided for @errorDialogDescEnd.
+  ///
+  /// In en, this message translates to:
+  /// **'Please try again later'**
+  String get errorDialogDescEnd;
+
+  /// No description provided for @fieldShouldBeFilled.
+  ///
+  /// In en, this message translates to:
+  /// **'This field should be filled'**
+  String get fieldShouldBeFilled;
+
+  /// No description provided for @reports.
+  ///
+  /// In en, this message translates to:
+  /// **'Reports'**
+  String get reports;
+
+  /// No description provided for @reportPressureAndTemp.
+  ///
+  /// In en, this message translates to:
+  /// **'!'**
+  String get reportPressureAndTemp;
+
+  /// No description provided for @reportCorrectorNumbers.
+  ///
+  /// In en, this message translates to:
+  /// **'!'**
+  String get reportCorrectorNumbers;
+
+  /// No description provided for @dataEntry.
+  ///
+  /// In en, this message translates to:
+  /// **'!'**
+  String get dataEntry;
+
+  /// No description provided for @dataPressureAndTempEntry.
+  ///
+  /// In en, this message translates to:
+  /// **'!'**
+  String get dataPressureAndTempEntry;
+
+  /// No description provided for @dataCorrectorNumberEntry.
+  ///
+  /// In en, this message translates to:
+  /// **'!'**
+  String get dataCorrectorNumberEntry;
+
+  /// No description provided for @dataCorrectorReplacementEventEntry.
+  ///
+  /// In en, this message translates to:
+  /// **'!'**
+  String get dataCorrectorReplacementEventEntry;
+
+  /// No description provided for @dataCounterEntry.
+  ///
+  /// In en, this message translates to:
+  /// **'!'**
+  String get dataCounterEntry;
+
+  /// No description provided for @dataCounterReplacementEventEntry.
+  ///
+  /// In en, this message translates to:
+  /// **'!'**
+  String get dataCounterReplacementEventEntry;
+
+  /// No description provided for @station.
+  ///
+  /// In en, this message translates to:
+  /// **'station'**
+  String get station;
+
+  /// No description provided for @invalidUsernameOrPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Invalid Username or password'**
+  String get invalidUsernameOrPassword;
+
+  /// No description provided for @chooseStation.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a station'**
+  String get chooseStation;
+
+  /// No description provided for @finalll.
+  ///
+  /// In en, this message translates to:
+  /// **'final'**
+  String get finalll;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

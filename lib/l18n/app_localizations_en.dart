@@ -12,6 +12,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get title => 'tmms-shifts-client';
 
   @override
+  String get longTitle => 'tmms data control panel';
+
+  @override
   String get settings => 'Settings';
 
   @override
@@ -88,4 +91,55 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get passwordTextFieldLabel => 'Password';
+
+  @override
+  String get errorDialogTitle => 'There was an error!';
+
+  @override
+  String get errorDialogDescBegin => 'The error was:';
+
+  @override
+  String get errorDialogDescEnd => 'Please try again later';
+
+  @override
+  String get fieldShouldBeFilled => 'This field should be filled';
+
+  @override
+  String get reports => 'Reports';
+
+  @override
+  String get reportPressureAndTemp => '!';
+
+  @override
+  String get reportCorrectorNumbers => '!';
+
+  @override
+  String get dataEntry => '!';
+
+  @override
+  String get dataPressureAndTempEntry => '!';
+
+  @override
+  String get dataCorrectorNumberEntry => '!';
+
+  @override
+  String get dataCorrectorReplacementEventEntry => '!';
+
+  @override
+  String get dataCounterEntry => '!';
+
+  @override
+  String get dataCounterReplacementEventEntry => '!';
+
+  @override
+  String get station => 'station';
+
+  @override
+  String get invalidUsernameOrPassword => 'Invalid Username or password';
+
+  @override
+  String get chooseStation => 'Choose a station';
+
+  @override
+  String get finalll => 'final';
 }

@@ -4,6 +4,7 @@
   "@title": {
     "description": "The title of the app"
   },
+  "longTitle": "سامانه ثبت مقادیر tmms",
   "settings": "تنظیمات",
   "about": "درباره",
   "aboutDescription": "A client for tmms-shifts",
@@ -29,5 +30,22 @@
   "usernameTextFieldHint": "نام کاربری",
   "usernameTextFieldLabel": "نام کاربری",
   "passwordTextFieldHint": "رمز عبور",
-  "passwordTextFieldLabel": "رمز عبور"
+  "passwordTextFieldLabel": "رمز عبور",
+  "errorDialogTitle": "مشکلی پیش آمده است!",
+  "errorDialogDescBegin": "خطای پیش آمده:",
+  "errorDialogDescEnd": "لطفا بعدا دوباره امتحان کنید",
+  "fieldShouldBeFilled": "این فیلد باید پر شود",
+  "reports": "گزارش ها",
+  "reportPressureAndTemp": "گزارش ثبت فشار و دما",
+  "reportCorrectorNumbers": "گزارش ثبت ارقام تصحیح کننده",
+  "dataEntry": "ثبت مقادیر",
+  "dataPressureAndTempEntry": "ثبت مقادیر فشار و دما",
+  "dataCorrectorNumberEntry": "ثبت تصحیح کننده",
+  "dataCorrectorReplacementEventEntry": "ثبت رویداد تعویض تصحیح کننده",
+  "dataCounterEntry": "ثبت ارقام کنتور",
+  "dataCounterReplacementEventEntry": "ثبت رویداد تعویض کنتور",
+  "station": "ایستگاه",
+  "invalidUsernameOrPassword": "نام کاربری یا کلمه عبور اشتباه می باشد",
+  "chooseStation": "انتخاب ایستگاه",
+  "finalll": "final"
 }

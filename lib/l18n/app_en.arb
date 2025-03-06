@@ -4,6 +4,7 @@
   "@title": {
     "description": "The title of the app"
   },
+  "longTitle": "tmms data control panel",
   "settings": "Settings",
   "about": "About",
   "aboutDescription": "A client for tmms-shifts",
@@ -29,5 +30,22 @@
   "usernameTextFieldHint": "Username",
   "usernameTextFieldLabel": "Username",
   "passwordTextFieldHint": "Password",
-  "passwordTextFieldLabel": "Password"
+  "passwordTextFieldLabel": "Password",
+  "errorDialogTitle": "There was an error!",
+  "errorDialogDescBegin": "The error was:",
+  "errorDialogDescEnd": "Please try again later",
+  "fieldShouldBeFilled": "This field should be filled",
+  "reports": "Reports",
+  "reportPressureAndTemp": "!",
+  "reportCorrectorNumbers": "!",
+  "dataEntry": "!",
+  "dataPressureAndTempEntry": "!",
+  "dataCorrectorNumberEntry": "!",
+  "dataCorrectorReplacementEventEntry": "!",
+  "dataCounterEntry": "!",
+  "dataCounterReplacementEventEntry": "!",
+  "station": "station",
+  "invalidUsernameOrPassword": "Invalid Username or password",
+  "chooseStation": "Choose a station",
+  "finalll": "final"
 }

@@ -1,9 +1,46 @@
-import 'dart:io';
+import 'dart:convert';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:json_annotation/json_annotation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tmms_shifts_client/consts.dart';
+import 'package:tmms_shifts_client/data/backend_types.dart';
+
+part "preferences.g.dart";
+
+@JsonSerializable()
+class ActiveUser {
+  ActiveUser({
+    required this.username,
+    required this.password,
+    required this.token,
+    required this.isStaff,
+    required this.expiry,
+    required this.stations,
+    this.fullname,
+  });
+
+  final String username;
+  final String password;
+  final String? fullname;
+  final List<Station> stations;
+  final String token;
+  final bool isStaff;
+  final DateTime expiry;
+
+  ActiveUser.fromLoginResponse(LoginResponse resp, this.password)
+    : username = resp.user.username,
+      token = resp.token,
+      isStaff = resp.user.isStaff,
+      expiry = resp.expiry,
+      fullname = resp.user.fullname,
+      stations = resp.user.stations ?? [];
+
+  factory ActiveUser.fromJson(Map<String, dynamic> json) =>
+      _$ActiveUserFromJson(json);
+
+  Map<String, dynamic> toJson() => _$ActiveUserToJson(this);
+}
 
 /// This provider class manages the SharedPreferences instance which holds the
 /// user's theme and locale preferences and notifies the listeners of the changes
@@ -29,7 +66,7 @@ class Preferences extends ChangeNotifier {
   late Locale _locale;
 
   /// The user's stored authorization token
-  String? _authToken;
+  ActiveUser? _activeUser;
 
   /// The user's preferred theme mode.
   ///
@@ -42,7 +79,7 @@ class Preferences extends ChangeNotifier {
   Locale get locale => _locale;
 
   /// The user's stored authorization token
-  String? get authToken => _authToken;
+  ActiveUser? get activeUser => _activeUser;
 
   /// Loads the user's preferences and sets the necessary instance variables. Should
   /// be called and awaited before the instance can be used.
@@ -50,7 +87,7 @@ class Preferences extends ChangeNotifier {
     _sp = await SharedPreferences.getInstance();
 
     // Get the User's preferred theme. Defaults to system theme.
-    final savedThemeMode = _sp.getString(themeModeKey) ?? systemThemeValue;
+    final savedThemeMode = _sp.getString(themeModeKey) ?? lightThemeValue;
     switch (savedThemeMode) {
       case lightThemeValue:
         _themeMode = ThemeMode.light;
@@ -62,8 +99,7 @@ class Preferences extends ChangeNotifier {
         _themeMode = ThemeMode.system;
     }
 
-    // Get the User's preferred locale. Defaults to English if system locale
-    // isn't set to Persian.
+    // Get the User's preferred locale. Defaults to Persian.
     final savedLocale = _sp.getString(localeKey);
     switch (savedLocale) {
       case englishLocaleValue:
@@ -73,17 +109,67 @@ class Preferences extends ChangeNotifier {
         _locale = persianLocale;
         break;
       default:
-        if (!kIsWeb && Platform.localeName.contains('fa')) {
-          _locale = persianLocale;
-        } else {
-          _locale = englishLocale;
-        }
+        _locale = persianLocale;
     }
+
+    // FIX: Replace with actual code!!!
+    _activeUser = ActiveUser(
+      username: "admin",
+      password: "asd123!@#",
+      token: "asdasdasdaasd",
+      isStaff: true,
+      expiry: DateTime.now().add(Duration(days: 365)),
+      fullname: "Mammad",
+      stations: [
+        Station(
+          code: "123",
+          rans: [
+            Ran(id: 1, sequenceNumber: 1, station: "123"),
+            Ran(id: 2, sequenceNumber: 2, station: "123"),
+          ],
+          typeName: "CGS",
+          name: "Mammad__1",
+          district: "Semnan",
+          area: "Shahrood",
+          capacity: 1234,
+          type: 1,
+        ),
+        Station(
+          code: "142",
+          rans: [
+            Ran(id: 4, sequenceNumber: 1, station: "142"),
+            Ran(id: 5, sequenceNumber: 2, station: "142"),
+          ],
+          typeName: "CGS",
+          name: "Mammad__2",
+          district: "Tehran",
+          area: "Khode Tehran",
+          capacity: 1234,
+          type: 1,
+        ),
+      ],
+    );
+
+    // final savedActiveUser = _sp.getString(activeUserKey);
+    // if (savedActiveUser != null) {
+    //   final Map<String, dynamic> user = jsonDecode(savedActiveUser);
+    //   final previousUser = ActiveUser.fromJson(user);
+    //   final now = DateTime.now();
+    //   if (previousUser.expiry.isAfter(now)) {
+    //     _sp.remove(activeUserKey);
+    //   } else {
+    //     _activeUser = previousUser;
+    //   }
+    // }
   }
 
   /// Sets the user's preferred theme to [themeMode] and saves it to SharedPreferences.
   void setTheme(ThemeMode themeMode) {
-    if (themeMode == _themeMode && _sp.getString(themeModeKey) != null) return;
+    if (themeMode == _themeMode && _sp.getString(themeModeKey) != null) {
+      notifyListeners();
+      return;
+    }
+
     var themeValue = '';
     switch (themeMode) {
       case ThemeMode.light:
@@ -102,7 +188,11 @@ class Preferences extends ChangeNotifier {
 
   /// Sets the user's preferred localization to [locale] and saves it to SharedPreferences.
   void setLocale(Locale locale) {
-    if (locale == _locale && _sp.getString(localeKey) != null) return;
+    if (locale == _locale && _sp.getString(localeKey) != null) {
+      notifyListeners();
+      return;
+    }
+
     var localeValue = '';
     switch (locale.languageCode) {
       case 'fa':
@@ -117,17 +207,17 @@ class Preferences extends ChangeNotifier {
   }
 
   /// Sets the user's auth token to [token] and saves it to SharedPreferences.
-  void setAuthToken(String token) {
-    if (token == _authToken && _sp.getString(authKey) != null) return;
-    _sp.setString(authKey, token);
-    _authToken = token;
+  void setActiveUser(LoginResponse resp, String password) {
+    final user = ActiveUser.fromLoginResponse(resp, password);
+    _sp.setString(activeUserKey, jsonEncode(user.toJson));
+    _activeUser = user;
     notifyListeners();
   }
 
   /// Unsets the user's auth token from SharedPreferences.
-  void unsetAuthToken() {
-    _sp.remove(authKey);
-    _authToken = null;
+  void unsetActiveUser() {
+    _sp.remove(activeUserKey);
+    _activeUser = null;
     notifyListeners();
   }
 
