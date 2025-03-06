@@ -86,3 +86,190 @@ Map<String, dynamic> _$RanToJson(Ran instance) => <String, dynamic>{
   'sequence_number': instance.sequenceNumber,
   'station': instance.station,
 };
+
+CreateShiftDataRequest _$CreateShiftDataRequestFromJson(
+  Map<String, dynamic> json,
+) => CreateShiftDataRequest(
+  station: json['station'] as String,
+  shift: json['shift'] as String,
+  inputPressure: (json['input_pressure'] as num).toInt(),
+  outputPressure: (json['output_pressure'] as num).toInt(),
+  inputTemperature: (json['input_temperature'] as num).toInt(),
+  outputTemperature: (json['output_temperature'] as num).toInt(),
+  date: json['date'] as String,
+);
+
+Map<String, dynamic> _$CreateShiftDataRequestToJson(
+  CreateShiftDataRequest instance,
+) => <String, dynamic>{
+  'station': instance.station,
+  'shift': instance.shift,
+  'input_pressure': instance.inputPressure,
+  'output_pressure': instance.outputPressure,
+  'input_temperature': instance.inputTemperature,
+  'output_temperature': instance.outputTemperature,
+  'date': instance.date,
+};
+
+CreateShiftDataResponse _$CreateShiftDataResponseFromJson(
+  Map<String, dynamic> json,
+) => CreateShiftDataResponse(
+  registeredDatetime: json['registered_datetime'] as String,
+  station: json['station'] as String,
+  shift: json['shift'] as String,
+  inputPressure: (json['input_pressure'] as num).toInt(),
+  outputPressure: (json['output_pressure'] as num).toInt(),
+  inputTemperature: (json['input_temperature'] as num).toInt(),
+  outputTemperature: (json['output_temperature'] as num).toInt(),
+  date: json['date'] as String,
+  user: json['user'] as String?,
+);
+
+Map<String, dynamic> _$CreateShiftDataResponseToJson(
+  CreateShiftDataResponse instance,
+) => <String, dynamic>{
+  'station': instance.station,
+  'shift': instance.shift,
+  'input_pressure': instance.inputPressure,
+  'output_pressure': instance.outputPressure,
+  'input_temperature': instance.inputTemperature,
+  'output_temperature': instance.outputTemperature,
+  'date': instance.date,
+  'registered_datetime': instance.registeredDatetime,
+  'user': instance.user,
+};
+
+UpdateShiftDataRequest _$UpdateShiftDataRequestFromJson(
+  Map<String, dynamic> json,
+) => UpdateShiftDataRequest(
+  station: json['station'] as String,
+  shift: json['shift'] as String,
+  inputPressure: (json['input_pressure'] as num).toInt(),
+  outputPressure: (json['output_pressure'] as num).toInt(),
+  inputTemperature: (json['input_temperature'] as num).toInt(),
+  outputTemperature: (json['output_temperature'] as num).toInt(),
+  date: json['date'] as String,
+);
+
+Map<String, dynamic> _$UpdateShiftDataRequestToJson(
+  UpdateShiftDataRequest instance,
+) => <String, dynamic>{
+  'station': instance.station,
+  'shift': instance.shift,
+  'input_pressure': instance.inputPressure,
+  'output_pressure': instance.outputPressure,
+  'input_temperature': instance.inputTemperature,
+  'output_temperature': instance.outputTemperature,
+  'date': instance.date,
+};
+
+UpdateShiftDataResponse _$UpdateShiftDataResponseFromJson(
+  Map<String, dynamic> json,
+) => UpdateShiftDataResponse(
+  id: (json['id'] as num).toInt(),
+  user: json['user'] as String?,
+  station: json['station'] as String,
+  registeredDatetime: json['registered_datetime'] as String,
+  shift: json['shift'] as String,
+  inputPressure: (json['input_pressure'] as num).toInt(),
+  outputPressure: (json['output_pressure'] as num).toInt(),
+  inputTemperature: (json['input_temperature'] as num).toInt(),
+  outputTemperature: (json['output_temperature'] as num).toInt(),
+  date: json['date'] as String,
+);
+
+Map<String, dynamic> _$UpdateShiftDataResponseToJson(
+  UpdateShiftDataResponse instance,
+) => <String, dynamic>{
+  'id': instance.id,
+  'station': instance.station,
+  'shift': instance.shift,
+  'input_pressure': instance.inputPressure,
+  'output_pressure': instance.outputPressure,
+  'input_temperature': instance.inputTemperature,
+  'output_temperature': instance.outputTemperature,
+  'date': instance.date,
+  'registered_datetime': instance.registeredDatetime,
+  'user': instance.user,
+};
+
+GetShiftDataResponse _$GetShiftDataResponseFromJson(
+  Map<String, dynamic> json,
+) => GetShiftDataResponse(
+  id: (json['id'] as num).toInt(),
+  user: json['user'] as String?,
+  station: json['station'] as String,
+  shift: json['shift'] as String,
+  inputPressure: (json['input_pressure'] as num).toInt(),
+  outputPressure: (json['output_pressure'] as num).toInt(),
+  inputTemperature: (json['input_temperature'] as num).toInt(),
+  registeredDatetime: json['registered_datetime'] as String,
+  outputTemperature: (json['output_temperature'] as num).toInt(),
+  date: json['date'] as String,
+);
+
+Map<String, dynamic> _$GetShiftDataResponseToJson(
+  GetShiftDataResponse instance,
+) => <String, dynamic>{
+  'id': instance.id,
+  'station': instance.station,
+  'shift': instance.shift,
+  'input_pressure': instance.inputPressure,
+  'output_pressure': instance.outputPressure,
+  'input_temperature': instance.inputTemperature,
+  'output_temperature': instance.outputTemperature,
+  'date': instance.date,
+  'registered_datetime': instance.registeredDatetime,
+  'user': instance.user,
+};
+
+GetShiftLastActionResponse _$GetShiftLastActionResponseFromJson(
+  Map<String, dynamic> json,
+) => GetShiftLastActionResponse(
+  id: (json['id'] as num).toInt(),
+  user: json['user'] as String?,
+  station: json['station'] as String,
+  shift: json['shift'] as String,
+  inputPressure: (json['input_pressure'] as num).toInt(),
+  outputPressure: (json['output_pressure'] as num).toInt(),
+  inputTemperature: (json['input_temperature'] as num).toInt(),
+  outputTemperature: (json['output_temperature'] as num).toInt(),
+  registeredDatetime: json['registered_datetime'] as String,
+  date: json['date'] as String,
+);
+
+Map<String, dynamic> _$GetShiftLastActionResponseToJson(
+  GetShiftLastActionResponse instance,
+) => <String, dynamic>{
+  'id': instance.id,
+  'station': instance.station,
+  'shift': instance.shift,
+  'input_pressure': instance.inputPressure,
+  'output_pressure': instance.outputPressure,
+  'input_temperature': instance.inputTemperature,
+  'output_temperature': instance.outputTemperature,
+  'date': instance.date,
+  'registered_datetime': instance.registeredDatetime,
+  'user': instance.user,
+};
+
+GetShiftDataListResponse _$GetShiftDataListResponseFromJson(
+  Map<String, dynamic> json,
+) => GetShiftDataListResponse(
+  count: (json['count'] as num).toInt(),
+  next: json['next'],
+  previous: json['previous'],
+  results:
+      (json['results'] as List<dynamic>)
+          .map((e) => GetShiftDataResponse.fromJson(e as Map<String, dynamic>))
+          .toList(),
+);
+
+Map<String, dynamic> _$GetShiftDataListResponseToJson(
+  GetShiftDataListResponse instance,
+) => <String, dynamic>{
+  'count': instance.count,
+  'next': instance.next,
+  'previous': instance.previous,
+  'results': instance.results,
+};
