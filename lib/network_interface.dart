@@ -170,32 +170,32 @@ class NetworkInterface {
     );
   }
 
-  Future<GetMeterAndCorrectorFullReportResponse>
-  getMeterAndCorrectorFullReport({
-    String? fromDate,
-    String? toDate,
-    int? stationCode,
-  }) async {
-    final Map<String, dynamic>? queries;
-    if (fromDate == null && toDate == null && stationCode == null) {
-      queries = null;
-    } else {
-      queries = {
-        if (fromDate != null) "from_date": fromDate,
-        if (toDate != null) "to_date": toDate,
-        if (stationCode != null) "station_codes": stationCode,
-      };
-    }
-    final Response<Map<String, dynamic>> resp = await dio.get(
-      "/reports/meter_and_corrector/full_report",
-      options: Options(headers: authHeaderWithToken()),
-      queryParameters: queries,
-    );
-    final finalResp = GetMeterAndCorrectorFullReportResponse.fromJson(
-      resp.data!,
-    );
-    return finalResp;
-  }
+  // Future<GetMeterAndCorrectorFullReportResponse>
+  // getMeterAndCorrectorFullReport({
+  //   String? fromDate,
+  //   String? toDate,
+  //   int? stationCode,
+  // }) async {
+  //   final Map<String, dynamic>? queries;
+  //   if (fromDate == null && toDate == null && stationCode == null) {
+  //     queries = null;
+  //   } else {
+  //     queries = {
+  //       if (fromDate != null) "from_date": fromDate,
+  //       if (toDate != null) "to_date": toDate,
+  //       if (stationCode != null) "station_codes": stationCode,
+  //     };
+  //   }
+  //   final Response<Map<String, dynamic>> resp = await dio.get(
+  //     "/reports/meter_and_corrector/full_report",
+  //     options: Options(headers: authHeaderWithToken()),
+  //     queryParameters: queries,
+  //   );
+  //   final finalResp = GetMeterAndCorrectorFullReportResponse.fromJson(
+  //     resp.data!,
+  //   );
+  //   return finalResp;
+  // }
 
   /// The factory that returns the singleton instance.
   factory NetworkInterface.instance() => _interface;
