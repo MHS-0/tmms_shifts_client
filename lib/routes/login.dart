@@ -102,13 +102,14 @@ class _LoginRouteState extends State<LoginRoute> {
                               try {
                                 final resp = await NetworkInterface.instance()
                                     .login(loginInfo);
-                                if (context.mounted) {
-                                  context.read<Preferences>().setActiveUser(
-                                    resp,
-                                    _passwordController.text,
-                                  );
-                                  context.go("/");
-                                }
+                                // FIX: Actually implement it with the final backend responses.
+                                // if (context.mounted) {
+                                //   context.read<Preferences>().setActiveUser(
+                                //     resp,
+                                //     _passwordController.text,
+                                //   );
+                                //   context.go("/");
+                                // }
                               } on DioException catch (e) {
                                 if (e.response?.statusCode == 400) {
                                   if (context.mounted) {

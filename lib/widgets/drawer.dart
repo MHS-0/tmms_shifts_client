@@ -104,52 +104,6 @@ class MyDrawer extends StatelessWidget {
               ),
             ],
           ),
-          ExpansionTile(
-            childrenPadding: EdgeInsets.symmetric(horizontal: 16),
-            leading: Icon(Icons.data_exploration),
-            title: Text(localizations.dataEntry),
-            children: [
-              SizedBox(height: 8),
-              Text(
-                localizations.dataPressureAndTempEntry,
-                style: Theme.of(context).textTheme.titleLarge,
-                textAlign: TextAlign.center,
-              ),
-              SizedBox(height: 8),
-              DropdownMenu(
-                width: 200,
-                label: Text(localizations.station),
-                dropdownMenuEntries: [],
-              ),
-              SizedBox(height: 16),
-              Text(
-                localizations.dataCounterEntry,
-                style: Theme.of(context).textTheme.titleLarge,
-                textAlign: TextAlign.center,
-              ),
-              SizedBox(height: 8),
-              DropdownMenu(
-                width: 200,
-                label: Text(localizations.station),
-                dropdownMenuEntries: [],
-              ),
-              SizedBox(height: 16),
-              Text(
-                localizations.dataCounterReplacementEventEntry,
-                style: Theme.of(context).textTheme.titleLarge,
-                textAlign: TextAlign.center,
-              ),
-              SizedBox(height: 8),
-              DropdownMenu(
-                width: 200,
-                label: Text(localizations.station),
-                enableFilter: true,
-                inputDecorationTheme: InputDecorationTheme(filled: true),
-                dropdownMenuEntries: [],
-              ),
-              SizedBox(height: 16),
-            ],
-          ),
         ],
       ),
     );

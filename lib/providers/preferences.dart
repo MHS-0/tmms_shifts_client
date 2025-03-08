@@ -28,13 +28,16 @@ class ActiveUser {
   final bool isStaff;
   final DateTime expiry;
 
-  ActiveUser.fromLoginResponse(LoginResponse resp, this.password)
-    : username = resp.user.username,
+  ActiveUser.fromLoginResponse(
+    LoginResponse resp,
+    GetProfileResponse profile,
+    this.password,
+  ) : username = profile.username,
       token = resp.token,
       isStaff = resp.user.isStaff,
       expiry = resp.expiry,
-      fullname = resp.user.fullname,
-      stations = resp.user.stations ?? [];
+      fullname = profile.fullname,
+      stations = profile.stations ?? [];
 
   factory ActiveUser.fromJson(Map<String, dynamic> json) =>
       _$ActiveUserFromJson(json);
@@ -54,7 +57,7 @@ class Preferences extends ChangeNotifier {
   static final Preferences _preferences = Preferences._privateConstructor();
 
   static const englishLocale = Locale('en');
-  static const persianLocale = Locale('fa');
+  static const persianLocale = Locale('fa', 'IR');
 
   /// The SharedPreferences instance
   late SharedPreferences _sp;
@@ -124,28 +127,30 @@ class Preferences extends ChangeNotifier {
         Station(
           code: "123",
           rans: [
-            Ran(id: 1, sequenceNumber: 1, station: "123"),
-            Ran(id: 2, sequenceNumber: 2, station: "123"),
+            Ran(code: 1, sequenceNumber: 1, station: 123),
+            Ran(code: 2, sequenceNumber: 2, station: 123),
           ],
           typeName: "CGS",
-          name: "Mammad__1",
-          district: "Semnan",
-          area: "Shahrood",
+          title: "مهدی شهر",
+          district: "مهدی شهر",
+          area: "Semnan",
           capacity: 1234,
           type: 1,
+          activity: 1,
         ),
         Station(
           code: "142",
           rans: [
-            Ran(id: 4, sequenceNumber: 1, station: "142"),
-            Ran(id: 5, sequenceNumber: 2, station: "142"),
+            Ran(code: 4, sequenceNumber: 1, station: 142),
+            Ran(code: 5, sequenceNumber: 2, station: 142),
           ],
           typeName: "CGS",
-          name: "Mammad__2",
-          district: "Tehran",
-          area: "Khode Tehran",
+          title: "سمنان",
+          district: "سمنان",
+          area: "Semnan",
           capacity: 1234,
           type: 1,
+          activity: 2,
         ),
       ],
     );
@@ -207,8 +212,12 @@ class Preferences extends ChangeNotifier {
   }
 
   /// Sets the user's auth token to [token] and saves it to SharedPreferences.
-  void setActiveUser(LoginResponse resp, String password) {
-    final user = ActiveUser.fromLoginResponse(resp, password);
+  void setActiveUser(
+    LoginResponse resp,
+    GetProfileResponse profile,
+    String password,
+  ) {
+    final user = ActiveUser.fromLoginResponse(resp, profile, password);
     _sp.setString(activeUserKey, jsonEncode(user.toJson));
     _activeUser = user;
     notifyListeners();

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_web_plugins/url_strategy.dart';
 import 'package:go_router/go_router.dart';
+import 'package:persian_datetime_picker/persian_datetime_picker.dart';
 import 'package:provider/provider.dart';
 import 'package:tmms_shifts_client/routes/corrector_replacement_event_register.dart';
 import 'package:tmms_shifts_client/routes/login.dart';
@@ -80,12 +81,30 @@ class App extends StatelessWidget {
             return MaterialApp.router(
               debugShowCheckedModeBanner: false,
               restorationScopeId: 'tmms-shifts-client',
-              locale: value.locale,
+              locale: const Locale("fa", "IR"),
               onGenerateTitle: (context) => AppLocalizations.of(context)!.title,
               // The below two lines are needed for localizations. They set the supported
               // languages for this app and make the AppLocalizations.of callback available.
-              localizationsDelegates: AppLocalizations.localizationsDelegates,
-              supportedLocales: AppLocalizations.supportedLocales,
+              localizationsDelegates: [
+                PersianMaterialLocalizations.delegate,
+                PersianCupertinoLocalizations.delegate,
+                ...AppLocalizations.localizationsDelegates,
+              ],
+              supportedLocales: [
+                Locale('fa', 'IR'),
+                Locale('fa'),
+                Locale('en'),
+              ],
+              localeResolutionCallback: (locale, supportedLocales) {
+                if (locale?.languageCode == 'fa') {
+                  return const Locale(
+                    'fa',
+                  ); // Use generic Persian if fa-IR isn't found
+                }
+                return supportedLocales.contains(locale)
+                    ? locale
+                    : const Locale('en');
+              },
               theme: AppTheme.light,
               darkTheme: AppTheme.dark,
               themeMode: value.themeMode,

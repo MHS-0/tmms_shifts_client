@@ -1,4 +1,5 @@
 synthetic-package: false
 arb-dir: lib/l18n
 template-arb-file: app_en.arb
+preferred-supported-locales: [fa_IR, fa]
 output-localization-file: app_localizations.dart

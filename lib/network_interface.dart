@@ -35,6 +35,15 @@ class NetworkInterface {
     return finalResp;
   }
 
+  Future<GetProfileResponse> getProfile() async {
+    final Response<Map<String, dynamic>> resp = await dio.get(
+      "/user/profile/",
+      options: Options(headers: authHeaderEmpty()),
+    );
+    final finalResp = GetProfileResponse.fromJson(resp.data!);
+    return finalResp;
+  }
+
   Future<void> logout() async {
     await dio.post(
       "/user/logout",
@@ -95,7 +104,7 @@ class NetworkInterface {
     );
   }
 
-  Future<GetShiftDataListResponse> getShiftDataList({
+  Future<GetShiftsDataListResponse> getShiftsDataList({
     String? fromDate,
     String? toDate,
     int? stationCodes,
@@ -116,7 +125,7 @@ class NetworkInterface {
       options: Options(headers: authHeaderWithToken()),
       queryParameters: queries,
     );
-    final finalResp = GetShiftDataListResponse.fromJson(resp.data!);
+    final finalResp = GetShiftsDataListResponse.fromJson(resp.data!);
     return finalResp;
   }
 
@@ -170,32 +179,171 @@ class NetworkInterface {
     );
   }
 
-  // Future<GetMeterAndCorrectorFullReportResponse>
-  // getMeterAndCorrectorFullReport({
-  //   String? fromDate,
-  //   String? toDate,
-  //   int? stationCode,
-  // }) async {
-  //   final Map<String, dynamic>? queries;
-  //   if (fromDate == null && toDate == null && stationCode == null) {
-  //     queries = null;
-  //   } else {
-  //     queries = {
-  //       if (fromDate != null) "from_date": fromDate,
-  //       if (toDate != null) "to_date": toDate,
-  //       if (stationCode != null) "station_codes": stationCode,
-  //     };
-  //   }
-  //   final Response<Map<String, dynamic>> resp = await dio.get(
-  //     "/reports/meter_and_corrector/full_report",
-  //     options: Options(headers: authHeaderWithToken()),
-  //     queryParameters: queries,
-  //   );
-  //   final finalResp = GetMeterAndCorrectorFullReportResponse.fromJson(
-  //     resp.data!,
-  //   );
-  //   return finalResp;
-  // }
+  Future<GetMeterAndCorrectorFullReportResponse>
+  getMeterAndCorrectorFullReport({
+    String? fromDate,
+    String? toDate,
+    int? stationCode,
+  }) async {
+    final Map<String, dynamic>? queries;
+    if (fromDate == null && toDate == null && stationCode == null) {
+      queries = null;
+    } else {
+      queries = {
+        if (fromDate != null) "from_date": fromDate,
+        if (toDate != null) "to_date": toDate,
+        if (stationCode != null) "station_code": stationCode,
+      };
+    }
+    final Response<Map<String, dynamic>> resp = await dio.get(
+      "/reports/meter_and_corrector/full_report",
+      options: Options(headers: authHeaderWithToken()),
+      queryParameters: queries,
+    );
+    final finalResp = GetMeterAndCorrectorFullReportResponse.fromJson(
+      resp.data!,
+    );
+    return finalResp;
+  }
+
+  Future<GetMonitoringFullReportResponse> getMonitoringFullReport({
+    String? fromDate,
+    String? toDate,
+    int? stationCode,
+  }) async {
+    final Map<String, dynamic>? queries;
+    if (fromDate == null && toDate == null && stationCode == null) {
+      queries = null;
+    } else {
+      queries = {
+        if (fromDate != null) "from_date": fromDate,
+        if (toDate != null) "to_date": toDate,
+        if (stationCode != null) "station_code": stationCode,
+      };
+    }
+    final Response<Map<String, dynamic>> resp = await dio.get(
+      "/reports/monitoring/full_report",
+      options: Options(headers: authHeaderWithToken()),
+      queryParameters: queries,
+    );
+    final finalResp = GetMonitoringFullReportResponse.fromJson(resp.data!);
+    return finalResp;
+  }
+
+  Future<GetPressureAndTemperatureFullReportResponse>
+  getPressureAndTemperatureFullReport({
+    String? fromDate,
+    String? toDate,
+    int? stationCode,
+  }) async {
+    final Map<String, dynamic>? queries;
+    if (fromDate == null && toDate == null && stationCode == null) {
+      queries = null;
+    } else {
+      queries = {
+        if (fromDate != null) "from_date": fromDate,
+        if (toDate != null) "to_date": toDate,
+        if (stationCode != null) "station_code": stationCode,
+      };
+    }
+    final Response<Map<String, dynamic>> resp = await dio.get(
+      "/reports/pressure_and_temperature/full_report",
+      options: Options(headers: authHeaderWithToken()),
+      queryParameters: queries,
+    );
+    final finalResp = GetPressureAndTemperatureFullReportResponse.fromJson(
+      resp.data!,
+    );
+    return finalResp;
+  }
+
+  Future<GetMeterChangeEventResponse> getMeterChangeEventResponse() async {
+    final Response<Map<String, dynamic>> resp = await dio.get(
+      "/equipment_replacement_events/meter/4/",
+      options: Options(headers: authHeaderWithToken()),
+    );
+    final finalResp = GetMeterChangeEventResponse.fromJson(resp.data!);
+    return finalResp;
+  }
+
+  Future<CreateMeterChangeEventResponse> createMeterChangeEventResponse(
+    CreateMeterChangeEventRequest data,
+  ) async {
+    final Response<Map<String, dynamic>> resp = await dio.post(
+      "/equipment_replacement_events/meter/",
+      options: Options(headers: authHeaderWithToken()),
+      data: data.toJson(),
+    );
+    final finalResp = CreateMeterChangeEventResponse.fromJson(resp.data!);
+    return finalResp;
+  }
+
+  Future<GetMeterChangeEventsListResponse> getMeterChangeEventsList({
+    String? fromDate,
+    String? toDate,
+    List<int>? stationCodes,
+  }) async {
+    final Map<String, dynamic>? queries;
+    if (fromDate == null && toDate == null && stationCodes == null) {
+      queries = null;
+    } else {
+      queries = {
+        if (fromDate != null) "from_date": fromDate,
+        if (toDate != null) "to_date": toDate,
+        if (stationCodes != null) "station_codes": stationCodes.join(","),
+      };
+    }
+    final Response<Map<String, dynamic>> resp = await dio.get(
+      "/equipment_replacement_events/meter",
+      options: Options(headers: authHeaderWithToken()),
+      queryParameters: queries,
+    );
+    final finalResp = GetMeterChangeEventsListResponse.fromJson(resp.data!);
+    return finalResp;
+  }
+
+  Future<UpdateMeterChangeEventResponse> updateMeterChangeEventResponse(
+    UpdateMeterChangeEventRequest data,
+  ) async {
+    final Response<Map<String, dynamic>> resp = await dio.put(
+      "/equipment_replacement_events/meter/1/",
+      options: Options(headers: authHeaderWithToken()),
+      data: data.toJson(),
+    );
+    final finalResp = UpdateMeterChangeEventResponse.fromJson(resp.data!);
+    return finalResp;
+  }
+
+  Future<void> deleteMeterChangeEventResponse() async {
+    await dio.delete(
+      "/equipment_replacement_events/meter/1/",
+      options: Options(headers: authHeaderWithToken()),
+    );
+  }
+
+  Future<GetMeterChangeEventLastActionResponse> getMeterChangeLastAction({
+    int? stationCode,
+    int? ranId,
+  }) async {
+    final Map<String, dynamic>? queries;
+    if (stationCode == null && ranId == null) {
+      queries = null;
+    } else {
+      queries = {
+        if (stationCode != null) "station_code": stationCode,
+        if (ranId != null) "ran_id": ranId,
+      };
+    }
+    final Response<Map<String, dynamic>> resp = await dio.get(
+      "/equipment_replacement_events/last-action/meter",
+      options: Options(headers: authHeaderWithToken()),
+      queryParameters: queries,
+    );
+    final finalResp = GetMeterChangeEventLastActionResponse.fromJson(
+      resp.data!,
+    );
+    return finalResp;
+  }
 
   /// The factory that returns the singleton instance.
   factory NetworkInterface.instance() => _interface;

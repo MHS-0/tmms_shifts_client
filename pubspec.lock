@@ -580,6 +580,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.3.0"
+  persian_datetime_picker:
+    dependency: "direct main"
+    description:
+      name: persian_datetime_picker
+      sha256: "7ccbfd3a68dc89d405550f624e9fa590c914fed2aa2d48973c4f4400baab2e06"
+      url: "https://pub.dev"
+    source: hosted
+    version: "3.1.0"
   petitparser:
     dependency: transitive
     description:
@@ -640,10 +648,10 @@ packages:
     dependency: transitive
     description:
       name: pub_semver
-      sha256: "7b3cfbf654f3edd0c6298ecd5be782ce997ddf0e00531b9464b55245185bbbbd"
+      sha256: "5bfcf68ca79ef689f8990d1160781b4bad40a3bd5e5218ad4076ddb7f4081585"
       url: "https://pub.dev"
     source: hosted
-    version: "2.1.5"
+    version: "2.2.0"
   pubspec_parse:
     dependency: transitive
     description:
@@ -652,6 +660,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.5.0"
+  shamsi_date:
+    dependency: "direct main"
+    description:
+      name: shamsi_date
+      sha256: "4614789ed11bfffe5ba0aa157a20f2857ab6328528401766e0d924e453c866bd"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.0.4"
   shared_preferences:
     dependency: "direct main"
     description:
