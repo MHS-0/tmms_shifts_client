@@ -992,3 +992,369 @@ class PutUpdateCorrectorBulkRequest {
 
   Map<String, dynamic> toJson() => _$PutUpdateCorrectorBulkRequestToJson(this);
 }
+
+@JsonSerializable()
+class GetCorrectorDataBulkLastActionResponse {
+  final String date;
+  final List<Ran4> rans;
+
+  GetCorrectorDataBulkLastActionResponse({
+    required this.date,
+    required this.rans,
+  });
+
+  factory GetCorrectorDataBulkLastActionResponse.fromJson(
+    Map<String, dynamic> json,
+  ) => _$GetCorrectorDataBulkLastActionResponseFromJson(json);
+
+  Map<String, dynamic> toJson() =>
+      _$GetCorrectorDataBulkLastActionResponseToJson(this);
+}
+
+@JsonSerializable()
+class GetShiftDataBulkLastActionResponse {
+  final int id;
+  final int station;
+  final String shift;
+  @JsonKey(name: 'input_pressure')
+  final int inputPressure;
+  @JsonKey(name: 'output_pressure')
+  final int outputPressure;
+  @JsonKey(name: 'input_temperature')
+  final int inputTemperature;
+  @JsonKey(name: 'output_temperature')
+  final int outputTemperature;
+  final String date;
+  @JsonKey(name: 'registered_datetime')
+  final String registeredDatetime;
+  final String? user;
+
+  factory GetShiftDataBulkLastActionResponse.fromJson(
+    Map<String, dynamic> json,
+  ) => _$GetShiftDataBulkLastActionResponseFromJson(json);
+
+  GetShiftDataBulkLastActionResponse({
+    required this.id,
+    this.user,
+    required this.station,
+    required this.registeredDatetime,
+    required this.shift,
+    required this.inputPressure,
+    required this.outputPressure,
+    required this.inputTemperature,
+    required this.outputTemperature,
+    required this.date,
+  });
+
+  Map<String, dynamic> toJson() =>
+      _$GetShiftDataBulkLastActionResponseToJson(this);
+}
+
+@JsonSerializable()
+class GetStationDataListResponse {
+  final int count;
+  final Object? next;
+  final Object? previous;
+  final List<Station2> results;
+
+  factory GetStationDataListResponse.fromJson(Map<String, dynamic> json) =>
+      _$GetStationDataListResponseFromJson(json);
+
+  GetStationDataListResponse({
+    required this.count,
+    this.next,
+    this.previous,
+    required this.results,
+  });
+
+  Map<String, dynamic> toJson() => _$GetStationDataListResponseToJson(this);
+}
+
+@JsonSerializable()
+class Station2 {
+  final String code;
+  final List<Ran5> rans;
+  final String type;
+  final String name;
+  final String district;
+  final String area;
+  final int capacity;
+
+  Station2({
+    required this.name,
+    required this.code,
+    required this.rans,
+    required this.district,
+    required this.area,
+    required this.capacity,
+    required this.type,
+  });
+
+  factory Station2.fromJson(Map<String, dynamic> json) =>
+      _$Station2FromJson(json);
+
+  Map<String, dynamic> toJson() => _$Station2ToJson(this);
+}
+
+@JsonSerializable()
+class Ran5 {
+  final int id;
+  @JsonKey(name: 'sequence_number')
+  final int sequenceNumber;
+  final String station;
+
+  Ran5({required this.id, required this.sequenceNumber, required this.station});
+
+  factory Ran5.fromJson(Map<String, dynamic> json) => _$Ran5FromJson(json);
+
+  Map<String, dynamic> toJson() => _$Ran5ToJson(this);
+}
+
+@JsonSerializable()
+class GetStationTypeDataListResponse {
+  final int count;
+  final Object? next;
+  final Object? previous;
+  final List<StationType> results;
+
+  factory GetStationTypeDataListResponse.fromJson(Map<String, dynamic> json) =>
+      _$GetStationTypeDataListResponseFromJson(json);
+
+  GetStationTypeDataListResponse({
+    required this.count,
+    this.next,
+    this.previous,
+    required this.results,
+  });
+
+  Map<String, dynamic> toJson() => _$GetStationTypeDataListResponseToJson(this);
+}
+
+@JsonSerializable()
+class StationType {
+  @JsonKey(name: 'type_name')
+  final String typeName;
+
+  factory StationType.fromJson(Map<String, dynamic> json) =>
+      _$StationTypeFromJson(json);
+
+  StationType({required this.typeName});
+
+  Map<String, dynamic> toJson() => _$StationTypeToJson(this);
+}
+
+@JsonSerializable()
+class PostCreateStationRequest {
+  final int code;
+  final String name;
+  final String district;
+  final String area;
+  final int capacity;
+  final int type;
+
+  factory PostCreateStationRequest.fromJson(Map<String, dynamic> json) =>
+      _$PostCreateStationRequestFromJson(json);
+
+  PostCreateStationRequest({
+    required this.code,
+    required this.name,
+    required this.district,
+    required this.area,
+    required this.capacity,
+    required this.type,
+  });
+
+  Map<String, dynamic> toJson() => _$PostCreateStationRequestToJson(this);
+}
+
+@JsonSerializable()
+class Station3 {
+  final String code;
+  final List<Ran> rans;
+  @JsonKey(name: 'type_name')
+  final String typeName;
+  final String name;
+  final String district;
+  final String area;
+  final int capacity;
+  final int type;
+
+  Station3({
+    required this.code,
+    required this.rans,
+    required this.typeName,
+    required this.name,
+    required this.district,
+    required this.area,
+    required this.capacity,
+    required this.type,
+  });
+
+  factory Station3.fromJson(Map<String, dynamic> json) =>
+      _$Station3FromJson(json);
+
+  Map<String, dynamic> toJson() => _$Station3ToJson(this);
+}
+
+@JsonSerializable()
+class StationType2 {
+  @JsonKey(name: 'type_name')
+  final String typeName;
+  final int id;
+
+  factory StationType2.fromJson(Map<String, dynamic> json) =>
+      _$StationType2FromJson(json);
+
+  StationType2({required this.id, required this.typeName});
+
+  Map<String, dynamic> toJson() => _$StationType2ToJson(this);
+}
+
+@JsonSerializable()
+class GetCorrectorChangeEventResponse {
+  final int id;
+  final String date;
+  @JsonKey(name: 'station_code')
+  final int stationCode;
+  @JsonKey(name: 'ran_sequence')
+  final int ranSequence;
+  @JsonKey(name: 'old_meter_amount')
+  final int oldMeterAmount;
+  @JsonKey(name: 'new_meter_amount')
+  final int newMeterAmount;
+  @JsonKey(name: 'old_corrector_amount')
+  final int oldCorrectorAmount;
+  @JsonKey(name: 'new_corrector_amount')
+  final int newCorrectorAmount;
+  @JsonKey(name: 'registered_datetime')
+  final String registeredDatetime;
+  final int ran;
+  final String? user;
+
+  factory GetCorrectorChangeEventResponse.fromJson(Map<String, dynamic> json) =>
+      _$GetCorrectorChangeEventResponseFromJson(json);
+
+  GetCorrectorChangeEventResponse({
+    required this.oldCorrectorAmount,
+    required this.newCorrectorAmount,
+    required this.id,
+    required this.ranSequence,
+    required this.oldMeterAmount,
+    required this.newMeterAmount,
+    required this.registeredDatetime,
+    required this.ran,
+    this.user,
+    required this.stationCode,
+    required this.date,
+  });
+
+  Map<String, dynamic> toJson() =>
+      _$GetCorrectorChangeEventResponseToJson(this);
+}
+
+@JsonSerializable()
+class PostCorrectorChangeEventRequest {
+  final String date;
+  @JsonKey(name: 'old_meter_amount')
+  final int oldMeterAmount;
+  @JsonKey(name: 'new_meter_amount')
+  final int newMeterAmount;
+  @JsonKey(name: 'old_corrector_amount')
+  final int oldCorrectorAmount;
+  @JsonKey(name: 'new_corrector_amount')
+  final int newCorrectorAmount;
+  @JsonKey(name: 'registered_datetime')
+  final int ran;
+
+  factory PostCorrectorChangeEventRequest.fromJson(Map<String, dynamic> json) =>
+      _$PostCorrectorChangeEventRequestFromJson(json);
+
+  PostCorrectorChangeEventRequest({
+    required this.oldCorrectorAmount,
+    required this.newCorrectorAmount,
+    required this.oldMeterAmount,
+    required this.newMeterAmount,
+    required this.ran,
+    required this.date,
+  });
+
+  Map<String, dynamic> toJson() =>
+      _$PostCorrectorChangeEventRequestToJson(this);
+}
+
+@JsonSerializable()
+class GetCorrectorChangeEventListResponse {
+  final int count;
+  final Object? next;
+  final Object? previous;
+  final List<GetCorrectorChangeEventResponse> results;
+
+  factory GetCorrectorChangeEventListResponse.fromJson(
+    Map<String, dynamic> json,
+  ) => _$GetCorrectorChangeEventListResponseFromJson(json);
+
+  GetCorrectorChangeEventListResponse({
+    required this.count,
+    this.next,
+    this.previous,
+    required this.results,
+  });
+
+  Map<String, dynamic> toJson() =>
+      _$GetCorrectorChangeEventListResponseToJson(this);
+}
+
+@JsonSerializable()
+class GetUsersCustomStationGroupResponse {
+  final int count;
+  final Object? next;
+  final Object? previous;
+  final List<StationGroup> results;
+
+  factory GetUsersCustomStationGroupResponse.fromJson(
+    Map<String, dynamic> json,
+  ) => _$GetUsersCustomStationGroupResponseFromJson(json);
+
+  GetUsersCustomStationGroupResponse({
+    required this.count,
+    this.next,
+    this.previous,
+    required this.results,
+  });
+
+  Map<String, dynamic> toJson() =>
+      _$GetUsersCustomStationGroupResponseToJson(this);
+}
+
+@JsonSerializable()
+class StationGroup {
+  final int? id;
+  final String title;
+  final String? user;
+  final List<Station4> stations;
+
+  factory StationGroup.fromJson(Map<String, dynamic> json) =>
+      _$StationGroupFromJson(json);
+
+  StationGroup({
+    this.id,
+    required this.title,
+    this.user,
+    required this.stations,
+  });
+
+  Map<String, dynamic> toJson() => _$StationGroupToJson(this);
+}
+
+@JsonSerializable()
+class Station4 {
+  final int priority;
+  final int station;
+
+  factory Station4.fromJson(Map<String, dynamic> json) =>
+      _$Station4FromJson(json);
+
+  Station4({required this.priority, required this.station});
+
+  Map<String, dynamic> toJson() => _$Station4ToJson(this);
+}

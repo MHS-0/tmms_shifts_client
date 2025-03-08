@@ -155,9 +155,20 @@ class NetworkInterface {
     String? fromDate,
     String? toDate,
   }) async {
+    final Map<String, dynamic>? queries;
+    if (fromDate == null && toDate == null) {
+      queries = null;
+    } else {
+      queries = {
+        if (fromDate != null) "from_date": fromDate,
+        if (toDate != null) "to_date": toDate,
+      };
+    }
+
     final Response<Map<String, dynamic>> resp = await dio.get(
       "/meter_and_corrector/shift",
       options: Options(headers: authHeaderWithToken()),
+      queryParameters: queries,
     );
     final finalResp = GetCorrectorDataListResponse.fromJson(resp.data!);
     return finalResp;
@@ -342,6 +353,254 @@ class NetworkInterface {
     final finalResp = GetMeterChangeEventLastActionResponse.fromJson(
       resp.data!,
     );
+    return finalResp;
+  }
+
+  Future<PostCreateCorrectorBulkResponse> createCorrectorBulk(
+    PostCreateCorrectorBulkRequest data,
+  ) async {
+    final Response<Map<String, dynamic>> resp = await dio.post(
+      "/meter_and_corrector/bulk/",
+      options: Options(headers: authHeaderWithToken()),
+      data: data.toJson(),
+    );
+    final finalResp = PostCreateCorrectorBulkResponse.fromJson(resp.data!);
+    return finalResp;
+  }
+
+  Future<void> putUpdateCorrectorBulk(
+    PutUpdateCorrectorBulkRequest data,
+  ) async {
+    await dio.post(
+      "/meter_and_corrector/bulk/",
+      options: Options(headers: authHeaderWithToken()),
+      data: data.toJson(),
+    );
+  }
+
+  // FIX
+  // Could return something that's not a list maybe...?
+  Future<List<GetCorrectorDataBulkLastActionResponse>>
+  getCorrectorDataBulkLastAction(
+    String? fromDate,
+    String? toDate,
+    int? stationCode,
+  ) async {
+    final Response<List<dynamic>> resp = await dio.get(
+      "/meter_and_corrector/bulk/last-action",
+      options: Options(headers: authHeaderWithToken()),
+    );
+    final data = resp.data!;
+    final List<GetCorrectorDataBulkLastActionResponse> list = [];
+    for (final item in data) {
+      final tempItem = GetCorrectorDataBulkLastActionResponse.fromJson(
+        item as Map<String, dynamic>,
+      );
+      list.add(tempItem);
+    }
+    return list;
+  }
+
+  Future<GetShiftDataBulkLastActionResponse> getShiftDataBulkLastAction({
+    int? stationCode,
+  }) async {
+    final Response<Map<String, dynamic>> resp = await dio.get(
+      "/pressure_and_temperature/last-action",
+      options: Options(headers: authHeaderWithToken()),
+      queryParameters:
+          stationCode != null ? {"station_code": stationCode} : null,
+    );
+    final finalResp = GetShiftDataBulkLastActionResponse.fromJson(resp.data!);
+    return finalResp;
+  }
+
+  Future<GetStationDataListResponse> getStationDataBulk() async {
+    final Response<Map<String, dynamic>> resp = await dio.get(
+      "/organization/station/",
+      options: Options(headers: authHeaderWithToken()),
+    );
+    final finalResp = GetStationDataListResponse.fromJson(resp.data!);
+    return finalResp;
+  }
+
+  Future<GetStationTypeDataListResponse> getStationTypeDataBulk() async {
+    final Response<Map<String, dynamic>> resp = await dio.get(
+      "/organization/station-type/",
+      options: Options(headers: authHeaderWithToken()),
+    );
+    final finalResp = GetStationTypeDataListResponse.fromJson(resp.data!);
+    return finalResp;
+  }
+
+  Future<Station2> getStationData() async {
+    final Response<Map<String, dynamic>> resp = await dio.get(
+      "/organization/station/12345/",
+      options: Options(headers: authHeaderWithToken()),
+    );
+    final finalResp = Station2.fromJson(resp.data!);
+    return finalResp;
+  }
+
+  Future<StationType> getStationTypeData() async {
+    final Response<Map<String, dynamic>> resp = await dio.get(
+      "/organization/station-type/2/",
+      options: Options(headers: authHeaderWithToken()),
+    );
+    final finalResp = StationType.fromJson(resp.data!);
+    return finalResp;
+  }
+
+  Future<Station3> createStation(PostCreateStationRequest data) async {
+    final Response<Map<String, dynamic>> resp = await dio.post(
+      "/organization/station/",
+      options: Options(headers: authHeaderWithToken()),
+    );
+    final finalResp = Station3.fromJson(resp.data!);
+    return finalResp;
+  }
+
+  Future<StationType> createStationType(StationType data) async {
+    final Response<Map<String, dynamic>> resp = await dio.post(
+      "/organization/station-type/",
+      options: Options(headers: authHeaderWithToken()),
+    );
+    final finalResp = StationType.fromJson(resp.data!);
+    return finalResp;
+  }
+
+  Future<Station3> updateStationData(PostCreateStationRequest data) async {
+    final Response<Map<String, dynamic>> resp = await dio.put(
+      "/organization/station/12347/",
+      options: Options(headers: authHeaderWithToken()),
+    );
+    final finalResp = Station3.fromJson(resp.data!);
+    return finalResp;
+  }
+
+  Future<StationType2> updateStationTypeData(StationType data) async {
+    final Response<Map<String, dynamic>> resp = await dio.put(
+      "/organization/station-type/2",
+      options: Options(headers: authHeaderWithToken()),
+    );
+    final finalResp = StationType2.fromJson(resp.data!);
+    return finalResp;
+  }
+
+  Future<void> deleteStation() async {
+    await dio.delete(
+      "/organization/station/12346/",
+      options: Options(headers: authHeaderWithToken()),
+    );
+  }
+
+  Future<void> deleteStationType() async {
+    await dio.delete(
+      "/organization/station-type/2",
+      options: Options(headers: authHeaderWithToken()),
+    );
+  }
+
+  Future<GetCorrectorChangeEventResponse> getCorrectorChangeEvent() async {
+    final Response<Map<String, dynamic>> resp = await dio.get(
+      "equipment_replacement_events/corrector/1/",
+      options: Options(headers: authHeaderWithToken()),
+    );
+    final finalResp = GetCorrectorChangeEventResponse.fromJson(resp.data!);
+    return finalResp;
+  }
+
+  Future<GetCorrectorChangeEventResponse> createCorrectorChangeEvent(
+    PostCorrectorChangeEventRequest data,
+  ) async {
+    final Response<Map<String, dynamic>> resp = await dio.post(
+      "/equipment_replacement_events/corrector/",
+      options: Options(headers: authHeaderWithToken()),
+      data: data.toJson(),
+    );
+    final finalResp = GetCorrectorChangeEventResponse.fromJson(resp.data!);
+    return finalResp;
+  }
+
+  Future<GetCorrectorChangeEventListResponse>
+  getCorrectorChangeEventListResponse({
+    String? fromDate,
+    String? toDate,
+  }) async {
+    final Map<String, dynamic>? queries;
+    if (fromDate == null && toDate == null) {
+      queries = null;
+    } else {
+      queries = {
+        if (fromDate != null) "from_date": fromDate,
+        if (toDate != null) "to_date": toDate,
+      };
+    }
+
+    final Response<Map<String, dynamic>> resp = await dio.get(
+      "/equipment_replacement_events/corrector",
+      options: Options(headers: authHeaderWithToken()),
+      queryParameters: queries,
+    );
+    final finalResp = GetCorrectorChangeEventListResponse.fromJson(resp.data!);
+    return finalResp;
+  }
+
+  Future<GetCorrectorChangeEventResponse> updateCorrectorChangeEvent(
+    PostCorrectorChangeEventRequest data,
+  ) async {
+    final Response<Map<String, dynamic>> resp = await dio.put(
+      "/equipment_replacement_events/corrector/1/",
+      options: Options(headers: authHeaderWithToken()),
+      data: data.toJson(),
+    );
+    final finalResp = GetCorrectorChangeEventResponse.fromJson(resp.data!);
+    return finalResp;
+  }
+
+  Future<void> deleteCorrectorChangeEvent() async {
+    await dio.delete(
+      "/equipment_replacement_events/corrector/1/",
+      options: Options(headers: authHeaderWithToken()),
+    );
+  }
+
+  Future<GetCorrectorChangeEventResponse> getCorrectorChangeEventLastAction({
+    int? stationCode,
+  }) async {
+    final Response<Map<String, dynamic>> resp = await dio.get(
+      "/equipment_replacement_events/last-action/corrector",
+      options: Options(headers: authHeaderWithToken()),
+      queryParameters:
+          stationCode != null ? {"station_code": stationCode} : null,
+    );
+    final finalResp = GetCorrectorChangeEventResponse.fromJson(resp.data!);
+    return finalResp;
+  }
+
+  Future<void> removeCustomStationGroup() async {
+    await dio.delete(
+      "/reports/station_groups/3/",
+      options: Options(headers: authHeaderWithToken()),
+    );
+  }
+
+  Future<GetUsersCustomStationGroupResponse>
+  getUsersCustomStationsGroup() async {
+    final Response<Map<String, dynamic>> resp = await dio.get(
+      "/reports/station_groups",
+      options: Options(headers: authHeaderWithToken()),
+    );
+    final finalResp = GetUsersCustomStationGroupResponse.fromJson(resp.data!);
+    return finalResp;
+  }
+
+  Future<StationGroup> createNewStationsGroup(StationGroup data) async {
+    final Response<Map<String, dynamic>> resp = await dio.post(
+      "/reports/station_groups",
+      options: Options(headers: authHeaderWithToken()),
+      data: data.toJson(),
+    );
+    final finalResp = StationGroup.fromJson(resp.data!);
     return finalResp;
   }
 
