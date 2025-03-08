@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:persian_datetime_picker/persian_datetime_picker.dart';
 import 'package:provider/provider.dart';
+import 'package:tmms_shifts_client/consts.dart';
 import 'package:tmms_shifts_client/data/backend_types.dart';
 import 'package:tmms_shifts_client/l18n/app_localizations.dart';
 import 'package:tmms_shifts_client/providers/preferences.dart';
@@ -84,6 +85,13 @@ class _MainRouteState extends State<MainRoute> {
       return value;
     }
     return data;
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    precacheImage(const AssetImage(iconAssetPath), context);
+    precacheImage(const AssetImage(userIconAssetPath), context);
   }
 
   @override
@@ -206,8 +214,7 @@ class MonitoringFullReportDataSource extends DataTableSource {
       } else {
         final List<Widget> shiftsWidgets = [];
 
-        for (var i = 0; i < data.results[index].shifts.length; i++) {
-          final shift = data.results[index].shifts[i];
+        for (final shift in data.results[index].shifts) {
           final title = "شیفت ${shift.shift}";
           shiftsWidgets.addAll([
             InkWell(
@@ -217,7 +224,6 @@ class MonitoringFullReportDataSource extends DataTableSource {
               ),
               onTap: () async {
                 showDialog(
-                  barrierDismissible: false,
                   context: context,
                   builder: (context) {
                     return AlertDialog(

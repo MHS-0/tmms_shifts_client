@@ -14,13 +14,13 @@ class PageNotFoundRoute extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.center,
             mainAxisSize: MainAxisSize.max,
             children: [
-              Center(child: Text("Page not found... :(")),
+              Center(child: Text("صفحه مورد نظر یافت نشد!")),
               Center(
                 child: TextButton(
                   onPressed: () {
                     context.go("/");
                   },
-                  child: Text("Navigate to the main page"),
+                  child: Text("برکرد به صفحه اصلی"),
                 ),
               ),
             ],
