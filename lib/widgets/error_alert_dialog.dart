@@ -13,6 +13,7 @@ class ErrorAlertDialog extends StatelessWidget {
     final localizations = AppLocalizations.of(context)!;
     return AlertDialog(
       title: Text(localizations.errorDialogTitle),
+      contentTextStyle: TextStyle(fontSize: 20),
       content:
           isUnknownError
               ? Text(

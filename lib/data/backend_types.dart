@@ -73,7 +73,7 @@ class GetProfileResponse {
   Map<String, dynamic> toJson() => _$GetProfileResponseToJson(this);
 }
 
-@JsonSerializable()
+@JsonSerializable(explicitToJson: true)
 class Station {
   final String code;
   final List<Ran> rans;
@@ -86,7 +86,7 @@ class Station {
   final int type;
   final int activity;
 
-  Station({
+  const Station({
     required this.code,
     required this.rans,
     required this.typeName,
@@ -104,14 +104,14 @@ class Station {
   Map<String, dynamic> toJson() => _$StationToJson(this);
 }
 
-@JsonSerializable()
+@JsonSerializable(explicitToJson: true)
 class Ran {
   final int code;
   @JsonKey(name: 'sequence_number')
   final int sequenceNumber;
   final int station;
 
-  Ran({
+  const Ran({
     required this.code,
     required this.sequenceNumber,
     required this.station,
@@ -579,7 +579,7 @@ class Ran2 {
   Map<String, dynamic> toJson() => _$Ran2ToJson(this);
 }
 
-@JsonSerializable()
+@JsonSerializable(explicitToJson: true)
 class GetMonitoringFullReportResponse {
   final int count;
   final String? next;
@@ -600,7 +600,7 @@ class GetMonitoringFullReportResponse {
       _$GetMonitoringFullReportResponseToJson(this);
 }
 
-@JsonSerializable()
+@JsonSerializable(explicitToJson: true)
 class GetMonitoringFullReportResponseResultItem {
   @JsonKey(name: 'station_code')
   final int stationCode;
@@ -626,7 +626,7 @@ class GetMonitoringFullReportResponseResultItem {
       _$GetMonitoringFullReportResponseResultItemToJson(this);
 }
 
-@JsonSerializable()
+@JsonSerializable(explicitToJson: true)
 class Shift {
   @JsonKey(name: 'input_pressure')
   final int inputPressure;
@@ -1328,6 +1328,7 @@ class GetUsersCustomStationGroupResponse {
 
 @JsonSerializable()
 class StationGroup {
+  @JsonKey(includeIfNull: false)
   final int? id;
   final String title;
   final String? user;

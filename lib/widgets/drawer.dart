@@ -52,13 +52,36 @@ class MyDrawer extends StatelessWidget {
             // TODO: Replace with some actual relevant data?
             subtitle: user.fullname != null ? Text(user.fullname!) : null,
             trailing: IconButton(
+              tooltip: "خروج از حساب",
               icon: Icon(Icons.logout),
               onPressed: () async {
                 final user = Preferences.instance().activeUser;
-                if (user == null) return;
-                context.pop();
+                if (user == null) {
+                  context.pop();
+                  return;
+                }
                 try {
-                  await NetworkInterface.instance().logout();
+                  // FIX
+                  // TODO
+                  // await NetworkInterface.instance().logout();
+                  showDialog(
+                    barrierDismissible: false,
+                    context: context,
+                    builder: (context) {
+                      return AlertDialog(
+                        content: Row(
+                          children: [
+                            Text("از حساب خارج شدید!"),
+                            SizedBox(width: 32),
+                            Icon(Icons.check_rounded, size: 80),
+                          ],
+                        ),
+                      );
+                    },
+                  );
+                  await Future.delayed(Duration(seconds: 2));
+                  if (!context.mounted) return;
+                  context.go("/login");
                 } on DioException catch (e) {
                   if (context.mounted) {
                     showDialog(

@@ -22,6 +22,8 @@ abstract final class AppTheme {
     ),
     visualDensity: FlexColorScheme.comfortablePlatformDensity,
     cupertinoOverrideTheme: const CupertinoThemeData(applyThemeToAll: true),
+  ).copyWith(
+    progressIndicatorTheme: ProgressIndicatorThemeData(year2023: false),
   );
   // The defined dark theme.
   static ThemeData dark = FlexThemeData.dark(
@@ -39,5 +41,7 @@ abstract final class AppTheme {
     ),
     visualDensity: FlexColorScheme.comfortablePlatformDensity,
     cupertinoOverrideTheme: const CupertinoThemeData(applyThemeToAll: true),
+  ).copyWith(
+    progressIndicatorTheme: ProgressIndicatorThemeData(year2023: false),
   );
 }

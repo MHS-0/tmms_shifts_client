@@ -18,21 +18,26 @@ class MainRoute extends StatefulWidget {
 }
 
 class _MainRouteState extends State<MainRoute> {
-  int? selectedStation;
+  final _fromDateController = TextEditingController();
+  final _toDateController = TextEditingController();
+  Jalali? _fromDate;
+  Jalali? _toDate;
+
+  int? _selectedStation;
 
   static final data = GetMonitoringFullReportResponse(
     count: 1,
     results: [
       GetMonitoringFullReportResponseResultItem(
         stationCode: 123,
-        date: "1403-02-03",
+        date: "1403-12-18",
         shifts: [
           Shift(
             inputPressure: 1,
             outputPressure: 2,
             inputTemperature: 3,
             outputTemperature: 4,
-            registeredDatetime: "1403-02-03",
+            registeredDatetime: "1403-12-18",
             user: "Me",
             shift: "06",
           ),
@@ -41,7 +46,31 @@ class _MainRouteState extends State<MainRoute> {
             outputPressure: 2,
             inputTemperature: 3,
             outputTemperature: 4,
-            registeredDatetime: "1403-02-03",
+            registeredDatetime: "1403-12-18",
+            user: "Me",
+            shift: "08",
+          ),
+        ],
+      ),
+      GetMonitoringFullReportResponseResultItem(
+        stationCode: 123,
+        date: "1403-12-18",
+        shifts: [
+          Shift(
+            inputPressure: 1,
+            outputPressure: 2,
+            inputTemperature: 3,
+            outputTemperature: 4,
+            registeredDatetime: "1403-12-18",
+            user: "Me",
+            shift: "06",
+          ),
+          Shift(
+            inputPressure: 1,
+            outputPressure: 2,
+            inputTemperature: 3,
+            outputTemperature: 4,
+            registeredDatetime: "1403-12-18",
             user: "Me",
             shift: "08",
           ),
@@ -75,16 +104,42 @@ class _MainRouteState extends State<MainRoute> {
   );
 
   GetMonitoringFullReportResponse getData(int? stationCode) {
-    if (stationCode != null) {
-      final localResults = data.results.toList();
-      localResults.retainWhere((item) => item.stationCode == stationCode);
-      final value = GetMonitoringFullReportResponse(
-        count: 1,
-        results: localResults,
-      );
-      return value;
+    final localResults = data.results.toList();
+
+    if (_fromDate != null) {
+      localResults.retainWhere((item) {
+        final dateParts = item.date.split("-");
+        final itemJalaliDate = Jalali(
+          int.parse(dateParts[0]),
+          int.parse(dateParts[1]),
+          int.parse(dateParts[2]),
+        );
+        return itemJalaliDate.isAfter(_fromDate!) ||
+            itemJalaliDate.isAtSameMomentAs(_fromDate!);
+      });
     }
-    return data;
+
+    if (_toDate != null) {
+      localResults.retainWhere((item) {
+        final dateParts = item.date.split("-");
+        final itemJalaliDate = Jalali(
+          int.parse(dateParts[0]),
+          int.parse(dateParts[1]),
+          int.parse(dateParts[2]),
+        );
+        return itemJalaliDate.isBefore(_toDate!) ||
+            itemJalaliDate.isAtSameMomentAs(_toDate!);
+      });
+    }
+
+    if (stationCode != null) {
+      localResults.retainWhere((item) => item.stationCode == stationCode);
+    }
+    final value = GetMonitoringFullReportResponse(
+      count: 1,
+      results: localResults,
+    );
+    return value;
   }
 
   @override
@@ -117,7 +172,7 @@ class _MainRouteState extends State<MainRoute> {
                       }
                       if (value.contains("همه")) {
                         setState(() {
-                          selectedStation = null;
+                          _selectedStation = null;
                         });
                         return;
                       }
@@ -125,9 +180,108 @@ class _MainRouteState extends State<MainRoute> {
                       final station = preferences.activeUser!.stations
                           .singleWhere((item) => item.code.contains(value));
                       setState(() {
-                        selectedStation = int.tryParse(station.code);
+                        _selectedStation = int.tryParse(station.code);
                       });
                     },
+                  ),
+                  SizedBox(height: 32),
+                  Padding(
+                    padding: const EdgeInsets.all(32.0),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceAround,
+                      children: [
+                        Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            IconButton(
+                              tooltip: "حذف فیلتر",
+                              icon: Icon(Icons.delete),
+                              color: Colors.red,
+                              disabledColor: Colors.grey,
+                              onPressed:
+                                  _fromDate == null
+                                      ? null
+                                      : () {
+                                        setState(() {
+                                          _fromDate = null;
+                                          _fromDateController.clear();
+                                        });
+                                      },
+                            ),
+                            TextField(
+                              readOnly: true,
+                              decoration: InputDecoration(
+                                constraints: BoxConstraints.loose(
+                                  Size(300, double.infinity),
+                                ),
+                                labelText: "از تاریخ:",
+                                hintText: "از تاریخ:",
+                              ),
+                              controller: _fromDateController,
+                              onTap: () async {
+                                final date = await showPersianDatePicker(
+                                  context: context,
+                                  locale: Preferences.persianLocale,
+                                  firstDate: Jalali(1350),
+                                  lastDate: Jalali.now(),
+                                );
+                                if (!context.mounted || date == null) return;
+                                setState(() {
+                                  _fromDate = date;
+                                  _fromDateController.text =
+                                      _fromDate!.formatShortDate();
+                                });
+                              },
+                            ),
+                          ],
+                        ),
+                        Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            IconButton(
+                              tooltip: "حذف فیلتر",
+                              icon: Icon(Icons.delete),
+                              color: Colors.red,
+                              disabledColor: Colors.grey,
+                              onPressed:
+                                  _toDate == null
+                                      ? null
+                                      : () {
+                                        setState(() {
+                                          _toDate = null;
+                                          _toDateController.clear();
+                                        });
+                                      },
+                            ),
+                            TextField(
+                              readOnly: true,
+                              decoration: InputDecoration(
+                                constraints: BoxConstraints.loose(
+                                  Size(300, double.infinity),
+                                ),
+                                labelText: "تا تاریخ:",
+                                hintText: "تا تاریخ:",
+                              ),
+                              controller: _toDateController,
+                              onTap: () async {
+                                final date = await showPersianDatePicker(
+                                  context: context,
+                                  locale: Preferences.persianLocale,
+                                  firstDate: Jalali(1350),
+                                  lastDate: Jalali.now(),
+                                );
+                                if (!context.mounted || date == null) return;
+                                setState(() {
+                                  _toDate = date;
+                                  _toDateController.text =
+                                      _toDate!.formatShortDate();
+                                });
+                              },
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
                   ),
                   SizedBox(height: 32),
                   Center(
@@ -172,7 +326,7 @@ class _MainRouteState extends State<MainRoute> {
                           source: MonitoringFullReportDataSource(
                             context,
                             localizations,
-                            getData(selectedStation),
+                            getData(_selectedStation),
                           ),
                         ),
                       ),
@@ -195,6 +349,13 @@ class _MainRouteState extends State<MainRoute> {
         );
       },
     );
+  }
+
+  @override
+  void dispose() {
+    _fromDateController.dispose();
+    _toDateController.dispose();
+    super.dispose();
   }
 }
 

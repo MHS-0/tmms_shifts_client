@@ -8,9 +8,9 @@ import 'package:tmms_shifts_client/data/backend_types.dart';
 
 part "preferences.g.dart";
 
-@JsonSerializable()
+@JsonSerializable(explicitToJson: true)
 class ActiveUser {
-  ActiveUser({
+  const ActiveUser({
     required this.username,
     required this.password,
     required this.token,
@@ -115,57 +115,17 @@ class Preferences extends ChangeNotifier {
         _locale = persianLocale;
     }
 
-    // FIX: Replace with actual code!!!
-    _activeUser = ActiveUser(
-      username: "admin",
-      password: "asd123!@#",
-      token: "asdasdasdaasd",
-      isStaff: true,
-      expiry: DateTime.now().add(Duration(days: 365)),
-      fullname: "Mammad",
-      stations: [
-        Station(
-          code: "123",
-          rans: [
-            Ran(code: 1, sequenceNumber: 1, station: 123),
-            Ran(code: 2, sequenceNumber: 2, station: 123),
-          ],
-          typeName: "CGS",
-          title: "مهدی شهر",
-          district: "مهدی شهر",
-          area: "Semnan",
-          capacity: 1234,
-          type: 1,
-          activity: 1,
-        ),
-        Station(
-          code: "142",
-          rans: [
-            Ran(code: 4, sequenceNumber: 1, station: 142),
-            Ran(code: 5, sequenceNumber: 2, station: 142),
-          ],
-          typeName: "CGS",
-          title: "سمنان",
-          district: "سمنان",
-          area: "Semnan",
-          capacity: 1234,
-          type: 1,
-          activity: 2,
-        ),
-      ],
-    );
-
-    // final savedActiveUser = _sp.getString(activeUserKey);
-    // if (savedActiveUser != null) {
-    //   final Map<String, dynamic> user = jsonDecode(savedActiveUser);
-    //   final previousUser = ActiveUser.fromJson(user);
-    //   final now = DateTime.now();
-    //   if (previousUser.expiry.isAfter(now)) {
-    //     _sp.remove(activeUserKey);
-    //   } else {
-    //     _activeUser = previousUser;
-    //   }
-    // }
+    final savedActiveUser = _sp.getString(activeUserKey);
+    if (savedActiveUser != null) {
+      final Map<String, dynamic> user = jsonDecode(savedActiveUser);
+      final previousUser = ActiveUser.fromJson(user);
+      final now = DateTime.now();
+      if (previousUser.expiry.isAfter(now)) {
+        _sp.remove(activeUserKey);
+      } else {
+        _activeUser = previousUser;
+      }
+    }
   }
 
   /// Sets the user's preferred theme to [themeMode] and saves it to SharedPreferences.
@@ -212,14 +172,11 @@ class Preferences extends ChangeNotifier {
   }
 
   /// Sets the user's auth token to [token] and saves it to SharedPreferences.
-  void setActiveUser(
-    LoginResponse resp,
-    GetProfileResponse profile,
-    String password,
-  ) {
-    final user = ActiveUser.fromLoginResponse(resp, profile, password);
-    _sp.setString(activeUserKey, jsonEncode(user.toJson));
-    _activeUser = user;
+  void setActiveUser(ActiveUser user, String password) {
+    // final user = ActiveUser.fromLoginResponse(resp, profile, password);
+    final tempUser = ActiveUser.fromJson(user.toJson());
+    _sp.setString(activeUserKey, jsonEncode(user));
+    _activeUser = tempUser;
     notifyListeners();
   }
 

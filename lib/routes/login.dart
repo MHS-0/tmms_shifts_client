@@ -27,6 +27,12 @@ class _LoginRouteState extends State<LoginRoute> {
   final _passwordController = TextEditingController();
 
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    precacheImage(const AssetImage(iconAssetPath), context);
+  }
+
+  @override
   Widget build(BuildContext context) {
     final localizations = AppLocalizations.of(context)!;
     return SelectionArea(
@@ -100,16 +106,117 @@ class _LoginRouteState extends State<LoginRoute> {
                             );
                             if (_formKey.currentState!.validate()) {
                               try {
-                                final resp = await NetworkInterface.instance()
-                                    .login(loginInfo);
+                                // TODO
                                 // FIX: Actually implement it with the final backend responses.
-                                // if (context.mounted) {
-                                //   context.read<Preferences>().setActiveUser(
-                                //     resp,
-                                //     _passwordController.text,
-                                //   );
-                                //   context.go("/");
-                                // }
+                                //
+                                // final resp = await NetworkInterface.instance()
+                                //     .login(loginInfo);
+                                //
+                                // FIX: Actually implement it with the final backend responses.
+                                if (loginInfo.username == "user1" &&
+                                    loginInfo.password == "1234") {
+                                  showDialog(
+                                    barrierDismissible: false,
+                                    context: context,
+                                    builder: (context) {
+                                      return AlertDialog(
+                                        content: Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.spaceBetween,
+                                          children: [
+                                            Text("لطفا صبر کنید..."),
+                                            CircularProgressIndicator(),
+                                          ],
+                                        ),
+                                      );
+                                    },
+                                  );
+                                  await Future.delayed(Duration(seconds: 3));
+                                  final activeUser = ActiveUser(
+                                    username: "admin",
+                                    password: "asd123!@#",
+                                    token: "asdasdasdaasd",
+                                    isStaff: true,
+                                    expiry: DateTime.now().add(
+                                      Duration(days: 365),
+                                    ),
+                                    fullname: "Mammad",
+                                    stations: [
+                                      Station(
+                                        code: "123",
+                                        rans: [
+                                          Ran(
+                                            code: 1,
+                                            sequenceNumber: 1,
+                                            station: 123,
+                                          ),
+                                          Ran(
+                                            code: 2,
+                                            sequenceNumber: 2,
+                                            station: 123,
+                                          ),
+                                        ],
+                                        typeName: "CGS",
+                                        title: "مهدی شهر",
+                                        district: "مهدی شهر",
+                                        area: "Semnan",
+                                        capacity: 1234,
+                                        type: 1,
+                                        activity: 1,
+                                      ),
+                                      Station(
+                                        code: "142",
+                                        rans: [
+                                          Ran(
+                                            code: 4,
+                                            sequenceNumber: 1,
+                                            station: 142,
+                                          ),
+                                          Ran(
+                                            code: 5,
+                                            sequenceNumber: 2,
+                                            station: 142,
+                                          ),
+                                        ],
+                                        typeName: "CGS",
+                                        title: "سمنان",
+                                        district: "سمنان",
+                                        area: "Semnan",
+                                        capacity: 1234,
+                                        type: 1,
+                                        activity: 2,
+                                      ),
+                                    ],
+                                  );
+                                  if (!context.mounted) return;
+                                  context.pop();
+                                  showDialog(
+                                    context: context,
+                                    builder: (context) {
+                                      return AlertDialog(
+                                        content: Row(
+                                          children: [
+                                            Text("با موفقیت وارد شدید!"),
+                                            SizedBox(width: 32),
+                                            Icon(Icons.check_rounded, size: 80),
+                                          ],
+                                        ),
+                                      );
+                                    },
+                                  );
+                                  await Future.delayed(Duration(seconds: 2));
+                                  if (!context.mounted) return;
+                                  context.read<Preferences>().setActiveUser(
+                                    activeUser,
+                                    _passwordController.text,
+                                  );
+                                  context.go("/");
+                                } else {
+                                  // TODO
+                                  // FIX
+                                  final resp = await NetworkInterface.instance()
+                                      .login(loginInfo);
+                                }
                               } on DioException catch (e) {
                                 if (e.response?.statusCode == 400) {
                                   if (context.mounted) {
@@ -132,8 +239,7 @@ class _LoginRouteState extends State<LoginRoute> {
                                     context: context,
                                     builder: (context) {
                                       return ErrorAlertDialog(
-                                        e,
-                                        isUnknownError: true,
+                                        "لاگین ناموفقیت آمیز بود",
                                       );
                                     },
                                   );
