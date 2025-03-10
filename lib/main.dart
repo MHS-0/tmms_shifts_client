@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:persian_datetime_picker/persian_datetime_picker.dart';
 import 'package:provider/provider.dart';
 import 'package:tmms_shifts_client/routes/corrector_replacement_event_register.dart';
+import 'package:tmms_shifts_client/routes/counter_corrector_report_view.dart';
 import 'package:tmms_shifts_client/routes/counter_corrector_reports.dart';
 import 'package:tmms_shifts_client/routes/counter_replacement_event_register.dart';
 import 'package:tmms_shifts_client/routes/login.dart';
@@ -30,18 +31,35 @@ final GoRouter _router = GoRouter(
   routes: <RouteBase>[
     GoRoute(
       path: '/',
+      name: MainRoute.routingName,
+      pageBuilder: (_, state) {
+        final queries = state.uri.queryParameters;
+        return MaterialPage(
+          child: MainRoute(
+            stationCodes: queries["stationCodes"],
+            fromDate: queries["fromDate"],
+            toDate: queries["toDate"],
+          ),
+        );
+      },
+    ),
+    GoRoute(
+      path: '/404',
+      name: PageNotFoundRoute.routingName,
       pageBuilder: (_, __) {
-        return const MaterialPage(child: MainRoute());
+        return const MaterialPage(child: PageNotFoundRoute());
       },
     ),
     GoRoute(
       path: '/login',
+      name: LoginRoute.routingName,
       pageBuilder: (_, __) {
         return const MaterialPage(child: LoginRoute());
       },
     ),
     GoRoute(
       path: '/corrector-replacement-event-register',
+      name: "correctorReplacementEventRegister",
       pageBuilder: (_, __) {
         return const MaterialPage(
           child: CorrectorReplacementEventRegisterRoute(),
@@ -58,27 +76,31 @@ final GoRouter _router = GoRouter(
     ),
     GoRoute(
       path: '/counter-corrector-reports',
+      name: CounterCorrectorReportsRoute.routingName,
       pageBuilder: (_, __) {
         return const MaterialPage(child: CounterCorrectorReportsRoute());
       },
-    ),
-    GoRoute(
-      path: '/counter-corrector-reports/:report',
-      pageBuilder: (_, state) {
-        final report = state.pathParameters["report"];
-        if (report == null) {
-          return const MaterialPage(child: CounterCorrectorReportsRoute());
-        }
-        final reportNumber = int.tryParse(report);
-        if (reportNumber == null) {
-          // TODO
-          // Maybe instead we should re-route to the 404 page?
-          return const MaterialPage(child: CounterCorrectorReportsRoute());
-        }
-        return MaterialPage(
-          child: CounterCorrectorReportsRoute(report: reportNumber),
-        );
-      },
+      routes: [
+        GoRoute(
+          path: '/:report',
+          name: CounterCorrectorReportViewRoute.routingName,
+          pageBuilder: (_, state) {
+            final report = state.pathParameters["report"];
+            if (report == null) {
+              return const MaterialPage(child: CounterCorrectorReportsRoute());
+            }
+            final reportNumber = int.tryParse(report);
+            if (reportNumber == null) {
+              // TODO
+              // Maybe instead we should re-route to the 404 page?
+              return const MaterialPage(child: CounterCorrectorReportsRoute());
+            }
+            return MaterialPage(
+              child: CounterCorrectorReportViewRoute(report: reportNumber),
+            );
+          },
+        ),
+      ],
     ),
   ],
   redirect: (context, state) {

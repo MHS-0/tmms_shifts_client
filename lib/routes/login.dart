@@ -10,6 +10,8 @@ import 'package:tmms_shifts_client/providers/preferences.dart';
 import 'package:tmms_shifts_client/widgets/error_alert_dialog.dart';
 
 class LoginRoute extends StatefulWidget {
+  static const routingName = "login";
+
   const LoginRoute({super.key});
 
   @override
@@ -207,10 +209,13 @@ class _LoginRouteState extends State<LoginRoute> {
                                   );
                                   await Future.delayed(Duration(seconds: 2));
                                   if (!context.mounted) return;
-                                  context.read<Preferences>().setActiveUser(
-                                    activeUser,
-                                    _passwordController.text,
-                                  );
+                                  await context
+                                      .read<Preferences>()
+                                      .setActiveUser(
+                                        activeUser,
+                                        _passwordController.text,
+                                      );
+                                  if (!context.mounted) return;
                                   context.pop();
                                   context.go("/");
                                 } else {

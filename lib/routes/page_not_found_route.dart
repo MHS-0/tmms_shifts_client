@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 class PageNotFoundRoute extends StatelessWidget {
+  static const routingName = "NotFound";
+
   const PageNotFoundRoute({super.key});
 
   @override

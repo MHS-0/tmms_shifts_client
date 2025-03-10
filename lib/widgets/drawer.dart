@@ -6,9 +6,12 @@ import 'package:tmms_shifts_client/consts.dart';
 import 'package:tmms_shifts_client/l18n/app_localizations.dart';
 import 'package:tmms_shifts_client/network_interface.dart';
 import 'package:tmms_shifts_client/providers/preferences.dart';
+import 'package:tmms_shifts_client/routes/counter_corrector_reports.dart';
+import 'package:tmms_shifts_client/routes/login.dart';
+import 'package:tmms_shifts_client/routes/main_route.dart';
 import 'package:tmms_shifts_client/widgets/error_alert_dialog.dart';
 
-class MyDrawer extends StatelessWidget {
+class MyDrawer extends StatefulWidget {
   const MyDrawer({super.key});
 
   static const _divider = Divider(
@@ -17,6 +20,11 @@ class MyDrawer extends StatelessWidget {
     endIndent: 10,
   );
 
+  @override
+  State<MyDrawer> createState() => _MyDrawerState();
+}
+
+class _MyDrawerState extends State<MyDrawer> {
   @override
   Widget build(BuildContext context) {
     final localizations = AppLocalizations.of(context)!;
@@ -28,7 +36,12 @@ class MyDrawer extends StatelessWidget {
         children: [
           InkWell(
             onTap: () {
-              context.go("/");
+              final routerState = GoRouter.of(context).state;
+              if (routerState.name != "home") {
+                context.goNamed(MainRoute.routingName);
+              } else {
+                context.pop();
+              }
             },
             child: DrawerHeader(
               decoration: BoxDecoration(
@@ -69,6 +82,8 @@ class MyDrawer extends StatelessWidget {
                   // FIX
                   // TODO
                   // await NetworkInterface.instance().logout();
+                  await Preferences.instance().unsetActiveUser();
+                  if (!context.mounted) return;
                   showDialog(
                     barrierDismissible: false,
                     context: context,
@@ -86,7 +101,8 @@ class MyDrawer extends StatelessWidget {
                   );
                   await Future.delayed(Duration(seconds: 2));
                   if (!context.mounted) return;
-                  context.go("/login");
+                  context.pop();
+                  context.goNamed(LoginRoute.routingName);
                 } on DioException catch (e) {
                   if (context.mounted) {
                     showDialog(
@@ -110,12 +126,12 @@ class MyDrawer extends StatelessWidget {
                 }
                 if (context.mounted) {
                   context.read<Preferences>().unsetActiveUser();
-                  context.go("/login");
+                  context.goNamed(LoginRoute.routingName);
                 }
               },
             ),
           ),
-          _divider,
+          MyDrawer._divider,
           ExpansionTile(
             leading: Icon(Icons.info),
             title: Text(localizations.reports),
@@ -134,7 +150,13 @@ class MyDrawer extends StatelessWidget {
                 leading: Icon(Icons.report),
                 title: Text("گزارش کنتور و تصحیح کننده"),
                 onTap: () {
-                  context.go("/counter-corrector-reports");
+                  final routingState = GoRouter.of(context).state;
+                  if (routingState.name !=
+                      CounterCorrectorReportsRoute.routingName) {
+                    context.goNamed(CounterCorrectorReportsRoute.routingName);
+                  } else {
+                    context.pop();
+                  }
                 },
               ),
             ],

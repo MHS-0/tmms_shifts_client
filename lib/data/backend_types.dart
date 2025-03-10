@@ -506,7 +506,7 @@ class GetCorrectorDataResponse {
   Map<String, dynamic> toJson() => _$GetCorrectorDataResponseToJson(this);
 }
 
-@JsonSerializable()
+@JsonSerializable(explicitToJson: true)
 class GetMeterAndCorrectorFullReportResponse {
   final int count;
   final String? next;
@@ -517,7 +517,7 @@ class GetMeterAndCorrectorFullReportResponse {
     Map<String, dynamic> json,
   ) => _$GetMeterAndCorrectorFullReportResponseFromJson(json);
 
-  GetMeterAndCorrectorFullReportResponse({
+  const GetMeterAndCorrectorFullReportResponse({
     required this.count,
     this.next,
     this.previous,
@@ -528,7 +528,7 @@ class GetMeterAndCorrectorFullReportResponse {
       _$GetMeterAndCorrectorFullReportResponseToJson(this);
 }
 
-@JsonSerializable()
+@JsonSerializable(explicitToJson: true)
 class GetMeterAndCorrectorFullReportResponseResultItem {
   @JsonKey(name: 'station_code')
   final int stationCode;
@@ -542,7 +542,7 @@ class GetMeterAndCorrectorFullReportResponseResultItem {
     Map<String, dynamic> json,
   ) => _$GetMeterAndCorrectorFullReportResponseResultItemFromJson(json);
 
-  GetMeterAndCorrectorFullReportResponseResultItem({
+  const GetMeterAndCorrectorFullReportResponseResultItem({
     required this.stationCode,
     this.user,
     required this.date,
@@ -554,7 +554,7 @@ class GetMeterAndCorrectorFullReportResponseResultItem {
       _$GetMeterAndCorrectorFullReportResponseResultItemToJson(this);
 }
 
-@JsonSerializable()
+@JsonSerializable(explicitToJson: true)
 class Ran2 {
   @JsonKey(name: 'meter_amount')
   final int meterAmount;
@@ -566,7 +566,7 @@ class Ran2 {
   final int ranSequence;
   final int ran;
 
-  Ran2({
+  const Ran2({
     required this.meterAmount,
     required this.correctorAmount,
     required this.correctorMeterAmount,

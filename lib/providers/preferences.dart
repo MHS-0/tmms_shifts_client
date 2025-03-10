@@ -120,8 +120,8 @@ class Preferences extends ChangeNotifier {
       final Map<String, dynamic> user = jsonDecode(savedActiveUser);
       final previousUser = ActiveUser.fromJson(user);
       final now = DateTime.now();
-      if (previousUser.expiry.isAfter(now)) {
-        _sp.remove(activeUserKey);
+      if (previousUser.expiry.isBefore(now)) {
+        await _sp.remove(activeUserKey);
       } else {
         _activeUser = previousUser;
       }
@@ -172,17 +172,17 @@ class Preferences extends ChangeNotifier {
   }
 
   /// Sets the user's auth token to [token] and saves it to SharedPreferences.
-  void setActiveUser(ActiveUser user, String password) {
+  Future<void> setActiveUser(ActiveUser user, String password) async {
     // final user = ActiveUser.fromLoginResponse(resp, profile, password);
     final tempUser = ActiveUser.fromJson(user.toJson());
-    _sp.setString(activeUserKey, jsonEncode(user));
+    await _sp.setString(activeUserKey, jsonEncode(user));
     _activeUser = tempUser;
     notifyListeners();
   }
 
   /// Unsets the user's auth token from SharedPreferences.
-  void unsetActiveUser() {
-    _sp.remove(activeUserKey);
+  Future<void> unsetActiveUser() async {
+    await _sp.remove(activeUserKey);
     _activeUser = null;
     notifyListeners();
   }

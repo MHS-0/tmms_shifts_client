@@ -4,14 +4,21 @@ import 'package:persian_datetime_picker/persian_datetime_picker.dart';
 import 'package:provider/provider.dart';
 import 'package:tmms_shifts_client/consts.dart';
 import 'package:tmms_shifts_client/data/backend_types.dart';
+import 'package:tmms_shifts_client/heplers.dart' as helpers;
 import 'package:tmms_shifts_client/l18n/app_localizations.dart';
 import 'package:tmms_shifts_client/providers/preferences.dart';
 import 'package:tmms_shifts_client/widgets/drawer.dart';
 import 'package:tmms_shifts_client/widgets/stations_dropdown.dart';
 
 class MainRoute extends StatefulWidget {
+  static const routingName = "home";
+
+  final String? fromDate;
+  final String? toDate;
+  final String? stationCodes;
+
   /// Creates a new Main route for the app.
-  const MainRoute({super.key});
+  const MainRoute({super.key, this.fromDate, this.toDate, this.stationCodes});
 
   @override
   State<MainRoute> createState() => _MainRouteState();
@@ -144,6 +151,31 @@ class _MainRouteState extends State<MainRoute> {
   }
 
   @override
+  void initState() {
+    super.initState();
+    if (widget.fromDate != null) {
+      final input = widget.fromDate!;
+      final date = helpers.dashDateToJalali(input);
+      if (date != null) {
+        _fromDate = date;
+        _fromDateController.text = _fromDate!.formatCompactDate();
+      }
+    }
+    if (widget.toDate != null) {
+      final input = widget.toDate!;
+      final date = helpers.dashDateToJalali(input);
+      if (date != null) {
+        _toDate = date;
+        _toDateController.text = _toDate!.formatCompactDate();
+      }
+    }
+    if (widget.stationCodes != null) {
+      final code = int.tryParse(widget.stationCodes!);
+      _selectedStation = code;
+    }
+  }
+
+  @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     precacheImage(const AssetImage(iconAssetPath), context);
@@ -158,6 +190,7 @@ class _MainRouteState extends State<MainRoute> {
 
     return Consumer<Preferences>(
       builder: (_, preferences, __) {
+        final results = getData(_selectedStation);
         return SelectionArea(
           child: Scaffold(
             appBar: AppBar(title: Text("داشبورد"), centerTitle: true),
@@ -167,64 +200,70 @@ class _MainRouteState extends State<MainRoute> {
                 spacing: 16,
                 children: [
                   SizedBox(),
-                  Card(
-                    color: Theme.of(context).colorScheme.inversePrimary,
-                    elevation: 16,
-                    child: Padding(
-                      padding: const EdgeInsets.all(12.0),
-                      child: Wrap(
-                        spacing: 16,
-                        children: [
-                          FilterChip(
-                            label: Text("سمنان"),
-                            selected: chip,
-                            onSelected: (value) {
-                              setState(() {
-                                chip = value;
-                              });
-                            },
-                          ),
-                          FilterChip(
-                            label: Text("سمنان"),
-                            selected: chip,
-                            onSelected: (value) {
-                              setState(() {
-                                chip = value;
-                              });
-                            },
-                          ),
-                          FilterChip(
-                            label: Text("سمنان"),
-                            selected: chip,
-                            onSelected: (value) {
-                              setState(() {
-                                chip = value;
-                              });
-                            },
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                  // StationsDropDown(
-                  //   onSelected: (value) {
-                  //     if (value == null || preferences.activeUser == null) {
-                  //       return;
-                  //     }
-                  //     if (value.contains("همه")) {
-                  //       setState(() {
-                  //         _selectedStation = null;
-                  //       });
-                  //       return;
-                  //     }
-
-                  //     final station = preferences.activeUser!.stations
-                  //         .singleWhere((item) => item.code.contains(value));
-                  //     setState(() {
-                  //       _selectedStation = int.tryParse(station.code);
-                  //     });
-                  //   },
+                  // Card(
+                  //   color: Theme.of(context).colorScheme.inversePrimary,
+                  //   elevation: 16,
+                  //   child: Padding(
+                  //     padding: const EdgeInsets.all(12.0),
+                  //     child: Wrap(
+                  //       spacing: 16,
+                  //       children: [
+                  //         FilterChip(
+                  //           label: Text("سمنان"),
+                  //           selected: chip,
+                  //           onSelected: (value) {
+                  //             setState(() {
+                  //               chip = value;
+                  //             });
+                  //           },
+                  //         ),
+                  //         FilterChip(
+                  //           label: Text("سمنان"),
+                  //           selected: chip,
+                  //           onSelected: (value) {
+                  //             setState(() {
+                  //               chip = value;
+                  //             });
+                  //           },
+                  //         ),
+                  //         FilterChip(
+                  //           label: Text("سمنان"),
+                  //           selected: chip,
+                  //           onSelected: (value) {
+                  //             setState(() {
+                  //               chip = value;
+                  //             });
+                  //           },
+                  //         ),
+                  //       ],
+                  //     ),
+                  //   ),
                   // ),
+                  StationsDropDown(
+                    onSelected: (value) {
+                      if (value == null) {
+                        return;
+                      }
+
+                      if (value.contains("همه")) {
+                        helpers.removeQueryFromPath(context, "stationCodes");
+                        setState(() {
+                          _selectedStation = null;
+                        });
+                        return;
+                      }
+
+                      final station = preferences.activeUser!.stations
+                          .singleWhere((item) => item.code.contains(value));
+                      _selectedStation = int.tryParse(station.code);
+                      helpers.addQueryToPath(
+                        context,
+                        "stationCodes",
+                        station.code,
+                      );
+                      setState(() {});
+                    },
+                  ),
                   Padding(
                     padding: const EdgeInsets.all(32.0),
                     child: Wrap(
@@ -242,6 +281,10 @@ class _MainRouteState extends State<MainRoute> {
                                   _fromDate == null
                                       ? null
                                       : () {
+                                        helpers.removeQueryFromPath(
+                                          context,
+                                          "fromDate",
+                                        );
                                         setState(() {
                                           _fromDate = null;
                                           _fromDateController.clear();
@@ -266,10 +309,18 @@ class _MainRouteState extends State<MainRoute> {
                                   lastDate: Jalali.now(),
                                 );
                                 if (!context.mounted || date == null) return;
+                                final queryString = helpers.jalaliToDashDate(
+                                  date,
+                                );
+                                helpers.addQueryToPath(
+                                  context,
+                                  "fromDate",
+                                  queryString,
+                                );
                                 setState(() {
                                   _fromDate = date;
                                   _fromDateController.text =
-                                      _fromDate!.formatShortDate();
+                                      _fromDate!.formatCompactDate();
                                 });
                               },
                             ),
@@ -287,6 +338,10 @@ class _MainRouteState extends State<MainRoute> {
                                   _toDate == null
                                       ? null
                                       : () {
+                                        helpers.removeQueryFromPath(
+                                          context,
+                                          "toDate",
+                                        );
                                         setState(() {
                                           _toDate = null;
                                           _toDateController.clear();
@@ -311,10 +366,18 @@ class _MainRouteState extends State<MainRoute> {
                                   lastDate: Jalali.now(),
                                 );
                                 if (!context.mounted || date == null) return;
+                                final queryString = helpers.jalaliToDashDate(
+                                  date,
+                                );
+                                helpers.addQueryToPath(
+                                  context,
+                                  "toDate",
+                                  queryString,
+                                );
                                 setState(() {
                                   _toDate = date;
                                   _toDateController.text =
-                                      _toDate!.formatShortDate();
+                                      _toDate!.formatCompactDate();
                                 });
                               },
                             ),
@@ -332,7 +395,11 @@ class _MainRouteState extends State<MainRoute> {
                           headingRowColor: WidgetStatePropertyAll(
                             Theme.of(context).colorScheme.inversePrimary,
                           ),
-                          rowsPerPage: 5,
+                          rowsPerPage:
+                              results.results.length <= 5 &&
+                                      results.results.isNotEmpty
+                                  ? results.results.length
+                                  : 5,
                           showEmptyRows: false,
                           dataRowMaxHeight: 100,
                           columns: [
@@ -426,48 +493,56 @@ class MonitoringFullReportDataSource extends DataTableSource {
                 showDialog(
                   context: context,
                   builder: (context) {
-                    return AlertDialog(
-                      scrollable: true,
-                      title: Text(title),
-                      content: SingleChildScrollView(
-                        scrollDirection: Axis.horizontal,
-                        child: DataTable(
-                          columns: [
-                            DataColumn(label: Text("فشار ورودی")),
-                            DataColumn(label: Text("فشار خروجی")),
-                            DataColumn(label: Text("دمای ورودی")),
-                            DataColumn(label: Text("دمای خروجی")),
-                            DataColumn(label: Text("زمان ثبت")),
-                            DataColumn(label: Text("کاربر")),
-                            DataColumn(label: Text("شیفت")),
-                          ],
-                          rows: [
-                            DataRow(
-                              cells: [
-                                DataCell(Text(shift.inputPressure.toString())),
-                                DataCell(Text(shift.outputPressure.toString())),
-                                DataCell(
-                                  Text(shift.inputTemperature.toString()),
-                                ),
-                                DataCell(
-                                  Text(shift.outputTemperature.toString()),
-                                ),
-                                DataCell(Text(shift.registeredDatetime ?? "")),
-                                DataCell(Text(shift.user ?? "")),
-                                DataCell(Text(shift.shift)),
-                              ],
-                            ),
-                          ],
+                    return SelectionArea(
+                      child: AlertDialog(
+                        scrollable: true,
+                        title: Text(title),
+                        content: SingleChildScrollView(
+                          scrollDirection: Axis.horizontal,
+                          child: DataTable(
+                            columns: [
+                              DataColumn(label: Text("فشار ورودی")),
+                              DataColumn(label: Text("فشار خروجی")),
+                              DataColumn(label: Text("دمای ورودی")),
+                              DataColumn(label: Text("دمای خروجی")),
+                              DataColumn(label: Text("زمان ثبت")),
+                              DataColumn(label: Text("کاربر")),
+                              DataColumn(label: Text("شیفت")),
+                            ],
+                            rows: [
+                              DataRow(
+                                cells: [
+                                  DataCell(
+                                    Text(shift.inputPressure.toString()),
+                                  ),
+                                  DataCell(
+                                    Text(shift.outputPressure.toString()),
+                                  ),
+                                  DataCell(
+                                    Text(shift.inputTemperature.toString()),
+                                  ),
+                                  DataCell(
+                                    Text(shift.outputTemperature.toString()),
+                                  ),
+                                  DataCell(
+                                    Text(shift.registeredDatetime ?? ""),
+                                  ),
+                                  DataCell(Text(shift.user ?? "")),
+                                  DataCell(Text(shift.shift)),
+                                ],
+                              ),
+                            ],
+                          ),
                         ),
+                        actions: [
+                          ElevatedButton(
+                            child: Text(localizations.okButtonText),
+                            onPressed: () {
+                              context.pop();
+                            },
+                          ),
+                        ],
                       ),
-                      actions: [
-                        ElevatedButton(
-                          child: Text(localizations.okButtonText),
-                          onPressed: () {
-                            context.pop();
-                          },
-                        ),
-                      ],
                     );
                   },
                 );
