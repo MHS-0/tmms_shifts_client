@@ -14,7 +14,7 @@ class LoginRequest {
   Map<String, dynamic> toJson() => _$LoginRequestToJson(this);
 }
 
-@JsonSerializable()
+@JsonSerializable(explicitToJson: true)
 class LoginResponse {
   @JsonKey(fromJson: _parseDateTime, toJson: _serializeDateTime)
   final DateTime expiry;
@@ -38,7 +38,7 @@ class LoginResponse {
       dateTime.toIso8601String();
 }
 
-@JsonSerializable()
+@JsonSerializable(explicitToJson: true)
 class LoginResponseUser {
   final String? username;
   @JsonKey(name: 'is_staff')

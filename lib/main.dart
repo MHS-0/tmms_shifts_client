@@ -4,6 +4,8 @@ import 'package:go_router/go_router.dart';
 import 'package:persian_datetime_picker/persian_datetime_picker.dart';
 import 'package:provider/provider.dart';
 import 'package:tmms_shifts_client/routes/corrector_replacement_event_register.dart';
+import 'package:tmms_shifts_client/routes/counter_corrector_reports.dart';
+import 'package:tmms_shifts_client/routes/counter_replacement_event_register.dart';
 import 'package:tmms_shifts_client/routes/login.dart';
 import 'package:tmms_shifts_client/routes/main_route.dart';
 import 'package:tmms_shifts_client/routes/page_not_found_route.dart';
@@ -28,26 +30,54 @@ final GoRouter _router = GoRouter(
   routes: <RouteBase>[
     GoRoute(
       path: '/',
-      builder: (_, __) {
-        return const MainRoute();
+      pageBuilder: (_, __) {
+        return const MaterialPage(child: MainRoute());
       },
     ),
     GoRoute(
       path: '/login',
-      builder: (_, __) {
-        return const LoginRoute();
+      pageBuilder: (_, __) {
+        return const MaterialPage(child: LoginRoute());
       },
     ),
     GoRoute(
       path: '/corrector-replacement-event-register',
-      builder: (_, __) {
-        return const CorrectorReplacementEventRegisterRoute();
+      pageBuilder: (_, __) {
+        return const MaterialPage(
+          child: CorrectorReplacementEventRegisterRoute(),
+        );
       },
     ),
     GoRoute(
       path: '/counter-replacement-event-register',
-      builder: (_, __) {
-        return const CorrectorReplacementEventRegisterRoute();
+      pageBuilder: (_, __) {
+        return const MaterialPage(
+          child: CounterReplacementEventRegisterRoute(),
+        );
+      },
+    ),
+    GoRoute(
+      path: '/counter-corrector-reports',
+      pageBuilder: (_, __) {
+        return const MaterialPage(child: CounterCorrectorReportsRoute());
+      },
+    ),
+    GoRoute(
+      path: '/counter-corrector-reports/:report',
+      pageBuilder: (_, state) {
+        final report = state.pathParameters["report"];
+        if (report == null) {
+          return const MaterialPage(child: CounterCorrectorReportsRoute());
+        }
+        final reportNumber = int.tryParse(report);
+        if (reportNumber == null) {
+          // TODO
+          // Maybe instead we should re-route to the 404 page?
+          return const MaterialPage(child: CounterCorrectorReportsRoute());
+        }
+        return MaterialPage(
+          child: CounterCorrectorReportsRoute(report: reportNumber),
+        );
       },
     ),
   ],
@@ -62,7 +92,7 @@ final GoRouter _router = GoRouter(
     return null;
   },
   errorPageBuilder: (_, __) {
-    return MaterialPage(child: PageNotFoundRoute());
+    return const MaterialPage(child: PageNotFoundRoute());
   },
 );
 
@@ -81,7 +111,7 @@ class App extends StatelessWidget {
             return MaterialApp.router(
               debugShowCheckedModeBanner: false,
               restorationScopeId: 'tmms-shifts-client',
-              locale: const Locale("fa", "IR"),
+              locale: Preferences.persianLocale,
               onGenerateTitle: (context) => AppLocalizations.of(context)!.title,
               // The below two lines are needed for localizations. They set the supported
               // languages for this app and make the AppLocalizations.of callback available.

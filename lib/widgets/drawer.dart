@@ -26,20 +26,25 @@ class MyDrawer extends StatelessWidget {
     return Drawer(
       child: ListView(
         children: [
-          DrawerHeader(
-            decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.inversePrimary,
-            ),
-            child: Center(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Image.asset(iconAssetPath, width: 100, height: 100),
-                  Text(
-                    localizations.longTitle,
-                    style: const TextStyle(fontSize: 20),
-                  ),
-                ],
+          InkWell(
+            onTap: () {
+              context.go("/");
+            },
+            child: DrawerHeader(
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.inversePrimary,
+              ),
+              child: Center(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Image.asset(iconAssetPath, width: 100, height: 100),
+                    Text(
+                      localizations.longTitle,
+                      style: const TextStyle(fontSize: 20),
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
@@ -124,6 +129,13 @@ class MyDrawer extends StatelessWidget {
                 leading: Icon(Icons.add),
                 title: Text(localizations.reportCorrectorNumbers),
                 onTap: () {},
+              ),
+              ListTile(
+                leading: Icon(Icons.report),
+                title: Text("گزارش کنتور و تصحیح کننده"),
+                onTap: () {
+                  context.go("/counter-corrector-reports");
+                },
               ),
             ],
           ),

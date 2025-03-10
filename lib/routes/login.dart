@@ -191,6 +191,7 @@ class _LoginRouteState extends State<LoginRoute> {
                                   if (!context.mounted) return;
                                   context.pop();
                                   showDialog(
+                                    barrierDismissible: false,
                                     context: context,
                                     builder: (context) {
                                       return AlertDialog(
@@ -210,6 +211,7 @@ class _LoginRouteState extends State<LoginRoute> {
                                     activeUser,
                                     _passwordController.text,
                                   );
+                                  context.pop();
                                   context.go("/");
                                 } else {
                                   // TODO

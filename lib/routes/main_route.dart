@@ -22,6 +22,7 @@ class _MainRouteState extends State<MainRoute> {
   final _toDateController = TextEditingController();
   Jalali? _fromDate;
   Jalali? _toDate;
+  bool chip = false;
 
   int? _selectedStation;
 
@@ -163,35 +164,74 @@ class _MainRouteState extends State<MainRoute> {
             drawer: MyDrawer(),
             body: SingleChildScrollView(
               child: Column(
+                spacing: 16,
                 children: [
-                  SizedBox(height: 32),
-                  StationsDropDown(
-                    onSelected: (value) {
-                      if (value == null || preferences.activeUser == null) {
-                        return;
-                      }
-                      if (value.contains("همه")) {
-                        setState(() {
-                          _selectedStation = null;
-                        });
-                        return;
-                      }
-
-                      final station = preferences.activeUser!.stations
-                          .singleWhere((item) => item.code.contains(value));
-                      setState(() {
-                        _selectedStation = int.tryParse(station.code);
-                      });
-                    },
+                  SizedBox(),
+                  Card(
+                    color: Theme.of(context).colorScheme.inversePrimary,
+                    elevation: 16,
+                    child: Padding(
+                      padding: const EdgeInsets.all(12.0),
+                      child: Wrap(
+                        spacing: 16,
+                        children: [
+                          FilterChip(
+                            label: Text("سمنان"),
+                            selected: chip,
+                            onSelected: (value) {
+                              setState(() {
+                                chip = value;
+                              });
+                            },
+                          ),
+                          FilterChip(
+                            label: Text("سمنان"),
+                            selected: chip,
+                            onSelected: (value) {
+                              setState(() {
+                                chip = value;
+                              });
+                            },
+                          ),
+                          FilterChip(
+                            label: Text("سمنان"),
+                            selected: chip,
+                            onSelected: (value) {
+                              setState(() {
+                                chip = value;
+                              });
+                            },
+                          ),
+                        ],
+                      ),
+                    ),
                   ),
-                  SizedBox(height: 32),
+                  // StationsDropDown(
+                  //   onSelected: (value) {
+                  //     if (value == null || preferences.activeUser == null) {
+                  //       return;
+                  //     }
+                  //     if (value.contains("همه")) {
+                  //       setState(() {
+                  //         _selectedStation = null;
+                  //       });
+                  //       return;
+                  //     }
+
+                  //     final station = preferences.activeUser!.stations
+                  //         .singleWhere((item) => item.code.contains(value));
+                  //     setState(() {
+                  //       _selectedStation = int.tryParse(station.code);
+                  //     });
+                  //   },
+                  // ),
                   Padding(
                     padding: const EdgeInsets.all(32.0),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    child: Wrap(
+                      spacing: 64,
                       children: [
-                        Row(
-                          mainAxisSize: MainAxisSize.min,
+                        Wrap(
+                          crossAxisAlignment: WrapCrossAlignment.center,
                           children: [
                             IconButton(
                               tooltip: "حذف فیلتر",
@@ -235,8 +275,8 @@ class _MainRouteState extends State<MainRoute> {
                             ),
                           ],
                         ),
-                        Row(
-                          mainAxisSize: MainAxisSize.min,
+                        Wrap(
+                          crossAxisAlignment: WrapCrossAlignment.center,
                           children: [
                             IconButton(
                               tooltip: "حذف فیلتر",
@@ -283,7 +323,6 @@ class _MainRouteState extends State<MainRoute> {
                       ],
                     ),
                   ),
-                  SizedBox(height: 32),
                   Center(
                     child: Padding(
                       padding: const EdgeInsets.all(32.0),

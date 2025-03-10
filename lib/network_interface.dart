@@ -5,30 +5,25 @@ import 'package:tmms_shifts_client/providers/preferences.dart';
 const authHeaderKey = "Authorization";
 
 class NetworkInterface {
-  static final dio = Dio(
-    BaseOptions(
-      baseUrl: "localhost:8000",
-      extra: {"withCredentials": true},
-      preserveHeaderCase: true,
-    ),
-  );
+  final Dio dio;
 
   /// Private constructor to use when instantiating an instance inside the file.
-  NetworkInterface._privateConstructor();
+  const NetworkInterface._privateConstructor(this.dio);
 
-  static Map<String, dynamic> authHeaderEmpty() => {authHeaderKey: ""};
-  static Map<String, dynamic> authHeaderWithToken() => {
-    authHeaderKey: "Token ${Preferences.instance().activeUser?.token}",
-  };
+  static final Options authHeaderEmpty = Options(headers: {authHeaderKey: ""});
+  static final Options authHeaderWithToken = Options(
+    headers: {
+      authHeaderKey: "Token ${Preferences.instance().activeUser?.token}",
+    },
+  );
 
   /// The singleton instance of this class
-  static final NetworkInterface _interface =
-      NetworkInterface._privateConstructor();
+  static NetworkInterface? _interface;
 
   Future<LoginResponse> login(LoginRequest loginInfo) async {
     final Response<Map<String, dynamic>> resp = await dio.post(
       "/user/login",
-      options: Options(headers: authHeaderEmpty()),
+      options: authHeaderEmpty,
       data: loginInfo.toJson(),
     );
     final finalResp = LoginResponse.fromJson(resp.data!);
@@ -38,17 +33,14 @@ class NetworkInterface {
   Future<GetProfileResponse> getProfile() async {
     final Response<Map<String, dynamic>> resp = await dio.get(
       "/user/profile/",
-      options: Options(headers: authHeaderEmpty()),
+      options: authHeaderEmpty,
     );
     final finalResp = GetProfileResponse.fromJson(resp.data!);
     return finalResp;
   }
 
   Future<void> logout() async {
-    await dio.post(
-      "/user/logout",
-      options: Options(headers: authHeaderWithToken()),
-    );
+    await dio.post("/user/logout", options: authHeaderWithToken);
   }
 
   Future<CreateShiftDataResponse> createShiftData(
@@ -56,7 +48,7 @@ class NetworkInterface {
   ) async {
     final Response<Map<String, dynamic>> resp = await dio.post(
       "/pressure_and_temperature/shift/",
-      options: Options(headers: authHeaderWithToken()),
+      options: authHeaderWithToken,
       data: data.toJson(),
     );
     final finalResp = CreateShiftDataResponse.fromJson(resp.data!);
@@ -68,7 +60,7 @@ class NetworkInterface {
   ) async {
     final Response<Map<String, dynamic>> resp = await dio.put(
       "/pressure_and_temperature/shift/3/",
-      options: Options(headers: authHeaderWithToken()),
+      options: authHeaderWithToken,
       data: data.toJson(),
     );
     final finalResp = UpdateShiftDataResponse.fromJson(resp.data!);
@@ -78,7 +70,7 @@ class NetworkInterface {
   Future<GetShiftDataResponse> getShiftData() async {
     final Response<Map<String, dynamic>> resp = await dio.get(
       "/pressure_and_temperature/shift/12",
-      options: Options(headers: authHeaderWithToken()),
+      options: authHeaderWithToken,
     );
     final finalResp = GetShiftDataResponse.fromJson(resp.data!);
     return finalResp;
@@ -89,7 +81,7 @@ class NetworkInterface {
   }) async {
     final Response<Map<String, dynamic>> resp = await dio.get(
       "/pressure_and_temperature/last-action",
-      options: Options(headers: authHeaderWithToken()),
+      options: authHeaderWithToken,
       queryParameters:
           stationCode != null ? {"station_code": stationCode} : null,
     );
@@ -100,7 +92,7 @@ class NetworkInterface {
   Future<void> destroyShiftData() async {
     await dio.delete(
       "/pressure_and_temperature/shift/3",
-      options: Options(headers: authHeaderWithToken()),
+      options: authHeaderWithToken,
     );
   }
 
@@ -122,7 +114,7 @@ class NetworkInterface {
 
     final Response<Map<String, dynamic>> resp = await dio.get(
       "/pressure_and_temperature/shift",
-      options: Options(headers: authHeaderWithToken()),
+      options: authHeaderWithToken,
       queryParameters: queries,
     );
     final finalResp = GetShiftsDataListResponse.fromJson(resp.data!);
@@ -134,7 +126,7 @@ class NetworkInterface {
   ) async {
     final Response<Map<String, dynamic>> resp = await dio.post(
       "/meter_and_corrector/shift/",
-      options: Options(headers: authHeaderWithToken()),
+      options: authHeaderWithToken,
     );
     final finalResp = CreateCorrectorResponse.fromJson(resp.data!);
     return finalResp;
@@ -145,7 +137,7 @@ class NetworkInterface {
   ) async {
     final Response<Map<String, dynamic>> resp = await dio.put(
       "/meter_and_corrector/shift/1/",
-      options: Options(headers: authHeaderWithToken()),
+      options: authHeaderWithToken,
     );
     final finalResp = UpdateCorrectorResponse.fromJson(resp.data!);
     return finalResp;
@@ -167,7 +159,7 @@ class NetworkInterface {
 
     final Response<Map<String, dynamic>> resp = await dio.get(
       "/meter_and_corrector/shift",
-      options: Options(headers: authHeaderWithToken()),
+      options: authHeaderWithToken,
       queryParameters: queries,
     );
     final finalResp = GetCorrectorDataListResponse.fromJson(resp.data!);
@@ -177,7 +169,7 @@ class NetworkInterface {
   Future<GetCorrectorDataResponse> getCorrectorData() async {
     final Response<Map<String, dynamic>> resp = await dio.get(
       "/meter_and_corrector/shift/1/",
-      options: Options(headers: authHeaderWithToken()),
+      options: authHeaderWithToken,
     );
     final finalResp = GetCorrectorDataResponse.fromJson(resp.data!);
     return finalResp;
@@ -186,7 +178,7 @@ class NetworkInterface {
   Future<void> deleteCorrectorData() async {
     await dio.delete(
       "/meter_and_corrector/shift/1/",
-      options: Options(headers: authHeaderWithToken()),
+      options: authHeaderWithToken,
     );
   }
 
@@ -208,7 +200,7 @@ class NetworkInterface {
     }
     final Response<Map<String, dynamic>> resp = await dio.get(
       "/reports/meter_and_corrector/full_report",
-      options: Options(headers: authHeaderWithToken()),
+      options: authHeaderWithToken,
       queryParameters: queries,
     );
     final finalResp = GetMeterAndCorrectorFullReportResponse.fromJson(
@@ -234,7 +226,7 @@ class NetworkInterface {
     }
     final Response<Map<String, dynamic>> resp = await dio.get(
       "/reports/monitoring/full_report",
-      options: Options(headers: authHeaderWithToken()),
+      options: authHeaderWithToken,
       queryParameters: queries,
     );
     final finalResp = GetMonitoringFullReportResponse.fromJson(resp.data!);
@@ -259,7 +251,7 @@ class NetworkInterface {
     }
     final Response<Map<String, dynamic>> resp = await dio.get(
       "/reports/pressure_and_temperature/full_report",
-      options: Options(headers: authHeaderWithToken()),
+      options: authHeaderWithToken,
       queryParameters: queries,
     );
     final finalResp = GetPressureAndTemperatureFullReportResponse.fromJson(
@@ -271,7 +263,7 @@ class NetworkInterface {
   Future<GetMeterChangeEventResponse> getMeterChangeEventResponse() async {
     final Response<Map<String, dynamic>> resp = await dio.get(
       "/equipment_replacement_events/meter/4/",
-      options: Options(headers: authHeaderWithToken()),
+      options: authHeaderWithToken,
     );
     final finalResp = GetMeterChangeEventResponse.fromJson(resp.data!);
     return finalResp;
@@ -282,7 +274,7 @@ class NetworkInterface {
   ) async {
     final Response<Map<String, dynamic>> resp = await dio.post(
       "/equipment_replacement_events/meter/",
-      options: Options(headers: authHeaderWithToken()),
+      options: authHeaderWithToken,
       data: data.toJson(),
     );
     final finalResp = CreateMeterChangeEventResponse.fromJson(resp.data!);
@@ -306,7 +298,7 @@ class NetworkInterface {
     }
     final Response<Map<String, dynamic>> resp = await dio.get(
       "/equipment_replacement_events/meter",
-      options: Options(headers: authHeaderWithToken()),
+      options: authHeaderWithToken,
       queryParameters: queries,
     );
     final finalResp = GetMeterChangeEventsListResponse.fromJson(resp.data!);
@@ -318,7 +310,7 @@ class NetworkInterface {
   ) async {
     final Response<Map<String, dynamic>> resp = await dio.put(
       "/equipment_replacement_events/meter/1/",
-      options: Options(headers: authHeaderWithToken()),
+      options: authHeaderWithToken,
       data: data.toJson(),
     );
     final finalResp = UpdateMeterChangeEventResponse.fromJson(resp.data!);
@@ -328,7 +320,7 @@ class NetworkInterface {
   Future<void> deleteMeterChangeEventResponse() async {
     await dio.delete(
       "/equipment_replacement_events/meter/1/",
-      options: Options(headers: authHeaderWithToken()),
+      options: authHeaderWithToken,
     );
   }
 
@@ -347,7 +339,7 @@ class NetworkInterface {
     }
     final Response<Map<String, dynamic>> resp = await dio.get(
       "/equipment_replacement_events/last-action/meter",
-      options: Options(headers: authHeaderWithToken()),
+      options: authHeaderWithToken,
       queryParameters: queries,
     );
     final finalResp = GetMeterChangeEventLastActionResponse.fromJson(
@@ -361,7 +353,7 @@ class NetworkInterface {
   ) async {
     final Response<Map<String, dynamic>> resp = await dio.post(
       "/meter_and_corrector/bulk/",
-      options: Options(headers: authHeaderWithToken()),
+      options: authHeaderWithToken,
       data: data.toJson(),
     );
     final finalResp = PostCreateCorrectorBulkResponse.fromJson(resp.data!);
@@ -373,7 +365,7 @@ class NetworkInterface {
   ) async {
     await dio.post(
       "/meter_and_corrector/bulk/",
-      options: Options(headers: authHeaderWithToken()),
+      options: authHeaderWithToken,
       data: data.toJson(),
     );
   }
@@ -388,7 +380,7 @@ class NetworkInterface {
   ) async {
     final Response<List<dynamic>> resp = await dio.get(
       "/meter_and_corrector/bulk/last-action",
-      options: Options(headers: authHeaderWithToken()),
+      options: authHeaderWithToken,
     );
     final data = resp.data!;
     final List<GetCorrectorDataBulkLastActionResponse> list = [];
@@ -406,7 +398,7 @@ class NetworkInterface {
   }) async {
     final Response<Map<String, dynamic>> resp = await dio.get(
       "/pressure_and_temperature/last-action",
-      options: Options(headers: authHeaderWithToken()),
+      options: authHeaderWithToken,
       queryParameters:
           stationCode != null ? {"station_code": stationCode} : null,
     );
@@ -417,7 +409,7 @@ class NetworkInterface {
   Future<GetStationDataListResponse> getStationDataBulk() async {
     final Response<Map<String, dynamic>> resp = await dio.get(
       "/organization/station/",
-      options: Options(headers: authHeaderWithToken()),
+      options: authHeaderWithToken,
     );
     final finalResp = GetStationDataListResponse.fromJson(resp.data!);
     return finalResp;
@@ -426,7 +418,7 @@ class NetworkInterface {
   Future<GetStationTypeDataListResponse> getStationTypeDataBulk() async {
     final Response<Map<String, dynamic>> resp = await dio.get(
       "/organization/station-type/",
-      options: Options(headers: authHeaderWithToken()),
+      options: authHeaderWithToken,
     );
     final finalResp = GetStationTypeDataListResponse.fromJson(resp.data!);
     return finalResp;
@@ -435,7 +427,7 @@ class NetworkInterface {
   Future<Station2> getStationData() async {
     final Response<Map<String, dynamic>> resp = await dio.get(
       "/organization/station/12345/",
-      options: Options(headers: authHeaderWithToken()),
+      options: authHeaderWithToken,
     );
     final finalResp = Station2.fromJson(resp.data!);
     return finalResp;
@@ -444,7 +436,7 @@ class NetworkInterface {
   Future<StationType> getStationTypeData() async {
     final Response<Map<String, dynamic>> resp = await dio.get(
       "/organization/station-type/2/",
-      options: Options(headers: authHeaderWithToken()),
+      options: authHeaderWithToken,
     );
     final finalResp = StationType.fromJson(resp.data!);
     return finalResp;
@@ -453,7 +445,7 @@ class NetworkInterface {
   Future<Station3> createStation(PostCreateStationRequest data) async {
     final Response<Map<String, dynamic>> resp = await dio.post(
       "/organization/station/",
-      options: Options(headers: authHeaderWithToken()),
+      options: authHeaderWithToken,
     );
     final finalResp = Station3.fromJson(resp.data!);
     return finalResp;
@@ -462,7 +454,7 @@ class NetworkInterface {
   Future<StationType> createStationType(StationType data) async {
     final Response<Map<String, dynamic>> resp = await dio.post(
       "/organization/station-type/",
-      options: Options(headers: authHeaderWithToken()),
+      options: authHeaderWithToken,
     );
     final finalResp = StationType.fromJson(resp.data!);
     return finalResp;
@@ -471,7 +463,7 @@ class NetworkInterface {
   Future<Station3> updateStationData(PostCreateStationRequest data) async {
     final Response<Map<String, dynamic>> resp = await dio.put(
       "/organization/station/12347/",
-      options: Options(headers: authHeaderWithToken()),
+      options: authHeaderWithToken,
     );
     final finalResp = Station3.fromJson(resp.data!);
     return finalResp;
@@ -480,7 +472,7 @@ class NetworkInterface {
   Future<StationType2> updateStationTypeData(StationType data) async {
     final Response<Map<String, dynamic>> resp = await dio.put(
       "/organization/station-type/2",
-      options: Options(headers: authHeaderWithToken()),
+      options: authHeaderWithToken,
     );
     final finalResp = StationType2.fromJson(resp.data!);
     return finalResp;
@@ -489,21 +481,21 @@ class NetworkInterface {
   Future<void> deleteStation() async {
     await dio.delete(
       "/organization/station/12346/",
-      options: Options(headers: authHeaderWithToken()),
+      options: authHeaderWithToken,
     );
   }
 
   Future<void> deleteStationType() async {
     await dio.delete(
       "/organization/station-type/2",
-      options: Options(headers: authHeaderWithToken()),
+      options: authHeaderWithToken,
     );
   }
 
   Future<GetCorrectorChangeEventResponse> getCorrectorChangeEvent() async {
     final Response<Map<String, dynamic>> resp = await dio.get(
       "equipment_replacement_events/corrector/1/",
-      options: Options(headers: authHeaderWithToken()),
+      options: authHeaderWithToken,
     );
     final finalResp = GetCorrectorChangeEventResponse.fromJson(resp.data!);
     return finalResp;
@@ -514,7 +506,7 @@ class NetworkInterface {
   ) async {
     final Response<Map<String, dynamic>> resp = await dio.post(
       "/equipment_replacement_events/corrector/",
-      options: Options(headers: authHeaderWithToken()),
+      options: authHeaderWithToken,
       data: data.toJson(),
     );
     final finalResp = GetCorrectorChangeEventResponse.fromJson(resp.data!);
@@ -538,7 +530,7 @@ class NetworkInterface {
 
     final Response<Map<String, dynamic>> resp = await dio.get(
       "/equipment_replacement_events/corrector",
-      options: Options(headers: authHeaderWithToken()),
+      options: authHeaderWithToken,
       queryParameters: queries,
     );
     final finalResp = GetCorrectorChangeEventListResponse.fromJson(resp.data!);
@@ -550,7 +542,7 @@ class NetworkInterface {
   ) async {
     final Response<Map<String, dynamic>> resp = await dio.put(
       "/equipment_replacement_events/corrector/1/",
-      options: Options(headers: authHeaderWithToken()),
+      options: authHeaderWithToken,
       data: data.toJson(),
     );
     final finalResp = GetCorrectorChangeEventResponse.fromJson(resp.data!);
@@ -560,7 +552,7 @@ class NetworkInterface {
   Future<void> deleteCorrectorChangeEvent() async {
     await dio.delete(
       "/equipment_replacement_events/corrector/1/",
-      options: Options(headers: authHeaderWithToken()),
+      options: authHeaderWithToken,
     );
   }
 
@@ -569,7 +561,7 @@ class NetworkInterface {
   }) async {
     final Response<Map<String, dynamic>> resp = await dio.get(
       "/equipment_replacement_events/last-action/corrector",
-      options: Options(headers: authHeaderWithToken()),
+      options: authHeaderWithToken,
       queryParameters:
           stationCode != null ? {"station_code": stationCode} : null,
     );
@@ -580,7 +572,7 @@ class NetworkInterface {
   Future<void> removeCustomStationGroup() async {
     await dio.delete(
       "/reports/station_groups/3/",
-      options: Options(headers: authHeaderWithToken()),
+      options: authHeaderWithToken,
     );
   }
 
@@ -588,7 +580,7 @@ class NetworkInterface {
   getUsersCustomStationsGroup() async {
     final Response<Map<String, dynamic>> resp = await dio.get(
       "/reports/station_groups",
-      options: Options(headers: authHeaderWithToken()),
+      options: authHeaderWithToken,
     );
     final finalResp = GetUsersCustomStationGroupResponse.fromJson(resp.data!);
     return finalResp;
@@ -597,7 +589,7 @@ class NetworkInterface {
   Future<StationGroup> createNewStationsGroup(StationGroup data) async {
     final Response<Map<String, dynamic>> resp = await dio.post(
       "/reports/station_groups",
-      options: Options(headers: authHeaderWithToken()),
+      options: authHeaderWithToken,
       data: data.toJson(),
     );
     final finalResp = StationGroup.fromJson(resp.data!);
@@ -605,5 +597,26 @@ class NetworkInterface {
   }
 
   /// The factory that returns the singleton instance.
-  factory NetworkInterface.instance() => _interface;
+  /// Throws an error if the optional dio parameter is given but
+  /// the instance is already initialized.
+  factory NetworkInterface.instance({Dio? dio}) {
+    if (_interface != null && dio != null) {
+      throw "The network interface is already initialized with a different dio instance";
+    } else if (_interface == null) {
+      final Dio dioInstance;
+      if (dio != null) {
+        dioInstance = dio;
+      } else {
+        dioInstance = Dio(
+          BaseOptions(
+            baseUrl: "localhost:8000",
+            extra: {"withCredentials": true},
+            preserveHeaderCase: true,
+          ),
+        );
+      }
+      _interface = NetworkInterface._privateConstructor(dioInstance);
+    }
+    return _interface!;
+  }
 }
