@@ -82,7 +82,6 @@ class _MyDrawerState extends State<MyDrawer> {
                   // FIX
                   // TODO
                   // await NetworkInterface.instance().logout();
-                  await Preferences.instance().unsetActiveUser();
                   if (!context.mounted) return;
                   showDialog(
                     barrierDismissible: false,
@@ -100,6 +99,7 @@ class _MyDrawerState extends State<MyDrawer> {
                     },
                   );
                   await Future.delayed(Duration(seconds: 2));
+                  await Preferences.instance().unsetActiveUser();
                   if (!context.mounted) return;
                   context.pop();
                   context.goNamed(LoginRoute.routingName);
