@@ -66,6 +66,13 @@ void initialRouteSetup(
   final datePickerState = context.read<DatePickerProvider>();
   final selectedStationsState = context.read<SelectedStationsProvider>();
 
+  // Reset everything and start over.
+  WidgetsBinding.instance.addPostFrameCallback((_) {
+    datePickerState.setFromDate(null);
+    datePickerState.setToDate(null);
+    selectedStationsState.clearStations();
+  });
+
   if (fromDate != null) {
     final input = fromDate;
     final date = dashDateToJalali(input);
