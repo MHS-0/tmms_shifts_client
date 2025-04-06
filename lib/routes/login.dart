@@ -7,6 +7,7 @@ import 'package:tmms_shifts_client/data/backend_types.dart';
 import 'package:tmms_shifts_client/l18n/app_localizations.dart';
 import 'package:tmms_shifts_client/network_interface.dart';
 import 'package:tmms_shifts_client/providers/preferences.dart';
+import 'package:tmms_shifts_client/routes/monitoring_full_report_route.dart';
 import 'package:tmms_shifts_client/widgets/error_alert_dialog.dart';
 
 class LoginRoute extends StatefulWidget {
@@ -53,52 +54,50 @@ class _LoginRouteState extends State<LoginRoute> {
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       crossAxisAlignment: CrossAxisAlignment.center,
+                      spacing: 16,
                       children: [
                         SizedBox(height: 50),
                         Image.asset(iconAssetPath, width: 200, height: 200),
-                        Padding(
-                          padding: const EdgeInsets.all(16.0),
-                          child: TextFormField(
-                            controller: _usernameController,
-                            decoration: InputDecoration(
-                              constraints: BoxConstraints.loose(
-                                Size(300, double.infinity),
-                              ),
-                              labelText: localizations.usernameTextFieldLabel,
-                              hintText: localizations.usernameTextFieldHint,
-                            ),
-                            textInputAction: TextInputAction.next,
-                            autofocus: true,
-                            maxLines: 1,
-                            validator: (value) {
-                              if (value == null || value.isEmpty) {
-                                return localizations.fieldShouldBeFilled;
-                              }
-                              return null;
-                            },
-                          ),
+                        Text(
+                          localizations.longTitle,
+                          style: const TextStyle(fontSize: 20),
                         ),
-                        Padding(
-                          padding: const EdgeInsets.all(16.0),
-                          child: SizedBox(
-                            child: TextFormField(
-                              controller: _passwordController,
-                              decoration: InputDecoration(
-                                constraints: BoxConstraints.loose(
-                                  Size(300, double.infinity),
-                                ),
-                                labelText: localizations.passwordTextFieldLabel,
-                                hintText: localizations.passwordTextFieldHint,
-                              ),
-                              maxLines: 1,
-                              validator: (value) {
-                                if (value == null || value.isEmpty) {
-                                  return localizations.fieldShouldBeFilled;
-                                }
-                                return null;
-                              },
+                        SizedBox(),
+                        TextFormField(
+                          controller: _usernameController,
+                          decoration: InputDecoration(
+                            constraints: BoxConstraints.loose(
+                              Size(300, double.infinity),
                             ),
+                            labelText: localizations.usernameTextFieldLabel,
+                            hintText: localizations.usernameTextFieldHint,
                           ),
+                          textInputAction: TextInputAction.next,
+                          autofocus: true,
+                          maxLines: 1,
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return localizations.fieldShouldBeFilled;
+                            }
+                            return null;
+                          },
+                        ),
+                        TextFormField(
+                          controller: _passwordController,
+                          decoration: InputDecoration(
+                            constraints: BoxConstraints.loose(
+                              Size(300, double.infinity),
+                            ),
+                            labelText: localizations.passwordTextFieldLabel,
+                            hintText: localizations.passwordTextFieldHint,
+                          ),
+                          maxLines: 1,
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return localizations.fieldShouldBeFilled;
+                            }
+                            return null;
+                          },
                         ),
                         ElevatedButton(
                           onPressed: () async {
@@ -108,122 +107,83 @@ class _LoginRouteState extends State<LoginRoute> {
                             );
                             if (_formKey.currentState!.validate()) {
                               try {
+                                showDialog(
+                                  barrierDismissible: false,
+                                  context: context,
+                                  builder: (context) {
+                                    return AlertDialog(
+                                      content: Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          Text(localizations.pleaseWait),
+                                          CircularProgressIndicator(),
+                                        ],
+                                      ),
+                                    );
+                                  },
+                                );
                                 // TODO
                                 // FIX: Actually implement it with the final backend responses.
                                 //
-                                // final resp = await NetworkInterface.instance()
-                                //     .login(loginInfo);
+                                // final loginResp =
+                                //     await NetworkInterface.instance().login(
+                                //       loginInfo,
+                                //     );
+                                // final profileResp =
+                                //     await NetworkInterface.instance()
+                                //         .getProfile(loginResp.token);
+                                // final activeUser = ActiveUser(
+                                //   username: profileResp.username,
+                                //   password: _passwordController.text,
+                                //   token: loginResp.token,
+                                //   isStaff: profileResp.isStaff,
+                                //   expiry: loginResp.expiry,
+                                //   stations: profileResp.stations,
+                                // );
                                 //
                                 // FIX: Actually implement it with the final backend responses.
-                                if (loginInfo.username == "user1" &&
-                                    loginInfo.password == "1234") {
-                                  showDialog(
-                                    barrierDismissible: false,
-                                    context: context,
-                                    builder: (context) {
-                                      return AlertDialog(
-                                        content: Row(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.spaceBetween,
-                                          children: [
-                                            Text("لطفا صبر کنید..."),
-                                            CircularProgressIndicator(),
-                                          ],
-                                        ),
-                                      );
-                                    },
-                                  );
-                                  await Future.delayed(Duration(seconds: 3));
-                                  final activeUser = ActiveUser(
-                                    username: "admin",
-                                    password: "asd123!@#",
-                                    token: "asdasdasdaasd",
-                                    isStaff: true,
-                                    expiry: DateTime.now().add(
-                                      Duration(days: 365),
-                                    ),
-                                    fullname: "Mammad",
-                                    stations: [
-                                      Station(
-                                        code: "123",
-                                        rans: [
-                                          Ran(
-                                            code: 1,
-                                            sequenceNumber: 1,
-                                            station: 123,
+                                await Future.delayed(Duration(seconds: 3));
+
+                                // FIX: REMOVE before production deploy.
+                                final mockActiveUser =
+                                    ActiveUser.fromLoginResponse(
+                                      MockData.mockLoginResponse,
+                                      MockData.mockGetProfileResponse,
+                                      _passwordController.text,
+                                    );
+
+                                if (!context.mounted) return;
+                                context.pop();
+                                showDialog(
+                                  barrierDismissible: false,
+                                  context: context,
+                                  builder: (context) {
+                                    return AlertDialog(
+                                      content: Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          Text(
+                                            localizations.youHaveBeenLoggedIn,
                                           ),
-                                          Ran(
-                                            code: 2,
-                                            sequenceNumber: 2,
-                                            station: 123,
-                                          ),
+                                          SizedBox(width: 32),
+                                          Icon(Icons.check_rounded, size: 80),
                                         ],
-                                        typeName: "CGS",
-                                        title: "مهدی شهر",
-                                        district: "مهدی شهر",
-                                        area: "Semnan",
-                                        capacity: 1234,
-                                        type: 1,
-                                        activity: 1,
                                       ),
-                                      Station(
-                                        code: "142",
-                                        rans: [
-                                          Ran(
-                                            code: 4,
-                                            sequenceNumber: 1,
-                                            station: 142,
-                                          ),
-                                          Ran(
-                                            code: 5,
-                                            sequenceNumber: 2,
-                                            station: 142,
-                                          ),
-                                        ],
-                                        typeName: "CGS",
-                                        title: "سمنان",
-                                        district: "سمنان",
-                                        area: "Semnan",
-                                        capacity: 1234,
-                                        type: 1,
-                                        activity: 2,
-                                      ),
-                                    ],
-                                  );
-                                  if (!context.mounted) return;
-                                  context.pop();
-                                  showDialog(
-                                    barrierDismissible: false,
-                                    context: context,
-                                    builder: (context) {
-                                      return AlertDialog(
-                                        content: Row(
-                                          children: [
-                                            Text("با موفقیت وارد شدید!"),
-                                            SizedBox(width: 32),
-                                            Icon(Icons.check_rounded, size: 80),
-                                          ],
-                                        ),
-                                      );
-                                    },
-                                  );
-                                  await Future.delayed(Duration(seconds: 2));
-                                  if (!context.mounted) return;
-                                  await context
-                                      .read<Preferences>()
-                                      .setActiveUser(
-                                        activeUser,
-                                        _passwordController.text,
-                                      );
-                                  if (!context.mounted) return;
-                                  context.pop();
-                                  context.go("/");
-                                } else {
-                                  // TODO
-                                  // FIX
-                                  final resp = await NetworkInterface.instance()
-                                      .login(loginInfo);
-                                }
+                                    );
+                                  },
+                                );
+                                await Future.delayed(Duration(seconds: 2));
+                                if (!context.mounted) return;
+                                await context.read<Preferences>().setActiveUser(
+                                  mockActiveUser,
+                                );
+                                if (!context.mounted) return;
+                                context.pop();
+                                context.goNamed(
+                                  MonitoringFullReportRoute.routingName,
+                                );
                               } on DioException catch (e) {
                                 if (e.response?.statusCode == 400) {
                                   if (context.mounted) {
@@ -246,7 +206,7 @@ class _LoginRouteState extends State<LoginRoute> {
                                     context: context,
                                     builder: (context) {
                                       return ErrorAlertDialog(
-                                        "لاگین ناموفقیت آمیز بود",
+                                        "${localizations.logInFailed} \n $e",
                                       );
                                     },
                                   );
@@ -260,7 +220,7 @@ class _LoginRouteState extends State<LoginRoute> {
                                     context: context,
                                     builder: (context) {
                                       return ErrorAlertDialog(
-                                        e,
+                                        "${localizations.logInFailed} \n $e",
                                         isUnknownError: true,
                                       );
                                     },

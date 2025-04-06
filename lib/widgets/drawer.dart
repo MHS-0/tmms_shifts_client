@@ -8,7 +8,8 @@ import 'package:tmms_shifts_client/network_interface.dart';
 import 'package:tmms_shifts_client/providers/preferences.dart';
 import 'package:tmms_shifts_client/routes/counter_corrector_reports.dart';
 import 'package:tmms_shifts_client/routes/login.dart';
-import 'package:tmms_shifts_client/routes/main_route.dart';
+import 'package:tmms_shifts_client/routes/monitoring_full_report_route.dart';
+import 'package:tmms_shifts_client/routes/pressure_and_temp_reports_route.dart';
 import 'package:tmms_shifts_client/widgets/error_alert_dialog.dart';
 
 class MyDrawer extends StatefulWidget {
@@ -37,8 +38,8 @@ class _MyDrawerState extends State<MyDrawer> {
           InkWell(
             onTap: () {
               final routerState = GoRouter.of(context).state;
-              if (routerState.name != "home") {
-                context.goNamed(MainRoute.routingName);
+              if (routerState.name != MonitoringFullReportRoute.routingName) {
+                context.goNamed(MonitoringFullReportRoute.routingName);
               } else {
                 context.pop();
               }
@@ -51,7 +52,7 @@ class _MyDrawerState extends State<MyDrawer> {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Image.asset(iconAssetPath, width: 100, height: 100),
+                    Image.asset(iconAssetPath, width: 75, height: 75),
                     Text(
                       localizations.longTitle,
                       style: const TextStyle(fontSize: 20),
@@ -70,7 +71,7 @@ class _MyDrawerState extends State<MyDrawer> {
             // TODO: Replace with some actual relevant data?
             subtitle: user.fullname != null ? Text(user.fullname!) : null,
             trailing: IconButton(
-              tooltip: "خروج از حساب",
+              tooltip: localizations.logout,
               icon: Icon(Icons.logout),
               onPressed: () async {
                 final user = Preferences.instance().activeUser;
@@ -90,7 +91,7 @@ class _MyDrawerState extends State<MyDrawer> {
                       return AlertDialog(
                         content: Row(
                           children: [
-                            Text("از حساب خارج شدید!"),
+                            Text(localizations.youHaveBeenLoggedOut),
                             SizedBox(width: 32),
                             Icon(Icons.check_rounded, size: 80),
                           ],
@@ -103,16 +104,12 @@ class _MyDrawerState extends State<MyDrawer> {
                   if (!context.mounted) return;
                   context.pop();
                   context.goNamed(LoginRoute.routingName);
-                } on DioException catch (e) {
-                  if (context.mounted) {
-                    showDialog(
-                      context: context,
-                      builder: (context) {
-                        return ErrorAlertDialog(e, isUnknownError: true);
-                      },
-                    );
-                  }
-                  return;
+
+                  // Specific errors for network issues can be used with the below line:
+                  // on DioException catch (e) {
+                  //
+                  // In case we want to implement specific error dialogs for those cases in the
+                  // future.
                 } catch (e) {
                   if (context.mounted) {
                     showDialog(
@@ -124,42 +121,45 @@ class _MyDrawerState extends State<MyDrawer> {
                   }
                   return;
                 }
-                if (context.mounted) {
-                  context.read<Preferences>().unsetActiveUser();
-                  context.goNamed(LoginRoute.routingName);
-                }
               },
             ),
           ),
           MyDrawer._divider,
-          ExpansionTile(
-            leading: Icon(Icons.info),
-            title: Text(localizations.reports),
-            children: [
-              ListTile(
-                leading: Icon(Icons.add),
-                title: Text(localizations.reportPressureAndTemp),
-                onTap: () {},
-              ),
-              ListTile(
-                leading: Icon(Icons.add),
-                title: Text(localizations.reportCorrectorNumbers),
-                onTap: () {},
-              ),
-              ListTile(
-                leading: Icon(Icons.report),
-                title: Text("گزارش کنتور و تصحیح کننده"),
-                onTap: () {
-                  final routingState = GoRouter.of(context).state;
-                  if (routingState.name !=
-                      CounterCorrectorReportsRoute.routingName) {
-                    context.goNamed(CounterCorrectorReportsRoute.routingName);
-                  } else {
-                    context.pop();
-                  }
-                },
-              ),
-            ],
+          ListTile(
+            leading: Icon(Icons.thermostat_rounded),
+            title: Text(localizations.reportPressureAndTemp),
+            onTap: () {
+              final routingState = GoRouter.of(context).state;
+              if (routingState.name !=
+                  PressureAndTempReportsRoute.routingName) {
+                context.goNamed(PressureAndTempReportsRoute.routingName);
+              } else {
+                context.pop();
+              }
+            },
+          ),
+          ListTile(
+            leading: Icon(Icons.numbers),
+            title: Text(localizations.reportCorrectorNumbers),
+            onTap: () {
+              final routingState = GoRouter.of(context).state;
+              if (routingState.name !=
+                  CounterCorrectorReportsRoute.routingName) {
+                context.goNamed(CounterCorrectorReportsRoute.routingName);
+              } else {
+                context.pop();
+              }
+            },
+          ),
+          ListTile(
+            leading: Icon(Icons.sync),
+            title: Text(localizations.reportCounterChangeEvents),
+            onTap: () {},
+          ),
+          ListTile(
+            leading: Icon(Icons.sync_alt),
+            title: Text(localizations.reportCorrectorChangeEvents),
+            onTap: () {},
           ),
         ],
       ),

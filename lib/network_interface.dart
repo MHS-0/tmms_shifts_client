@@ -10,12 +10,13 @@ class NetworkInterface {
   /// Private constructor to use when instantiating an instance inside the file.
   const NetworkInterface._privateConstructor(this.dio);
 
-  static final Options authHeaderEmpty = Options(headers: {authHeaderKey: ""});
-  static final Options authHeaderWithToken = Options(
-    headers: {
-      authHeaderKey: "Token ${Preferences.instance().activeUser?.token}",
-    },
-  );
+  static const emptyHeaderMap = {authHeaderKey: ""};
+  static final filledHeaderMap = {
+    authHeaderKey: "Token ${Preferences.instance().activeUser?.token}",
+  };
+
+  static final Options authHeaderEmpty = Options(headers: emptyHeaderMap);
+  static final Options authHeaderWithToken = Options(headers: filledHeaderMap);
 
   /// The singleton instance of this class
   static NetworkInterface? _interface;
@@ -30,17 +31,23 @@ class NetworkInterface {
     return finalResp;
   }
 
-  Future<GetProfileResponse> getProfile() async {
+  // This function takes the token string directly instead of using preferences, becuase it might
+  // be used before OR after the active user is actually set through preferences.
+  Future<GetProfileResponse> getProfile(String token) async {
     final Response<Map<String, dynamic>> resp = await dio.get(
       "/user/profile/",
-      options: authHeaderEmpty,
+      options: authHeaderWithToken,
     );
     final finalResp = GetProfileResponse.fromJson(resp.data!);
     return finalResp;
   }
 
-  Future<void> logout() async {
-    await dio.post("/user/logout", options: authHeaderWithToken);
+  Future<void> logout(LoginRequest req) async {
+    await dio.post(
+      "/user/logout",
+      options: authHeaderWithToken,
+      data: req.toJson(),
+    );
   }
 
   Future<CreateShiftDataResponse> createShiftData(
@@ -57,9 +64,10 @@ class NetworkInterface {
 
   Future<UpdateShiftDataResponse> updateShiftData(
     UpdateShiftDataRequest data,
+    int shift,
   ) async {
     final Response<Map<String, dynamic>> resp = await dio.put(
-      "/pressure_and_temperature/shift/3/",
+      "/pressure_and_temperature/shift/$shift/",
       options: authHeaderWithToken,
       data: data.toJson(),
     );
@@ -67,9 +75,9 @@ class NetworkInterface {
     return finalResp;
   }
 
-  Future<GetShiftDataResponse> getShiftData() async {
+  Future<GetShiftDataResponse> getShiftData(int shift) async {
     final Response<Map<String, dynamic>> resp = await dio.get(
-      "/pressure_and_temperature/shift/12",
+      "/pressure_and_temperature/shift/$shift",
       options: authHeaderWithToken,
     );
     final finalResp = GetShiftDataResponse.fromJson(resp.data!);
@@ -89,9 +97,9 @@ class NetworkInterface {
     return finalResp;
   }
 
-  Future<void> destroyShiftData() async {
+  Future<void> destroyShiftData(int shift) async {
     await dio.delete(
-      "/pressure_and_temperature/shift/3",
+      "/pressure_and_temperature/shift/$shift",
       options: authHeaderWithToken,
     );
   }
@@ -99,16 +107,19 @@ class NetworkInterface {
   Future<GetShiftsDataListResponse> getShiftsDataList({
     String? fromDate,
     String? toDate,
-    int? stationCodes,
+    List<int>? stationCodes,
   }) async {
     final Map<String, dynamic>? queries;
-    if (fromDate == null && toDate == null && stationCodes == null) {
+    if (fromDate == null &&
+        toDate == null &&
+        (stationCodes == null || stationCodes.isEmpty)) {
       queries = null;
     } else {
       queries = {
         if (fromDate != null) "from_date": fromDate,
         if (toDate != null) "to_date": toDate,
-        if (stationCodes != null) "station_codes": stationCodes,
+        if (stationCodes != null && stationCodes.isNotEmpty)
+          "station_codes": stationCodes.join(","),
       };
     }
 
@@ -126,6 +137,7 @@ class NetworkInterface {
   ) async {
     final Response<Map<String, dynamic>> resp = await dio.post(
       "/meter_and_corrector/shift/",
+      data: data.toJson(),
       options: authHeaderWithToken,
     );
     final finalResp = CreateCorrectorResponse.fromJson(resp.data!);
@@ -134,9 +146,11 @@ class NetworkInterface {
 
   Future<UpdateCorrectorResponse> updateCorrector(
     UpdateCorrectorRequest data,
+    int shift,
   ) async {
     final Response<Map<String, dynamic>> resp = await dio.put(
-      "/meter_and_corrector/shift/1/",
+      "/meter_and_corrector/shift/$shift/",
+      data: data.toJson(),
       options: authHeaderWithToken,
     );
     final finalResp = UpdateCorrectorResponse.fromJson(resp.data!);
@@ -166,18 +180,18 @@ class NetworkInterface {
     return finalResp;
   }
 
-  Future<GetCorrectorDataResponse> getCorrectorData() async {
+  Future<GetCorrectorDataResponse> getCorrectorData(int shift) async {
     final Response<Map<String, dynamic>> resp = await dio.get(
-      "/meter_and_corrector/shift/1/",
+      "/meter_and_corrector/shift/$shift/",
       options: authHeaderWithToken,
     );
     final finalResp = GetCorrectorDataResponse.fromJson(resp.data!);
     return finalResp;
   }
 
-  Future<void> deleteCorrectorData() async {
+  Future<void> deleteCorrectorData(int shift) async {
     await dio.delete(
-      "/meter_and_corrector/shift/1/",
+      "/meter_and_corrector/shift/$shift/",
       options: authHeaderWithToken,
     );
   }

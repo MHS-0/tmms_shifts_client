@@ -135,7 +135,6 @@ class _CounterCorrectorReportsRouteState
         ),
         drawer: MyDrawer(),
         body: FutureBuilder(
-          initialData: null,
           future: getReports(),
           builder: (context, snapshot) {
             if (!snapshot.hasData) {

@@ -1,13 +1,14 @@
 import 'package:json_annotation/json_annotation.dart';
+import 'package:tmms_shifts_client/providers/preferences.dart';
 
 part 'backend_types.g.dart';
 
-@JsonSerializable()
+@JsonSerializable(explicitToJson: true)
 class LoginRequest {
   final String username;
   final String password;
 
-  LoginRequest({required this.username, required this.password});
+  const LoginRequest({required this.username, required this.password});
 
   factory LoginRequest.fromJson(Map<String, dynamic> json) =>
       _$LoginRequestFromJson(json);
@@ -21,7 +22,7 @@ class LoginResponse {
   final String token;
   final LoginResponseUser user;
 
-  LoginResponse({
+  const LoginResponse({
     required this.expiry,
     required this.token,
     required this.user,
@@ -44,7 +45,7 @@ class LoginResponseUser {
   @JsonKey(name: 'is_staff')
   final bool isStaff;
 
-  LoginResponseUser({this.username, required this.isStaff});
+  const LoginResponseUser({this.username, required this.isStaff});
 
   factory LoginResponseUser.fromJson(Map<String, dynamic> json) =>
       _$LoginResponseUserFromJson(json);
@@ -52,18 +53,18 @@ class LoginResponseUser {
   Map<String, dynamic> toJson() => _$LoginResponseUserToJson(this);
 }
 
-@JsonSerializable()
+@JsonSerializable(explicitToJson: true)
 class GetProfileResponse {
   final String username;
   final String? fullname;
-  final List<Station>? stations;
+  final List<Station> stations;
   @JsonKey(name: 'is_staff')
   final bool isStaff;
 
-  GetProfileResponse({
+  const GetProfileResponse({
     required this.username,
     required this.isStaff,
-    this.stations,
+    required this.stations,
     this.fullname,
   });
 
@@ -75,7 +76,7 @@ class GetProfileResponse {
 
 @JsonSerializable(explicitToJson: true)
 class Station {
-  final String code;
+  final int code;
   final List<Ran> rans;
   @JsonKey(name: 'type_name')
   final String typeName;
@@ -122,9 +123,9 @@ class Ran {
   Map<String, dynamic> toJson() => _$RanToJson(this);
 }
 
-@JsonSerializable()
+@JsonSerializable(explicitToJson: true)
 class CreateShiftDataRequest {
-  final String station;
+  final int station;
   final String shift;
   @JsonKey(name: 'input_pressure')
   final int inputPressure;
@@ -139,7 +140,7 @@ class CreateShiftDataRequest {
   factory CreateShiftDataRequest.fromJson(Map<String, dynamic> json) =>
       _$CreateShiftDataRequestFromJson(json);
 
-  CreateShiftDataRequest({
+  const CreateShiftDataRequest({
     required this.station,
     required this.shift,
     required this.inputPressure,
@@ -152,9 +153,9 @@ class CreateShiftDataRequest {
   Map<String, dynamic> toJson() => _$CreateShiftDataRequestToJson(this);
 }
 
-@JsonSerializable()
+@JsonSerializable(explicitToJson: true)
 class CreateShiftDataResponse {
-  final String station;
+  final int station;
   final String shift;
   @JsonKey(name: 'input_pressure')
   final int inputPressure;
@@ -172,7 +173,7 @@ class CreateShiftDataResponse {
   factory CreateShiftDataResponse.fromJson(Map<String, dynamic> json) =>
       _$CreateShiftDataResponseFromJson(json);
 
-  CreateShiftDataResponse({
+  const CreateShiftDataResponse({
     required this.registeredDatetime,
     required this.station,
     required this.shift,
@@ -187,9 +188,9 @@ class CreateShiftDataResponse {
   Map<String, dynamic> toJson() => _$CreateShiftDataResponseToJson(this);
 }
 
-@JsonSerializable()
+@JsonSerializable(explicitToJson: true)
 class UpdateShiftDataRequest {
-  final String station;
+  final int station;
   final String shift;
   @JsonKey(name: 'input_pressure')
   final int inputPressure;
@@ -204,7 +205,7 @@ class UpdateShiftDataRequest {
   factory UpdateShiftDataRequest.fromJson(Map<String, dynamic> json) =>
       _$UpdateShiftDataRequestFromJson(json);
 
-  UpdateShiftDataRequest({
+  const UpdateShiftDataRequest({
     required this.station,
     required this.shift,
     required this.inputPressure,
@@ -217,10 +218,10 @@ class UpdateShiftDataRequest {
   Map<String, dynamic> toJson() => _$UpdateShiftDataRequestToJson(this);
 }
 
-@JsonSerializable()
+@JsonSerializable(explicitToJson: true)
 class UpdateShiftDataResponse {
   final int id;
-  final String station;
+  final int station;
   final String shift;
   @JsonKey(name: 'input_pressure')
   final int inputPressure;
@@ -238,7 +239,7 @@ class UpdateShiftDataResponse {
   factory UpdateShiftDataResponse.fromJson(Map<String, dynamic> json) =>
       _$UpdateShiftDataResponseFromJson(json);
 
-  UpdateShiftDataResponse({
+  const UpdateShiftDataResponse({
     required this.id,
     this.user,
     required this.station,
@@ -254,10 +255,10 @@ class UpdateShiftDataResponse {
   Map<String, dynamic> toJson() => _$UpdateShiftDataResponseToJson(this);
 }
 
-@JsonSerializable()
+@JsonSerializable(explicitToJson: true)
 class GetShiftDataResponse {
   final int id;
-  final String station;
+  final int station;
   final String shift;
   @JsonKey(name: 'input_pressure')
   final int inputPressure;
@@ -275,7 +276,7 @@ class GetShiftDataResponse {
   factory GetShiftDataResponse.fromJson(Map<String, dynamic> json) =>
       _$GetShiftDataResponseFromJson(json);
 
-  GetShiftDataResponse({
+  const GetShiftDataResponse({
     required this.id,
     this.user,
     required this.station,
@@ -291,10 +292,10 @@ class GetShiftDataResponse {
   Map<String, dynamic> toJson() => _$GetShiftDataResponseToJson(this);
 }
 
-@JsonSerializable()
+@JsonSerializable(explicitToJson: true)
 class GetShiftLastActionResponse {
   final int id;
-  final String station;
+  final int station;
   final String shift;
   @JsonKey(name: 'input_pressure')
   final int inputPressure;
@@ -312,7 +313,7 @@ class GetShiftLastActionResponse {
   factory GetShiftLastActionResponse.fromJson(Map<String, dynamic> json) =>
       _$GetShiftLastActionResponseFromJson(json);
 
-  GetShiftLastActionResponse({
+  const GetShiftLastActionResponse({
     required this.id,
     this.user,
     required this.station,
@@ -328,7 +329,7 @@ class GetShiftLastActionResponse {
   Map<String, dynamic> toJson() => _$GetShiftLastActionResponseToJson(this);
 }
 
-@JsonSerializable()
+@JsonSerializable(explicitToJson: true)
 class GetShiftsDataListResponse {
   final int count;
   final Object? next;
@@ -338,7 +339,7 @@ class GetShiftsDataListResponse {
   factory GetShiftsDataListResponse.fromJson(Map<String, dynamic> json) =>
       _$GetShiftsDataListResponseFromJson(json);
 
-  GetShiftsDataListResponse({
+  const GetShiftsDataListResponse({
     required this.count,
     this.next,
     this.previous,
@@ -348,7 +349,7 @@ class GetShiftsDataListResponse {
   Map<String, dynamic> toJson() => _$GetShiftsDataListResponseToJson(this);
 }
 
-@JsonSerializable()
+@JsonSerializable(explicitToJson: true)
 class CreateCorrectorRequest {
   final String date;
   @JsonKey(name: 'meter_amount')
@@ -360,7 +361,7 @@ class CreateCorrectorRequest {
   factory CreateCorrectorRequest.fromJson(Map<String, dynamic> json) =>
       _$CreateCorrectorRequestFromJson(json);
 
-  CreateCorrectorRequest({
+  const CreateCorrectorRequest({
     required this.date,
     required this.meterAmount,
     required this.correctionAmount,
@@ -370,7 +371,7 @@ class CreateCorrectorRequest {
   Map<String, dynamic> toJson() => _$CreateCorrectorRequestToJson(this);
 }
 
-@JsonSerializable()
+@JsonSerializable(explicitToJson: true)
 class CreateCorrectorResponse {
   final String date;
   @JsonKey(name: 'registered_datetime')
@@ -381,13 +382,13 @@ class CreateCorrectorResponse {
   final int correctionAmount;
   final int ran;
   @JsonKey(name: 'station_code')
-  final String stationCode;
+  final int stationCode;
   final String? user;
 
   factory CreateCorrectorResponse.fromJson(Map<String, dynamic> json) =>
       _$CreateCorrectorResponseFromJson(json);
 
-  CreateCorrectorResponse({
+  const CreateCorrectorResponse({
     required this.date,
     this.registeredDatetime,
     required this.meterAmount,
@@ -400,7 +401,7 @@ class CreateCorrectorResponse {
   Map<String, dynamic> toJson() => _$CreateCorrectorResponseToJson(this);
 }
 
-@JsonSerializable()
+@JsonSerializable(explicitToJson: true)
 class UpdateCorrectorRequest {
   final String date;
   @JsonKey(name: 'meter_amount')
@@ -412,7 +413,7 @@ class UpdateCorrectorRequest {
   factory UpdateCorrectorRequest.fromJson(Map<String, dynamic> json) =>
       _$UpdateCorrectorRequestFromJson(json);
 
-  UpdateCorrectorRequest({
+  const UpdateCorrectorRequest({
     required this.date,
     required this.meterAmount,
     required this.correctionAmount,
@@ -422,14 +423,14 @@ class UpdateCorrectorRequest {
   Map<String, dynamic> toJson() => _$UpdateCorrectorRequestToJson(this);
 }
 
-@JsonSerializable()
+@JsonSerializable(explicitToJson: true)
 class UpdateCorrectorResponse {
   final int id;
   final String date;
   @JsonKey(name: 'registered_datetime')
   final String? registeredDatetime;
   @JsonKey(name: 'station_code')
-  final String stationCode;
+  final int stationCode;
   @JsonKey(name: 'meter_amount')
   final int meterAmount;
   @JsonKey(name: 'correction_amount')
@@ -440,7 +441,7 @@ class UpdateCorrectorResponse {
   factory UpdateCorrectorResponse.fromJson(Map<String, dynamic> json) =>
       _$UpdateCorrectorResponseFromJson(json);
 
-  UpdateCorrectorResponse({
+  const UpdateCorrectorResponse({
     required this.id,
     required this.date,
     this.registeredDatetime,
@@ -454,7 +455,7 @@ class UpdateCorrectorResponse {
   Map<String, dynamic> toJson() => _$UpdateCorrectorResponseToJson(this);
 }
 
-@JsonSerializable()
+@JsonSerializable(explicitToJson: true)
 class GetCorrectorDataListResponse {
   final int count;
   final String? next;
@@ -464,7 +465,7 @@ class GetCorrectorDataListResponse {
   factory GetCorrectorDataListResponse.fromJson(Map<String, dynamic> json) =>
       _$GetCorrectorDataListResponseFromJson(json);
 
-  GetCorrectorDataListResponse({
+  const GetCorrectorDataListResponse({
     required this.count,
     this.next,
     this.previous,
@@ -474,14 +475,14 @@ class GetCorrectorDataListResponse {
   Map<String, dynamic> toJson() => _$GetCorrectorDataListResponseToJson(this);
 }
 
-@JsonSerializable()
+@JsonSerializable(explicitToJson: true)
 class GetCorrectorDataResponse {
   final int id;
   final String date;
   @JsonKey(name: 'registered_datetime')
   final String? registeredDatetime;
   @JsonKey(name: 'station_code')
-  final String stationCode;
+  final int stationCode;
   @JsonKey(name: 'meter_amount')
   final int meterAmount;
   @JsonKey(name: 'correction_amount')
@@ -492,7 +493,7 @@ class GetCorrectorDataResponse {
   factory GetCorrectorDataResponse.fromJson(Map<String, dynamic> json) =>
       _$GetCorrectorDataResponseFromJson(json);
 
-  GetCorrectorDataResponse({
+  const GetCorrectorDataResponse({
     required this.id,
     required this.date,
     this.registeredDatetime,
@@ -589,7 +590,7 @@ class GetMonitoringFullReportResponse {
   factory GetMonitoringFullReportResponse.fromJson(Map<String, dynamic> json) =>
       _$GetMonitoringFullReportResponseFromJson(json);
 
-  GetMonitoringFullReportResponse({
+  const GetMonitoringFullReportResponse({
     required this.count,
     this.next,
     this.previous,
@@ -614,7 +615,7 @@ class GetMonitoringFullReportResponseResultItem {
     Map<String, dynamic> json,
   ) => _$GetMonitoringFullReportResponseResultItemFromJson(json);
 
-  GetMonitoringFullReportResponseResultItem({
+  const GetMonitoringFullReportResponseResultItem({
     required this.stationCode,
     required this.date,
     required this.shifts,
@@ -643,7 +644,7 @@ class Shift {
 
   factory Shift.fromJson(Map<String, dynamic> json) => _$ShiftFromJson(json);
 
-  Shift({
+  const Shift({
     required this.inputPressure,
     required this.outputPressure,
     required this.inputTemperature,
@@ -656,7 +657,7 @@ class Shift {
   Map<String, dynamic> toJson() => _$ShiftToJson(this);
 }
 
-@JsonSerializable()
+@JsonSerializable(explicitToJson: true)
 class GetPressureAndTemperatureFullReportResponse {
   final int count;
   final String? next;
@@ -667,7 +668,7 @@ class GetPressureAndTemperatureFullReportResponse {
     Map<String, dynamic> json,
   ) => _$GetPressureAndTemperatureFullReportResponseFromJson(json);
 
-  GetPressureAndTemperatureFullReportResponse({
+  const GetPressureAndTemperatureFullReportResponse({
     required this.count,
     this.next,
     this.previous,
@@ -678,7 +679,7 @@ class GetPressureAndTemperatureFullReportResponse {
       _$GetPressureAndTemperatureFullReportResponseToJson(this);
 }
 
-@JsonSerializable()
+@JsonSerializable(explicitToJson: true)
 class GetPressureAndTemperatureFullReportResponseResultItem {
   @JsonKey(name: 'station_code')
   final int stationCode;
@@ -689,7 +690,7 @@ class GetPressureAndTemperatureFullReportResponseResultItem {
     Map<String, dynamic> json,
   ) => _$GetPressureAndTemperatureFullReportResponseResultItemFromJson(json);
 
-  GetPressureAndTemperatureFullReportResponseResultItem({
+  const GetPressureAndTemperatureFullReportResponseResultItem({
     required this.stationCode,
     required this.date,
     required this.shifts,
@@ -699,7 +700,7 @@ class GetPressureAndTemperatureFullReportResponseResultItem {
       _$GetPressureAndTemperatureFullReportResponseResultItemToJson(this);
 }
 
-@JsonSerializable()
+@JsonSerializable(explicitToJson: true)
 class GetMeterChangeEventResponse {
   final int id;
   final String date;
@@ -719,7 +720,7 @@ class GetMeterChangeEventResponse {
   factory GetMeterChangeEventResponse.fromJson(Map<String, dynamic> json) =>
       _$GetMeterChangeEventResponseFromJson(json);
 
-  GetMeterChangeEventResponse({
+  const GetMeterChangeEventResponse({
     required this.id,
     required this.ranSequence,
     required this.oldMeterAmount,
@@ -734,7 +735,7 @@ class GetMeterChangeEventResponse {
   Map<String, dynamic> toJson() => _$GetMeterChangeEventResponseToJson(this);
 }
 
-@JsonSerializable()
+@JsonSerializable(explicitToJson: true)
 class CreateMeterChangeEventRequest {
   final String date;
   @JsonKey(name: 'old_meter_amount')
@@ -746,7 +747,7 @@ class CreateMeterChangeEventRequest {
   factory CreateMeterChangeEventRequest.fromJson(Map<String, dynamic> json) =>
       _$CreateMeterChangeEventRequestFromJson(json);
 
-  CreateMeterChangeEventRequest({
+  const CreateMeterChangeEventRequest({
     required this.oldMeterAmount,
     required this.newMeterAmount,
     required this.ran,
@@ -756,7 +757,7 @@ class CreateMeterChangeEventRequest {
   Map<String, dynamic> toJson() => _$CreateMeterChangeEventRequestToJson(this);
 }
 
-@JsonSerializable()
+@JsonSerializable(explicitToJson: true)
 class CreateMeterChangeEventResponse {
   final int id;
   final String date;
@@ -776,7 +777,7 @@ class CreateMeterChangeEventResponse {
   factory CreateMeterChangeEventResponse.fromJson(Map<String, dynamic> json) =>
       _$CreateMeterChangeEventResponseFromJson(json);
 
-  CreateMeterChangeEventResponse({
+  const CreateMeterChangeEventResponse({
     required this.id,
     required this.ranSequence,
     required this.oldMeterAmount,
@@ -791,7 +792,7 @@ class CreateMeterChangeEventResponse {
   Map<String, dynamic> toJson() => _$CreateMeterChangeEventResponseToJson(this);
 }
 
-@JsonSerializable()
+@JsonSerializable(explicitToJson: true)
 class GetMeterChangeEventsListResponse {
   final int count;
   final String? next;
@@ -802,7 +803,7 @@ class GetMeterChangeEventsListResponse {
     Map<String, dynamic> json,
   ) => _$GetMeterChangeEventsListResponseFromJson(json);
 
-  GetMeterChangeEventsListResponse({
+  const GetMeterChangeEventsListResponse({
     required this.count,
     this.next,
     this.previous,
@@ -813,7 +814,7 @@ class GetMeterChangeEventsListResponse {
       _$GetMeterChangeEventsListResponseToJson(this);
 }
 
-@JsonSerializable()
+@JsonSerializable(explicitToJson: true)
 class UpdateMeterChangeEventRequest {
   final String date;
   @JsonKey(name: 'old_meter_amount')
@@ -825,7 +826,7 @@ class UpdateMeterChangeEventRequest {
   factory UpdateMeterChangeEventRequest.fromJson(Map<String, dynamic> json) =>
       _$UpdateMeterChangeEventRequestFromJson(json);
 
-  UpdateMeterChangeEventRequest({
+  const UpdateMeterChangeEventRequest({
     required this.oldMeterAmount,
     required this.newMeterAmount,
     required this.ran,
@@ -835,7 +836,7 @@ class UpdateMeterChangeEventRequest {
   Map<String, dynamic> toJson() => _$UpdateMeterChangeEventRequestToJson(this);
 }
 
-@JsonSerializable()
+@JsonSerializable(explicitToJson: true)
 class UpdateMeterChangeEventResponse {
   final int id;
   final String date;
@@ -855,7 +856,7 @@ class UpdateMeterChangeEventResponse {
   factory UpdateMeterChangeEventResponse.fromJson(Map<String, dynamic> json) =>
       _$UpdateMeterChangeEventResponseFromJson(json);
 
-  UpdateMeterChangeEventResponse({
+  const UpdateMeterChangeEventResponse({
     required this.id,
     required this.ranSequence,
     required this.oldMeterAmount,
@@ -870,7 +871,7 @@ class UpdateMeterChangeEventResponse {
   Map<String, dynamic> toJson() => _$UpdateMeterChangeEventResponseToJson(this);
 }
 
-@JsonSerializable()
+@JsonSerializable(explicitToJson: true)
 class GetMeterChangeEventLastActionResponse {
   final int id;
   final String date;
@@ -891,7 +892,7 @@ class GetMeterChangeEventLastActionResponse {
     Map<String, dynamic> json,
   ) => _$GetMeterChangeEventLastActionResponseFromJson(json);
 
-  GetMeterChangeEventLastActionResponse({
+  const GetMeterChangeEventLastActionResponse({
     required this.id,
     required this.ranSequence,
     required this.oldMeterAmount,
@@ -907,12 +908,15 @@ class GetMeterChangeEventLastActionResponse {
       _$GetMeterChangeEventLastActionResponseToJson(this);
 }
 
-@JsonSerializable()
+@JsonSerializable(explicitToJson: true)
 class PostCreateCorrectorBulkRequest {
   final String date;
   final List<Ran3> rans;
 
-  PostCreateCorrectorBulkRequest({required this.date, required this.rans});
+  const PostCreateCorrectorBulkRequest({
+    required this.date,
+    required this.rans,
+  });
 
   factory PostCreateCorrectorBulkRequest.fromJson(Map<String, dynamic> json) =>
       _$PostCreateCorrectorBulkRequestFromJson(json);
@@ -920,7 +924,7 @@ class PostCreateCorrectorBulkRequest {
   Map<String, dynamic> toJson() => _$PostCreateCorrectorBulkRequestToJson(this);
 }
 
-@JsonSerializable()
+@JsonSerializable(explicitToJson: true)
 class Ran3 {
   @JsonKey(name: 'meter_amount')
   final String meterAmount;
@@ -928,7 +932,7 @@ class Ran3 {
   final String correctionAmount;
   final String ran;
 
-  Ran3({
+  const Ran3({
     required this.meterAmount,
     required this.correctionAmount,
     required this.ran,
@@ -939,13 +943,13 @@ class Ran3 {
   Map<String, dynamic> toJson() => _$Ran3ToJson(this);
 }
 
-@JsonSerializable()
+@JsonSerializable(explicitToJson: true)
 class PostCreateCorrectorBulkResponse {
   final int station;
   final String date;
   final List<Ran4> rans;
 
-  PostCreateCorrectorBulkResponse({
+  const PostCreateCorrectorBulkResponse({
     required this.station,
     required this.date,
     required this.rans,
@@ -958,7 +962,7 @@ class PostCreateCorrectorBulkResponse {
       _$PostCreateCorrectorBulkResponseToJson(this);
 }
 
-@JsonSerializable()
+@JsonSerializable(explicitToJson: true)
 class Ran4 {
   @JsonKey(name: 'meter_amount')
   final int meterAmount;
@@ -968,7 +972,7 @@ class Ran4 {
   final int ranSequence;
   final int ran;
 
-  Ran4({
+  const Ran4({
     required this.ranSequence,
     required this.meterAmount,
     required this.correctionAmount,
@@ -980,12 +984,12 @@ class Ran4 {
   Map<String, dynamic> toJson() => _$Ran4ToJson(this);
 }
 
-@JsonSerializable()
+@JsonSerializable(explicitToJson: true)
 class PutUpdateCorrectorBulkRequest {
   final String date;
   final List<Ran3> rans;
 
-  PutUpdateCorrectorBulkRequest({required this.date, required this.rans});
+  const PutUpdateCorrectorBulkRequest({required this.date, required this.rans});
 
   factory PutUpdateCorrectorBulkRequest.fromJson(Map<String, dynamic> json) =>
       _$PutUpdateCorrectorBulkRequestFromJson(json);
@@ -993,12 +997,12 @@ class PutUpdateCorrectorBulkRequest {
   Map<String, dynamic> toJson() => _$PutUpdateCorrectorBulkRequestToJson(this);
 }
 
-@JsonSerializable()
+@JsonSerializable(explicitToJson: true)
 class GetCorrectorDataBulkLastActionResponse {
   final String date;
   final List<Ran4> rans;
 
-  GetCorrectorDataBulkLastActionResponse({
+  const GetCorrectorDataBulkLastActionResponse({
     required this.date,
     required this.rans,
   });
@@ -1011,7 +1015,7 @@ class GetCorrectorDataBulkLastActionResponse {
       _$GetCorrectorDataBulkLastActionResponseToJson(this);
 }
 
-@JsonSerializable()
+@JsonSerializable(explicitToJson: true)
 class GetShiftDataBulkLastActionResponse {
   final int id;
   final int station;
@@ -1033,7 +1037,7 @@ class GetShiftDataBulkLastActionResponse {
     Map<String, dynamic> json,
   ) => _$GetShiftDataBulkLastActionResponseFromJson(json);
 
-  GetShiftDataBulkLastActionResponse({
+  const GetShiftDataBulkLastActionResponse({
     required this.id,
     this.user,
     required this.station,
@@ -1050,7 +1054,7 @@ class GetShiftDataBulkLastActionResponse {
       _$GetShiftDataBulkLastActionResponseToJson(this);
 }
 
-@JsonSerializable()
+@JsonSerializable(explicitToJson: true)
 class GetStationDataListResponse {
   final int count;
   final Object? next;
@@ -1060,7 +1064,7 @@ class GetStationDataListResponse {
   factory GetStationDataListResponse.fromJson(Map<String, dynamic> json) =>
       _$GetStationDataListResponseFromJson(json);
 
-  GetStationDataListResponse({
+  const GetStationDataListResponse({
     required this.count,
     this.next,
     this.previous,
@@ -1070,7 +1074,7 @@ class GetStationDataListResponse {
   Map<String, dynamic> toJson() => _$GetStationDataListResponseToJson(this);
 }
 
-@JsonSerializable()
+@JsonSerializable(explicitToJson: true)
 class Station2 {
   final String code;
   final List<Ran5> rans;
@@ -1080,7 +1084,7 @@ class Station2 {
   final String area;
   final int capacity;
 
-  Station2({
+  const Station2({
     required this.name,
     required this.code,
     required this.rans,
@@ -1096,21 +1100,25 @@ class Station2 {
   Map<String, dynamic> toJson() => _$Station2ToJson(this);
 }
 
-@JsonSerializable()
+@JsonSerializable(explicitToJson: true)
 class Ran5 {
   final int id;
   @JsonKey(name: 'sequence_number')
   final int sequenceNumber;
   final String station;
 
-  Ran5({required this.id, required this.sequenceNumber, required this.station});
+  const Ran5({
+    required this.id,
+    required this.sequenceNumber,
+    required this.station,
+  });
 
   factory Ran5.fromJson(Map<String, dynamic> json) => _$Ran5FromJson(json);
 
   Map<String, dynamic> toJson() => _$Ran5ToJson(this);
 }
 
-@JsonSerializable()
+@JsonSerializable(explicitToJson: true)
 class GetStationTypeDataListResponse {
   final int count;
   final Object? next;
@@ -1120,7 +1128,7 @@ class GetStationTypeDataListResponse {
   factory GetStationTypeDataListResponse.fromJson(Map<String, dynamic> json) =>
       _$GetStationTypeDataListResponseFromJson(json);
 
-  GetStationTypeDataListResponse({
+  const GetStationTypeDataListResponse({
     required this.count,
     this.next,
     this.previous,
@@ -1130,7 +1138,7 @@ class GetStationTypeDataListResponse {
   Map<String, dynamic> toJson() => _$GetStationTypeDataListResponseToJson(this);
 }
 
-@JsonSerializable()
+@JsonSerializable(explicitToJson: true)
 class StationType {
   @JsonKey(name: 'type_name')
   final String typeName;
@@ -1138,12 +1146,12 @@ class StationType {
   factory StationType.fromJson(Map<String, dynamic> json) =>
       _$StationTypeFromJson(json);
 
-  StationType({required this.typeName});
+  const StationType({required this.typeName});
 
   Map<String, dynamic> toJson() => _$StationTypeToJson(this);
 }
 
-@JsonSerializable()
+@JsonSerializable(explicitToJson: true)
 class PostCreateStationRequest {
   final int code;
   final String name;
@@ -1155,7 +1163,7 @@ class PostCreateStationRequest {
   factory PostCreateStationRequest.fromJson(Map<String, dynamic> json) =>
       _$PostCreateStationRequestFromJson(json);
 
-  PostCreateStationRequest({
+  const PostCreateStationRequest({
     required this.code,
     required this.name,
     required this.district,
@@ -1167,7 +1175,7 @@ class PostCreateStationRequest {
   Map<String, dynamic> toJson() => _$PostCreateStationRequestToJson(this);
 }
 
-@JsonSerializable()
+@JsonSerializable(explicitToJson: true)
 class Station3 {
   final String code;
   final List<Ran> rans;
@@ -1179,7 +1187,7 @@ class Station3 {
   final int capacity;
   final int type;
 
-  Station3({
+  const Station3({
     required this.code,
     required this.rans,
     required this.typeName,
@@ -1196,7 +1204,7 @@ class Station3 {
   Map<String, dynamic> toJson() => _$Station3ToJson(this);
 }
 
-@JsonSerializable()
+@JsonSerializable(explicitToJson: true)
 class StationType2 {
   @JsonKey(name: 'type_name')
   final String typeName;
@@ -1205,12 +1213,12 @@ class StationType2 {
   factory StationType2.fromJson(Map<String, dynamic> json) =>
       _$StationType2FromJson(json);
 
-  StationType2({required this.id, required this.typeName});
+  const StationType2({required this.id, required this.typeName});
 
   Map<String, dynamic> toJson() => _$StationType2ToJson(this);
 }
 
-@JsonSerializable()
+@JsonSerializable(explicitToJson: true)
 class GetCorrectorChangeEventResponse {
   final int id;
   final String date;
@@ -1234,7 +1242,7 @@ class GetCorrectorChangeEventResponse {
   factory GetCorrectorChangeEventResponse.fromJson(Map<String, dynamic> json) =>
       _$GetCorrectorChangeEventResponseFromJson(json);
 
-  GetCorrectorChangeEventResponse({
+  const GetCorrectorChangeEventResponse({
     required this.oldCorrectorAmount,
     required this.newCorrectorAmount,
     required this.id,
@@ -1252,7 +1260,7 @@ class GetCorrectorChangeEventResponse {
       _$GetCorrectorChangeEventResponseToJson(this);
 }
 
-@JsonSerializable()
+@JsonSerializable(explicitToJson: true)
 class PostCorrectorChangeEventRequest {
   final String date;
   @JsonKey(name: 'old_meter_amount')
@@ -1269,7 +1277,7 @@ class PostCorrectorChangeEventRequest {
   factory PostCorrectorChangeEventRequest.fromJson(Map<String, dynamic> json) =>
       _$PostCorrectorChangeEventRequestFromJson(json);
 
-  PostCorrectorChangeEventRequest({
+  const PostCorrectorChangeEventRequest({
     required this.oldCorrectorAmount,
     required this.newCorrectorAmount,
     required this.oldMeterAmount,
@@ -1282,7 +1290,7 @@ class PostCorrectorChangeEventRequest {
       _$PostCorrectorChangeEventRequestToJson(this);
 }
 
-@JsonSerializable()
+@JsonSerializable(explicitToJson: true)
 class GetCorrectorChangeEventListResponse {
   final int count;
   final Object? next;
@@ -1293,7 +1301,7 @@ class GetCorrectorChangeEventListResponse {
     Map<String, dynamic> json,
   ) => _$GetCorrectorChangeEventListResponseFromJson(json);
 
-  GetCorrectorChangeEventListResponse({
+  const GetCorrectorChangeEventListResponse({
     required this.count,
     this.next,
     this.previous,
@@ -1304,7 +1312,7 @@ class GetCorrectorChangeEventListResponse {
       _$GetCorrectorChangeEventListResponseToJson(this);
 }
 
-@JsonSerializable()
+@JsonSerializable(explicitToJson: true)
 class GetUsersCustomStationGroupResponse {
   final int count;
   final Object? next;
@@ -1315,7 +1323,7 @@ class GetUsersCustomStationGroupResponse {
     Map<String, dynamic> json,
   ) => _$GetUsersCustomStationGroupResponseFromJson(json);
 
-  GetUsersCustomStationGroupResponse({
+  const GetUsersCustomStationGroupResponse({
     required this.count,
     this.next,
     this.previous,
@@ -1326,7 +1334,7 @@ class GetUsersCustomStationGroupResponse {
       _$GetUsersCustomStationGroupResponseToJson(this);
 }
 
-@JsonSerializable()
+@JsonSerializable(explicitToJson: true)
 class StationGroup {
   @JsonKey(includeIfNull: false)
   final int? id;
@@ -1337,7 +1345,7 @@ class StationGroup {
   factory StationGroup.fromJson(Map<String, dynamic> json) =>
       _$StationGroupFromJson(json);
 
-  StationGroup({
+  const StationGroup({
     this.id,
     required this.title,
     this.user,
@@ -1347,7 +1355,7 @@ class StationGroup {
   Map<String, dynamic> toJson() => _$StationGroupToJson(this);
 }
 
-@JsonSerializable()
+@JsonSerializable(explicitToJson: true)
 class Station4 {
   final int priority;
   final int station;
@@ -1355,7 +1363,407 @@ class Station4 {
   factory Station4.fromJson(Map<String, dynamic> json) =>
       _$Station4FromJson(json);
 
-  Station4({required this.priority, required this.station});
+  const Station4({required this.priority, required this.station});
 
   Map<String, dynamic> toJson() => _$Station4ToJson(this);
+}
+
+// FIXME
+/// This is here for now because I want to visually test things too, but at some point it
+/// has to be moved to the relevant test sections/files.
+final class MockData {
+  static const mockToken =
+      "6b42ba81497dd6dcce0a4dd665f1619843bd460b031258ea7aee0316d5e019f5";
+  static const mockUsername = "admin";
+  static const mockPassword = "1234";
+  static const mockFullname = "Administrator";
+  static const mockIsStaff = true;
+  static const mockStations = [
+    Station(
+      code: 123,
+      rans: [
+        Ran(code: 1, sequenceNumber: 1, station: 123),
+        Ran(code: 2, sequenceNumber: 2, station: 123),
+      ],
+      typeName: "CGS",
+      title: "مهدی شهر",
+      district: "مهدی شهر",
+      area: "Semnan",
+      capacity: 1234,
+      type: 1,
+      activity: 1,
+    ),
+    Station(
+      code: 142,
+      rans: [
+        Ran(code: 4, sequenceNumber: 1, station: 142),
+        Ran(code: 5, sequenceNumber: 2, station: 142),
+      ],
+      typeName: "CGS",
+      title: "سمنان",
+      district: "سمنان",
+      area: "Semnan",
+      capacity: 1234,
+      type: 1,
+      activity: 2,
+    ),
+  ];
+  static final mockExpiry = DateTime(2040);
+
+  static const mockLoginRequest = LoginRequest(
+    username: mockUsername,
+    password: mockPassword,
+  );
+
+  static final mockLoginResponse = LoginResponse(
+    user: LoginResponseUser(username: mockUsername, isStaff: mockIsStaff),
+    token: mockToken,
+    expiry: mockExpiry,
+  );
+
+  static const mockGetProfileResponse = GetProfileResponse(
+    username: mockUsername,
+    isStaff: mockIsStaff,
+    stations: mockStations,
+    fullname: mockFullname,
+  );
+
+  static final mockActiveUser = ActiveUser.fromLoginResponse(
+    mockLoginResponse,
+    mockGetProfileResponse,
+    mockPassword,
+  );
+
+  // Same structure as the login request
+  static const mockLogoutRequest = mockLoginRequest;
+
+  static const mockCreateShiftDataRequest = CreateShiftDataRequest(
+    station: 31141050000010,
+    shift: "12",
+    inputPressure: 100,
+    outputPressure: 150,
+    inputTemperature: 3000,
+    outputTemperature: 2300,
+    date: "1403-11-11",
+  );
+
+  static const mockCreateShiftDataResponse = CreateShiftDataResponse(
+    date: "1403-11-11",
+    registeredDatetime: "1403-11-11",
+    shift: "12",
+    inputPressure: 100,
+    outputPressure: 150,
+    inputTemperature: 3000,
+    outputTemperature: 2300,
+    station: 12345,
+    user: null,
+  );
+
+  static const mockUpdateShiftDataRequest = UpdateShiftDataRequest(
+    station: 31141050000010,
+    shift: "12",
+    inputPressure: 100,
+    outputPressure: 150,
+    inputTemperature: 3000,
+    outputTemperature: 2300,
+    date: "1403-11-11",
+  );
+
+  static const mockUpdateShiftDataResponse = UpdateShiftDataResponse(
+    id: 3,
+    date: "1403-11-11",
+    registeredDatetime: "1403-11-11",
+    shift: "12",
+    inputPressure: 100,
+    outputPressure: 150,
+    inputTemperature: 3000,
+    outputTemperature: 2300,
+    station: 12345,
+    user: null,
+  );
+
+  static const mockGetShiftLastActionResponse = GetShiftLastActionResponse(
+    id: 3,
+    date: "1403-11-11",
+    registeredDatetime: "1403-11-11",
+    shift: "12",
+    inputPressure: 100,
+    outputPressure: 150,
+    inputTemperature: 3000,
+    outputTemperature: 2300,
+    station: 12345,
+    user: null,
+  );
+
+  static const mockGetShiftDataResponse1 = GetShiftDataResponse(
+    id: 3,
+    date: "1403-11-11",
+    registeredDatetime: "1403-11-11",
+    shift: "12",
+    inputPressure: 100,
+    outputPressure: 150,
+    inputTemperature: 3000,
+    outputTemperature: 2300,
+    station: 12345,
+    user: null,
+  );
+
+  static const mockGetShiftDataResponse2 = GetShiftDataResponse(
+    id: 3,
+    date: "1403-11-11",
+    registeredDatetime: "1403-11-11",
+    shift: "12",
+    inputPressure: 100,
+    outputPressure: 150,
+    inputTemperature: 3000,
+    outputTemperature: 2300,
+    station: 12345,
+    user: null,
+  );
+
+  static const mockGetShiftsDataListResponse = GetShiftsDataListResponse(
+    next: null,
+    previous: null,
+    count: 2,
+    results: [mockGetShiftDataResponse1, mockGetShiftDataResponse2],
+  );
+
+  static const mockCreateCorrectorRequest = CreateCorrectorRequest(
+    date: "1403-01-01",
+    meterAmount: 50,
+    correctionAmount: 51,
+    ran: 1,
+  );
+
+  static const mockCreateCorrectorResponse = CreateCorrectorResponse(
+    date: "1403-01-01",
+    registeredDatetime: null,
+    stationCode: 1234,
+    meterAmount: 50,
+    correctionAmount: 51,
+    ran: 1,
+    user: null,
+  );
+
+  static const mockUpdateCorrectorRequest = UpdateCorrectorRequest(
+    date: "1403-01-01",
+    meterAmount: 50,
+    correctionAmount: 51,
+    ran: 1,
+  );
+
+  static const mockUpdateCorrectorResponse = UpdateCorrectorResponse(
+    id: 2,
+    date: "1403-01-01",
+    registeredDatetime: null,
+    stationCode: 1234,
+    meterAmount: 50,
+    correctionAmount: 51,
+    ran: 1,
+    user: null,
+  );
+
+  static const mockGetCorrectorDataResponse = GetCorrectorDataResponse(
+    id: 2,
+    date: "1403-01-01",
+    registeredDatetime: null,
+    stationCode: 1234,
+    meterAmount: 50,
+    correctionAmount: 51,
+    ran: 1,
+    user: null,
+  );
+
+  static const mockGetCorrectorDataListResponse = GetCorrectorDataListResponse(
+    count: 1,
+    next: null,
+    previous: null,
+    results: [mockGetCorrectorDataResponse],
+  );
+
+  static final mockGetPressureAndTemperatureFullReportResponse =
+      GetPressureAndTemperatureFullReportResponse.fromJson({
+        "count": 3,
+        "next": null,
+        "previous": null,
+        "results": [
+          {
+            "station_code": 31141050000010,
+            "date": "1403-04-20",
+            "shifts": [
+              {
+                "input_pressure": 1,
+                "output_pressure": 1,
+                "input_temperature": 2,
+                "output_temperature": 2,
+                "registered_datetime": "1403-12-05 14:28:53.119717+0330",
+                "user": "admin",
+                "shift": "06",
+              },
+              {
+                "input_pressure": 1,
+                "output_pressure": 1,
+                "input_temperature": 2,
+                "output_temperature": 2,
+                "registered_datetime": "1403-12-05 14:29:10.423568+0330",
+                "user": "admin",
+                "shift": "12",
+              },
+              {
+                "input_pressure": 1,
+                "output_pressure": 1,
+                "input_temperature": 2,
+                "output_temperature": 2,
+                "registered_datetime": "1403-12-05 14:29:27.630016+0330",
+                "user": "admin",
+                "shift": "18",
+              },
+              {
+                "input_pressure": 1,
+                "output_pressure": 1,
+                "input_temperature": 2,
+                "output_temperature": 2,
+                "registered_datetime": "1403-12-05 14:31:31.54086+0330",
+                "user": "admin",
+                "shift": "24",
+              },
+            ],
+          },
+          {
+            "station_code": 31141050000010,
+            "date": "1403-04-21",
+            "shifts": [
+              {
+                "input_pressure": 1,
+                "output_pressure": 1,
+                "input_temperature": 2,
+                "output_temperature": 2,
+                "registered_datetime": "1403-12-05 14:39:57.23025+0330",
+                "user": "admin",
+                "shift": "06",
+              },
+              {
+                "input_pressure": 1,
+                "output_pressure": 1,
+                "input_temperature": 2,
+                "output_temperature": 2,
+                "registered_datetime": "1403-12-05 14:40:19.502577+0330",
+                "user": "admin",
+                "shift": "12",
+              },
+            ],
+          },
+          {
+            "station_code": 31141050000010,
+            "date": "1403-11-11",
+            "shifts": [
+              {
+                "input_pressure": 100,
+                "output_pressure": 150,
+                "input_temperature": 3000,
+                "output_temperature": 2300,
+                "registered_datetime": "1403-12-08 12:08:50.738588+0330",
+                "user": "test1",
+                "shift": "12",
+              },
+            ],
+          },
+        ],
+      });
+
+  static final mockGetMonitoringFullReportResponse =
+      GetMonitoringFullReportResponse.fromJson({
+        "count": 3,
+        "next": null,
+        "previous": null,
+        "results": [
+          {
+            "station_code": 31141050000010,
+            "date": "1403-04-20",
+            "shifts": [
+              {
+                "input_pressure": 1,
+                "output_pressure": 1,
+                "input_temperature": 2,
+                "output_temperature": 2,
+                "registered_datetime": "1403-12-05 14:28:53.119717+0330",
+                "user": "admin",
+                "shift": "06",
+              },
+              {
+                "input_pressure": 1,
+                "output_pressure": 1,
+                "input_temperature": 2,
+                "output_temperature": 2,
+                "registered_datetime": "1403-12-05 14:29:10.423568+0330",
+                "user": "admin",
+                "shift": "12",
+              },
+              {
+                "input_pressure": 1,
+                "output_pressure": 1,
+                "input_temperature": 2,
+                "output_temperature": 2,
+                "registered_datetime": "1403-12-05 14:29:27.630016+0330",
+                "user": "admin",
+                "shift": "18",
+              },
+              {
+                "input_pressure": 1,
+                "output_pressure": 1,
+                "input_temperature": 2,
+                "output_temperature": 2,
+                "registered_datetime": "1403-12-05 14:31:31.54086+0330",
+                "user": "admin",
+                "shift": "24",
+              },
+            ],
+            "consumption": null,
+            "average_consumption": null,
+          },
+          {
+            "station_code": 31141050000010,
+            "date": "1403-04-21",
+            "shifts": [
+              {
+                "input_pressure": 1,
+                "output_pressure": 1,
+                "input_temperature": 2,
+                "output_temperature": 2,
+                "registered_datetime": "1403-12-05 14:39:57.23025+0330",
+                "user": "admin",
+                "shift": "06",
+              },
+              {
+                "input_pressure": 1,
+                "output_pressure": 1,
+                "input_temperature": 2,
+                "output_temperature": 2,
+                "registered_datetime": "1403-12-05 14:40:19.502577+0330",
+                "user": "admin",
+                "shift": "12",
+              },
+            ],
+            "consumption": 9,
+            "average_consumption": 9,
+          },
+          {
+            "station_code": 31141050000010,
+            "date": "1403-11-11",
+            "shifts": [
+              {
+                "input_pressure": 100,
+                "output_pressure": 150,
+                "input_temperature": 3000,
+                "output_temperature": 2300,
+                "registered_datetime": "1403-12-08 12:08:50.738588+0330",
+                "user": "test1",
+                "shift": "12",
+              },
+            ],
+            "consumption": null,
+            "average_consumption": null,
+          },
+        ],
+      });
 }

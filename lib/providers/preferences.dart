@@ -2,11 +2,22 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:json_annotation/json_annotation.dart';
+import 'package:logging/logging.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:tmms_shifts_client/consts.dart';
 import 'package:tmms_shifts_client/data/backend_types.dart';
 
 part "preferences.g.dart";
+
+// Constants related to preferences
+// These keys and values are used to set and retrieve key-values using SharedPreferences
+const themeModeKey = 'themeMode';
+const lightThemeValue = 'light';
+const darkThemeValue = 'dark';
+const systemThemeValue = 'system';
+const localeKey = 'locale';
+const activeUserKey = 'activeUser';
+const englishLocaleValue = 'english';
+const persianLocaleValue = 'persian';
 
 @JsonSerializable(explicitToJson: true)
 class ActiveUser {
@@ -37,7 +48,7 @@ class ActiveUser {
       isStaff = resp.user.isStaff,
       expiry = resp.expiry,
       fullname = profile.fullname,
-      stations = profile.stations ?? [];
+      stations = profile.stations;
 
   factory ActiveUser.fromJson(Map<String, dynamic> json) =>
       _$ActiveUserFromJson(json);
@@ -57,7 +68,10 @@ class Preferences extends ChangeNotifier {
   static final Preferences _preferences = Preferences._privateConstructor();
 
   static const englishLocale = Locale('en');
-  static const persianLocale = Locale('fa', 'IR');
+  static const persianLocale = Locale('fa');
+  static const persianIRLocale = Locale('fa', 'IR');
+
+  static final log = Logger("Shared logger");
 
   /// The SharedPreferences instance
   late SharedPreferences _sp;
@@ -115,6 +129,7 @@ class Preferences extends ChangeNotifier {
         _locale = persianLocale;
     }
 
+    // Get the User's authentication information.
     final savedActiveUser = _sp.getString(activeUserKey);
     if (savedActiveUser != null) {
       final Map<String, dynamic> user = jsonDecode(savedActiveUser);
@@ -172,11 +187,9 @@ class Preferences extends ChangeNotifier {
   }
 
   /// Sets the user's auth token to [token] and saves it to SharedPreferences.
-  Future<void> setActiveUser(ActiveUser user, String password) async {
-    // final user = ActiveUser.fromLoginResponse(resp, profile, password);
-    final tempUser = ActiveUser.fromJson(user.toJson());
+  Future<void> setActiveUser(ActiveUser user) async {
     await _sp.setString(activeUserKey, jsonEncode(user));
-    _activeUser = tempUser;
+    _activeUser = user;
     notifyListeners();
   }
 

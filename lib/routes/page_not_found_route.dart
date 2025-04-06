@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:tmms_shifts_client/l18n/app_localizations.dart';
+import 'package:tmms_shifts_client/routes/monitoring_full_report_route.dart';
 
 class PageNotFoundRoute extends StatelessWidget {
   static const routingName = "NotFound";
@@ -8,6 +10,7 @@ class PageNotFoundRoute extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final localizations = AppLocalizations.of(context)!;
     return SelectionArea(
       child: Scaffold(
         body: Center(
@@ -16,13 +19,13 @@ class PageNotFoundRoute extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.center,
             mainAxisSize: MainAxisSize.max,
             children: [
-              Center(child: Text("صفحه مورد نظر یافت نشد!")),
+              Center(child: Text(localizations.pageNotFound)),
               Center(
-                child: TextButton(
+                child: FilledButton(
                   onPressed: () {
-                    context.go("/");
+                    context.goNamed(MonitoringFullReportRoute.routingName);
                   },
-                  child: Text("برکرد به صفحه اصلی"),
+                  child: Text(localizations.returnToHomePage),
                 ),
               ),
             ],
