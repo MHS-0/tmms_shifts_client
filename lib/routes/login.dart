@@ -83,6 +83,7 @@ class _LoginRouteState extends State<LoginRoute> {
                           },
                         ),
                         TextFormField(
+                          obscureText: true,
                           controller: _passwordController,
                           decoration: InputDecoration(
                             constraints: BoxConstraints.loose(

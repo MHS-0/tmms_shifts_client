@@ -69,5 +69,8 @@
   "date": "تاریخ",
   "stationCode": "کد ایستگاه",
   "registeredDate": "تاریخ ثبت",
+  "newReport": "گزارش جدید",
+  "pleaseFillTheField": "لطفا این فیلد را پر کنید",
+  "onlyNumbersAllowed": "این فیلد باید با اعداد پر شود",
   "pageNotFound": "صفحه مورد نظر یافت نشد!"
 }

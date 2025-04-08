@@ -1380,7 +1380,7 @@ final class MockData {
   static const mockIsStaff = true;
   static const mockStations = [
     Station(
-      code: 123,
+      code: 31141050000010,
       rans: [
         Ran(code: 1, sequenceNumber: 1, station: 123),
         Ran(code: 2, sequenceNumber: 2, station: 123),

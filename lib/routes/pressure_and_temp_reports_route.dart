@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:persian_datetime_picker/persian_datetime_picker.dart';
 import 'package:provider/provider.dart';
-import 'package:tmms_shifts_client/consts.dart';
 import 'package:tmms_shifts_client/data/backend_types.dart';
 import 'package:tmms_shifts_client/helpers.dart' as helpers;
 import 'package:tmms_shifts_client/l18n/app_localizations.dart';
@@ -11,7 +11,9 @@ import 'package:tmms_shifts_client/providers/preferences.dart';
 import 'package:tmms_shifts_client/providers/selected_stations_provider.dart';
 import 'package:tmms_shifts_client/widgets/date_picker_row.dart';
 import 'package:tmms_shifts_client/widgets/drawer.dart';
+import 'package:tmms_shifts_client/widgets/single_station_selection_dropdown.dart';
 import 'package:tmms_shifts_client/widgets/station_selection_field.dart';
+import 'package:tmms_shifts_client/widgets/title_and_text_field_row.dart';
 
 class PressureAndTempReportsRoute extends StatefulWidget {
   static const routingName = "pressure_and_temp_reports_route";
@@ -37,9 +39,18 @@ class _PressureAndTempReportsRouteState
   static final dateFormatterWithHour = DateFormat("HH:mm yyyy-MM-dd");
   static final dateFormatter = DateFormat("dd-MM-yyyy");
 
+  final _formKey = GlobalKey<FormState>();
+
   // TODO: Make this neater.
   bool _readyToCallDatabase = false;
-  int? selectedItemIndex;
+  String? selectedShift;
+  GetPressureAndTemperatureFullReportResponseResultItem?
+  _currentlyEditingReport;
+
+  final _inputPressureController = TextEditingController();
+  final _outputPressureController = TextEditingController();
+  final _inputTempController = TextEditingController();
+  final _outputTempController = TextEditingController();
 
   @override
   void didChangeDependencies() {
@@ -140,16 +151,35 @@ class _PressureAndTempReportsRouteState
 
                     return InkWell(
                       onTap: () {
-                        selectedItemIndex = index;
+                        _currentlyEditingReport = item;
+                        if (item.shifts.isNotEmpty) {
+                          selectedShift = item.shifts.first.shift;
+                        } else {
+                          selectedShift = "06";
+                        }
+                        final selectedStationState =
+                            context.read<SelectedStationsProvider>();
+                        selectedStationState.setSingleSelectedStation(
+                          item.stationCode,
+                        );
+                        setupTextControllers();
+                        setState(() {});
+
+                        showDialog(
+                          context: context,
+                          builder: (context) {
+                            return reportEditDialog(
+                              selectedStationState,
+                              localizations,
+                            );
+                          },
+                        );
                       },
                       child: Padding(
                         padding: const EdgeInsets.all(16.0),
                         child: Card(
                           margin: EdgeInsets.all(8),
                           child: ExpansionTile(
-                            onExpansionChanged: (_) {
-                              selectedItemIndex = index;
-                            },
                             initiallyExpanded: true,
                             title: Text(
                               '${localizations.stationCode}: ${item.stationCode}\n\n${localizations.date}: ${dateFormatter.format(DateTime.parse(item.date))}\n',
@@ -268,12 +298,169 @@ class _PressureAndTempReportsRouteState
                   const SizedBox(),
                   const StationSelectionField(),
                   const DatePickerRow(),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 32),
+                    child: SizedBox(
+                      height: 100,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          SizedBox(
+                            height: 50,
+                            child: FilledButton(
+                              onPressed: () async {
+                                _currentlyEditingReport = null;
+                                selectedShift = null;
+                                final selectedStationState =
+                                    context.read<SelectedStationsProvider>();
+                                selectedStationState.setSingleSelectedStation(
+                                  null,
+                                );
+                                setupTextControllers();
+                                setState(() {});
+
+                                showDialog(
+                                  context: context,
+                                  builder: (context) {
+                                    return reportEditDialog(
+                                      selectedStationState,
+                                      localizations,
+                                    );
+                                  },
+                                );
+                              },
+                              child: Row(
+                                spacing: 16,
+                                children: [
+                                  Text(localizations.newReport),
+                                  Icon(Icons.add),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
                   ...cards,
                 ],
               );
             }
           },
         ),
+      ),
+    );
+  }
+
+  void setupTextControllers() {
+    if (_currentlyEditingReport != null && selectedShift != null) {
+      final localShift = _currentlyEditingReport!.shifts.where(
+        (item) => item.shift.contains(selectedShift!),
+      );
+      if (localShift.isNotEmpty) {
+        final entry = localShift.first;
+        _inputPressureController.text = entry.inputPressure.toString();
+        _outputPressureController.text = entry.outputPressure.toString();
+        _inputTempController.text = entry.inputTemperature.toString();
+        _outputTempController.text = entry.outputTemperature.toString();
+      }
+    } else {
+      _inputPressureController.clear();
+      _outputPressureController.clear();
+      _inputTempController.clear();
+      _outputTempController.clear();
+    }
+  }
+
+  Widget reportEditDialog(
+    SelectedStationsProvider selectedStationState,
+    AppLocalizations localizations,
+  ) {
+    return ChangeNotifierProvider.value(
+      value: selectedStationState,
+      child: AlertDialog(
+        title: Text(localizations.newReport),
+        content: SizedBox(
+          width: 800,
+          height: 500,
+          child: SingleChildScrollView(
+            child: SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: SizedBox(
+                width: 800,
+                child: Form(
+                  key: _formKey,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    spacing: 16,
+                    children: [
+                      SingleStationSelectionDropdown(),
+                      DropdownMenu(
+                        initialSelection: selectedShift,
+                        onSelected: (shift) {
+                          if (shift == null) return;
+
+                          selectedShift = shift;
+                          setupTextControllers();
+                          setState(() {});
+                        },
+                        width: 300,
+                        hintText: localizations.shift,
+                        dropdownMenuEntries:
+                            ["06", "12", "18", "24"].map((entry) {
+                              return DropdownMenuEntry(
+                                value: entry,
+                                label: entry,
+                              );
+                            }).toList(),
+                      ),
+                      TitleAndTextFieldRow(
+                        title: localizations.inputPressure,
+                        controller: _inputPressureController,
+                        numbersOnly: true,
+                      ),
+                      TitleAndTextFieldRow(
+                        title: localizations.outputPressure,
+                        controller: _outputPressureController,
+                        numbersOnly: true,
+                      ),
+                      TitleAndTextFieldRow(
+                        title: localizations.inputTemp,
+                        controller: _inputTempController,
+                        numbersOnly: true,
+                      ),
+                      TitleAndTextFieldRow(
+                        title: localizations.outputTemp,
+                        controller: _outputTempController,
+                        numbersOnly: true,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+        actions: [
+          ElevatedButton(
+            onPressed: () {
+              // FIXME: Replace with network request.
+              if (_formKey.currentState != null &&
+                  _formKey.currentState!.validate()) {
+                context.pop();
+              }
+            },
+            child: Text(localizations.okButtonText),
+          ),
+          FilledButton(
+            child: Text(localizations.cancelButtonText),
+            onPressed: () {
+              context.pop();
+            },
+          ),
+        ],
       ),
     );
   }

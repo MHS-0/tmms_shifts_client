@@ -69,5 +69,8 @@
   "date": "Date",
   "stationCode": "Station code",
   "registeredDate": "Registered Date",
+  "newReport": "New report",
+  "pleaseFillTheField": "Please fill this field",
+  "onlyNumbersAllowed": "Only numbers are allowed",
   "pageNotFound": "Page not found!"
 }
