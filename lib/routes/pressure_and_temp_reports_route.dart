@@ -4,7 +4,7 @@ import 'package:intl/intl.dart';
 import 'package:persian_datetime_picker/persian_datetime_picker.dart';
 import 'package:provider/provider.dart';
 import 'package:tmms_shifts_client/data/backend_types.dart';
-import 'package:tmms_shifts_client/helpers.dart' as helpers;
+import 'package:tmms_shifts_client/helpers.dart';
 import 'package:tmms_shifts_client/l18n/app_localizations.dart';
 import 'package:tmms_shifts_client/providers/date_picker_provider.dart';
 import 'package:tmms_shifts_client/providers/preferences.dart';
@@ -57,7 +57,7 @@ class _PressureAndTempReportsRouteState
     super.didChangeDependencies();
 
     _readyToCallDatabase = false;
-    helpers.initialRouteSetup(
+    Helpers.initialRouteSetup(
       context,
       fromDate: widget.fromDate,
       toDate: widget.toDate,
@@ -94,9 +94,10 @@ class _PressureAndTempReportsRouteState
 
     if (fromDate != null) {
       localResults.retainWhere((item) {
-        final itemJalaliDate = helpers.dashDateToJalali(item.date);
-        if (itemJalaliDate == null) return true;
+        // final itemJalaliDate = helpers.dashDateToJalali(item.date);
+        // if (itemJalaliDate == null) return true;
 
+        final itemJalaliDate = item.date;
         return itemJalaliDate.isAfter(fromDate) ||
             itemJalaliDate.isAtSameMomentAs(fromDate);
       });
@@ -104,8 +105,10 @@ class _PressureAndTempReportsRouteState
 
     if (toDate != null) {
       localResults.retainWhere((item) {
-        final itemJalaliDate = helpers.dashDateToJalali(item.date);
-        if (itemJalaliDate == null) return true;
+        // final itemJalaliDate = helpers.dashDateToJalali(item.date);
+        // if (itemJalaliDate == null) return true;
+
+        final itemJalaliDate = item.date;
         return itemJalaliDate.isBefore(toDate) ||
             itemJalaliDate.isAtSameMomentAs(toDate);
       });
@@ -182,7 +185,7 @@ class _PressureAndTempReportsRouteState
                           child: ExpansionTile(
                             initiallyExpanded: true,
                             title: Text(
-                              '${localizations.stationCode}: ${item.stationCode}\n\n${localizations.date}: ${dateFormatter.format(DateTime.parse(item.date))}\n',
+                              '${localizations.stationCode}: ${item.stationCode}\n\n${localizations.date}: ${dateFormatter.format(DateTime.parse(item.date.toJalaliDateTime()))}\n',
                             ),
                             children: [
                               SingleChildScrollView(
@@ -265,13 +268,13 @@ class _PressureAndTempReportsRouteState
                                                     Text(
                                                       shift.registeredDatetime !=
                                                               null
-                                                          ? dateFormatterWithHour
-                                                              .format(
-                                                                DateTime.parse(
-                                                                  shift
-                                                                      .registeredDatetime!,
-                                                                ),
-                                                              )
+                                                          ? dateFormatterWithHour.format(
+                                                            DateTime.parse(
+                                                              shift
+                                                                  .registeredDatetime!
+                                                                  .toJalaliDateTime(),
+                                                            ),
+                                                          )
                                                           : "",
                                                     ),
                                                   ),

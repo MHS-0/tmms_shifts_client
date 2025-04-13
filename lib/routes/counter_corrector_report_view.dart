@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:persian_datetime_picker/persian_datetime_picker.dart';
 import 'package:tmms_shifts_client/consts.dart';
 import 'package:tmms_shifts_client/data/backend_types.dart';
-import 'package:tmms_shifts_client/routes/counter_corrector_reports.dart';
 import 'package:tmms_shifts_client/routes/page_not_found_route.dart';
 
 class CounterCorrectorReportViewRoute extends StatefulWidget {
@@ -33,6 +33,7 @@ class _CounterCorrectorReportViewRouteState
   Future<GetMeterAndCorrectorFullReportResponseResultItem> getReport(
     int reportId,
   ) async {
+    final mockResults = MockData.mockGetMeterAndCorrectorFullReportResponse;
     await Future.delayed(Duration(seconds: 2));
     if (reportId > mockResults.results.length) {
       return Future.error("Report doesn't exist");
@@ -101,8 +102,9 @@ class _CounterCorrectorReportViewRouteState
                 final data = snapshot.data!;
                 _stationCodeController.text = data.stationCode.toString();
                 _userController.text = data.user ?? "";
-                _dateController.text = data.date;
-                _registeredDateController.text = data.registeredDatetime ?? "";
+                _dateController.text = data.date.toJalaliDateTime();
+                _registeredDateController.text =
+                    data.registeredDatetime?.toJalaliDateTime() ?? "";
 
                 final List<Widget> ransWidgetsList = [];
                 final List<Ran2> ransList;
@@ -210,9 +212,7 @@ class _CounterCorrectorReportViewRouteState
                   bottomRow.add(
                     ElevatedButton(
                       onPressed: () {
-                        _tempRansInEdit.addAll(
-                          mockResults.results[widget.report].rans,
-                        );
+                        _tempRansInEdit.addAll(snapshot.data!.rans);
                         _editing = true;
                         setState(() {});
                       },
@@ -231,13 +231,15 @@ class _CounterCorrectorReportViewRouteState
                       onPressed: () {
                         _editing = false;
                         _tempRansInEdit.clear();
-                        final reportItem = mockResults.results[widget.report];
+                        final reportItem = snapshot.data!;
                         _stationCodeController.text =
                             reportItem.stationCode.toString();
                         _userController.text = reportItem.user ?? "";
-                        _dateController.text = reportItem.date;
+                        _dateController.text =
+                            reportItem.date.toJalaliDateTime();
                         _registeredDateController.text =
-                            reportItem.registeredDatetime ?? "";
+                            reportItem.registeredDatetime?.toJalaliDateTime() ??
+                            "";
                         for (var i = 0; i < reportItem.rans.length; i++) {
                           final ran = reportItem.rans[i];
                           _ranControllers[i].meterAmountController.text =

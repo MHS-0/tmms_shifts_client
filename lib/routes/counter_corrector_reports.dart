@@ -8,99 +8,6 @@ import 'package:tmms_shifts_client/providers/preferences.dart';
 import 'package:tmms_shifts_client/routes/counter_corrector_report_view.dart';
 import 'package:tmms_shifts_client/widgets/drawer.dart';
 
-const mockResults = GetMeterAndCorrectorFullReportResponse(
-  count: 3,
-  results: [
-    GetMeterAndCorrectorFullReportResponseResultItem(
-      stationCode: 123,
-      date: "1403-12-18",
-      user: "Ali",
-      registeredDatetime: "1403-12-18",
-      rans: [
-        Ran2(
-          meterAmount: 1,
-          correctorAmount: 2,
-          correctorMeterAmount: 3,
-          ranSequence: 1,
-          ran: 311410500000101,
-        ),
-        Ran2(
-          meterAmount: 1,
-          correctorAmount: 2,
-          correctorMeterAmount: 3,
-          ranSequence: 2,
-          ran: 311410500000101,
-        ),
-        Ran2(
-          meterAmount: 1,
-          correctorAmount: 2,
-          correctorMeterAmount: 3,
-          ranSequence: 3,
-          ran: 311410500000101,
-        ),
-      ],
-    ),
-    GetMeterAndCorrectorFullReportResponseResultItem(
-      stationCode: 142,
-      date: "1403-12-18",
-      user: "Mammad",
-      registeredDatetime: "1403-12-18",
-      rans: [
-        Ran2(
-          meterAmount: 2,
-          correctorAmount: 4,
-          correctorMeterAmount: 6,
-          ranSequence: 1,
-          ran: 311410500000101,
-        ),
-        Ran2(
-          meterAmount: 2,
-          correctorAmount: 4,
-          correctorMeterAmount: 6,
-          ranSequence: 2,
-          ran: 311410500000101,
-        ),
-        Ran2(
-          meterAmount: 2,
-          correctorAmount: 4,
-          correctorMeterAmount: 6,
-          ranSequence: 3,
-          ran: 311410500000101,
-        ),
-      ],
-    ),
-    GetMeterAndCorrectorFullReportResponseResultItem(
-      stationCode: 142,
-      date: "1403-12-18",
-      user: "Mammad",
-      registeredDatetime: "1403-12-18",
-      rans: [
-        Ran2(
-          meterAmount: 1,
-          correctorAmount: 1,
-          correctorMeterAmount: 1,
-          ranSequence: 1,
-          ran: 311410500000101,
-        ),
-        Ran2(
-          meterAmount: 1,
-          correctorAmount: 1,
-          correctorMeterAmount: 1,
-          ranSequence: 2,
-          ran: 311410500000101,
-        ),
-        Ran2(
-          meterAmount: 1,
-          correctorAmount: 1,
-          correctorMeterAmount: 1,
-          ranSequence: 3,
-          ran: 311410500000101,
-        ),
-      ],
-    ),
-  ],
-);
-
 class CounterCorrectorReportsRoute extends StatefulWidget {
   static const routingName = "CounterCorrectorReportsRoute";
 
@@ -118,7 +25,7 @@ class _CounterCorrectorReportsRouteState
   Future<GetMeterAndCorrectorFullReportResponse> getReports() async {
     await Future.delayed(Duration(seconds: 2));
     // final yesterdayString = (Jalali.now() - 1).toJalaliDateTime();
-    return mockResults;
+    return MockData.mockGetMeterAndCorrectorFullReportResponse;
   }
 
   @override
@@ -321,9 +228,16 @@ class CounterCorrectorReportsDataSource extends DataTableSource {
         },
         cells: [
           DataCell(Center(child: Text("${data.results[index].stationCode}"))),
-          DataCell(Center(child: Text(data.results[index].date))),
           DataCell(
-            Center(child: Text(data.results[index].registeredDatetime ?? "")),
+            Center(child: Text(data.results[index].date.toJalaliDateTime())),
+          ),
+          DataCell(
+            Center(
+              child: Text(
+                data.results[index].registeredDatetime?.toJalaliDateTime() ??
+                    "",
+              ),
+            ),
           ),
           DataCell(Center(child: Text(data.results[index].user ?? ""))),
           ransDatacell,

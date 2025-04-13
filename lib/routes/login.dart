@@ -147,12 +147,7 @@ class _LoginRouteState extends State<LoginRoute> {
                                 await Future.delayed(Duration(seconds: 3));
 
                                 // FIX: REMOVE before production deploy.
-                                final mockActiveUser =
-                                    ActiveUser.fromLoginResponse(
-                                      MockData.mockLoginResponse,
-                                      MockData.mockGetProfileResponse,
-                                      _passwordController.text,
-                                    );
+                                final mockActiveUser = MockData.mockActiveUser;
 
                                 if (!context.mounted) return;
                                 context.pop();

@@ -50,7 +50,7 @@ void main() {
     });
 
     test("Login", () async {
-      const req = MockData.mockLoginRequest;
+      final req = MockData.mockLoginRequest;
       final respJson = MockData.mockLoginResponse.toJson();
       dioAdapter.onPost(
         "/user/login",
@@ -68,7 +68,7 @@ void main() {
     });
 
     test("Logout", () async {
-      const req = MockData.mockLogoutRequest;
+      final req = MockData.mockLogoutRequest;
       dioAdapter.onPost(
         "/user/logout",
         (server) {
@@ -88,21 +88,7 @@ void main() {
       }, headers: NetworkInterface.filledHeaderMap);
 
       final respDeserialized = await networkInterface.getProfile(
-        MockData.mockToken,
-      );
-      assert(
-        DeepCollectionEquality().equals(respDeserialized.toJson(), respJson),
-      );
-    });
-
-    test("Get Profile", () async {
-      final respJson = MockData.mockGetProfileResponse.toJson();
-      dioAdapter.onGet("/user/profile/", (server) {
-        server.reply(200, respJson, delay: oneSecDelay);
-      }, headers: NetworkInterface.filledHeaderMap);
-
-      final respDeserialized = await networkInterface.getProfile(
-        MockData.mockToken,
+        MockData.mockLoginResponse.token,
       );
       assert(
         DeepCollectionEquality().equals(respDeserialized.toJson(), respJson),
@@ -110,7 +96,7 @@ void main() {
     });
 
     test("Create Shift Data", () async {
-      const req = MockData.mockCreateShiftDataRequest;
+      final req = MockData.mockCreateShiftDataRequest;
       final respJson = MockData.mockCreateShiftDataResponse.toJson();
       dioAdapter.onPost(
         "/pressure_and_temperature/shift/",
@@ -128,7 +114,7 @@ void main() {
     });
 
     test("Update Shift Data", () async {
-      const req = MockData.mockUpdateShiftDataRequest;
+      final req = MockData.mockUpdateShiftDataRequest;
       final respJson = MockData.mockUpdateShiftDataResponse.toJson();
       dioAdapter.onPut(
         "/pressure_and_temperature/shift/3/",
@@ -146,7 +132,7 @@ void main() {
     });
 
     test("Get Shift Data", () async {
-      final respJson = MockData.mockGetShiftDataResponse1.toJson();
+      final respJson = MockData.mockGetShiftDataResponse.toJson();
       dioAdapter.onGet(
         "/pressure_and_temperature/shift/3",
         (server) {
@@ -181,12 +167,12 @@ void main() {
         (server) {
           server.reply(200, respJson, delay: oneSecDelay);
         },
-        queryParameters: {"station_code": "12345"},
+        queryParameters: {"station_codes": "12345"},
         headers: NetworkInterface.filledHeaderMap,
       );
 
       final respDeserialized2 = await networkInterface.getShiftLastAction(
-        stationCode: 12345,
+        query: StationsQuery(stationCodes: [12345]),
       );
       assert(
         DeepCollectionEquality().equals(respDeserialized2.toJson(), respJson),
@@ -221,9 +207,11 @@ void main() {
       );
 
       final respDeserialized = await networkInterface.getShiftsDataList(
-        fromDate: "1402-01-01",
-        toDate: "1403-02-02",
-        stationCodes: [3123, 432],
+        query: ToFromDateStationsQuery(
+          fromDate: "1402-01-01",
+          toDate: "1403-02-02",
+          stationCodes: [3123, 432],
+        ),
       );
       assert(
         DeepCollectionEquality().equals(respDeserialized.toJson(), respJson),
@@ -239,7 +227,7 @@ void main() {
       );
 
       final respDeserialized2 = await networkInterface.getShiftsDataList(
-        fromDate: "1402-01-01",
+        query: ToFromDateStationsQuery(fromDate: "1402-01-01"),
       );
       assert(
         DeepCollectionEquality().equals(respDeserialized2.toJson(), respJson),
@@ -260,7 +248,7 @@ void main() {
     });
 
     test("Create Corrector", () async {
-      const req = MockData.mockCreateCorrectorRequest;
+      final req = MockData.mockCreateCorrectorRequest;
       final respJson = MockData.mockCreateCorrectorResponse.toJson();
       dioAdapter.onPost(
         "/meter_and_corrector/shift/",
@@ -278,7 +266,7 @@ void main() {
     });
 
     test("Update Corrector", () async {
-      const req = MockData.mockUpdateCorrectorRequest;
+      final req = MockData.mockUpdateCorrectorRequest;
       final respJson = MockData.mockUpdateCorrectorResponse.toJson();
       dioAdapter.onPut(
         "/meter_and_corrector/shift/3/",
@@ -319,8 +307,7 @@ void main() {
       );
 
       final respDeserialized = await networkInterface.getCorrectorDataList(
-        fromDate: "1402-01-01",
-        toDate: "1403-02-02",
+        query: ToFromDateQuery(toDate: "1403-02-02", fromDate: "1402-01-01"),
       );
       assert(
         DeepCollectionEquality().equals(respDeserialized.toJson(), respJson),
@@ -336,7 +323,7 @@ void main() {
       );
 
       final respDeserialized2 = await networkInterface.getCorrectorDataList(
-        fromDate: "1402-01-01",
+        query: ToFromDateQuery(fromDate: "1402-01-01"),
       );
       assert(
         DeepCollectionEquality().equals(respDeserialized2.toJson(), respJson),

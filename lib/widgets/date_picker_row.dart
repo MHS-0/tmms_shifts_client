@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:persian_datetime_picker/persian_datetime_picker.dart';
 import 'package:provider/provider.dart';
-import 'package:tmms_shifts_client/helpers.dart' as helpers;
+import 'package:tmms_shifts_client/helpers.dart';
 import 'package:tmms_shifts_client/l18n/app_localizations.dart';
 import 'package:tmms_shifts_client/providers/date_picker_provider.dart';
 import 'package:tmms_shifts_client/providers/preferences.dart';
@@ -71,7 +71,7 @@ class _DatePickerRowState extends State<DatePickerRow> {
                           fromDate == null
                               ? null
                               : () {
-                                helpers.removeQueryFromPath(
+                                Helpers.removeQueryFromPath(
                                   context,
                                   "fromDate",
                                 );
@@ -99,8 +99,8 @@ class _DatePickerRowState extends State<DatePickerRow> {
                         if (!context.mounted || date == null) {
                           return;
                         }
-                        final queryString = helpers.jalaliToDashDate(date);
-                        helpers.addQueryToPath(
+                        final queryString = Helpers.jalaliToDashDate(date);
+                        Helpers.addQueryToPath(
                           context,
                           "fromDate",
                           queryString,
@@ -123,7 +123,7 @@ class _DatePickerRowState extends State<DatePickerRow> {
                           toDate == null
                               ? null
                               : () {
-                                helpers.removeQueryFromPath(context, "toDate");
+                                Helpers.removeQueryFromPath(context, "toDate");
                                 value.setToDate(null);
                                 setState(() {});
                               },
@@ -148,8 +148,8 @@ class _DatePickerRowState extends State<DatePickerRow> {
                         if (!context.mounted || date == null) {
                           return;
                         }
-                        final queryString = helpers.jalaliToDashDate(date);
-                        helpers.addQueryToPath(context, "toDate", queryString);
+                        final queryString = Helpers.jalaliToDashDate(date);
+                        Helpers.addQueryToPath(context, "toDate", queryString);
                         value.setToDate(date);
                         setState(() {});
                       },

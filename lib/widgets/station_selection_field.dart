@@ -4,7 +4,7 @@ import 'package:multi_select_flutter/dialog/multi_select_dialog_field.dart';
 import 'package:multi_select_flutter/util/multi_select_item.dart';
 import 'package:provider/provider.dart';
 import 'package:tmms_shifts_client/data/backend_types.dart';
-import 'package:tmms_shifts_client/helpers.dart' as helpers;
+import 'package:tmms_shifts_client/helpers.dart';
 import 'package:tmms_shifts_client/l18n/app_localizations.dart';
 import 'package:tmms_shifts_client/providers/preferences.dart';
 import 'package:tmms_shifts_client/providers/selected_stations_provider.dart';
@@ -47,9 +47,9 @@ class StationSelectionField extends StatelessWidget {
                   value.addStation(station.code);
                 }
                 if (list.isEmpty) {
-                  helpers.removeQueryFromPath(context, "stationCodes");
+                  Helpers.removeQueryFromPath(context, "stationCodes");
                 } else {
-                  helpers.addQueryToPath(
+                  Helpers.addQueryToPath(
                     context,
                     "stationCodes",
                     selectedStations.join(","),

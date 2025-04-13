@@ -2,9 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:persian_datetime_picker/persian_datetime_picker.dart';
 import 'package:provider/provider.dart';
-import 'package:tmms_shifts_client/consts.dart';
 import 'package:tmms_shifts_client/data/backend_types.dart';
-import 'package:tmms_shifts_client/helpers.dart' as helpers;
+import 'package:tmms_shifts_client/helpers.dart';
 import 'package:tmms_shifts_client/l18n/app_localizations.dart';
 import 'package:tmms_shifts_client/network_interface.dart';
 import 'package:tmms_shifts_client/providers/date_picker_provider.dart';
@@ -60,9 +59,10 @@ class _MonitoringFullReportRouteState extends State<MonitoringFullReportRoute> {
 
     if (fromDate != null) {
       localResults.retainWhere((item) {
-        final itemJalaliDate = helpers.dashDateToJalali(item.date);
-        if (itemJalaliDate == null) return true;
+        // final itemJalaliDate = helpers.dashDateToJalali(item.date);
+        // if (itemJalaliDate == null) return true;
 
+        final itemJalaliDate = item.date;
         return itemJalaliDate.isAfter(fromDate) ||
             itemJalaliDate.isAtSameMomentAs(fromDate);
       });
@@ -70,8 +70,10 @@ class _MonitoringFullReportRouteState extends State<MonitoringFullReportRoute> {
 
     if (toDate != null) {
       localResults.retainWhere((item) {
-        final itemJalaliDate = helpers.dashDateToJalali(item.date);
-        if (itemJalaliDate == null) return true;
+        // final itemJalaliDate = helpers.dashDateToJalali(item.date);
+        // if (itemJalaliDate == null) return true;
+
+        final itemJalaliDate = item.date;
         return itemJalaliDate.isBefore(toDate) ||
             itemJalaliDate.isAtSameMomentAs(toDate);
       });
@@ -94,7 +96,7 @@ class _MonitoringFullReportRouteState extends State<MonitoringFullReportRoute> {
     super.didChangeDependencies();
 
     _readyToCallDatabase = false;
-    helpers.initialRouteSetup(
+    Helpers.initialRouteSetup(
       context,
       fromDate: widget.fromDate,
       toDate: widget.toDate,
@@ -133,50 +135,50 @@ class _MonitoringFullReportRouteState extends State<MonitoringFullReportRoute> {
                         padding: const EdgeInsets.all(32.0),
                         child: SizedBox(
                           width: 1500,
-                          child: PaginatedDataTable(
-                            headingRowColor: WidgetStatePropertyAll(
-                              Theme.of(context).colorScheme.inversePrimary,
-                            ),
-                            rowsPerPage:
-                                snapshot.data!.results.length <= 5 &&
-                                        snapshot.data!.results.isNotEmpty
-                                    ? snapshot.data!.results.length
-                                    : 5,
-                            showEmptyRows: false,
-                            dataRowMaxHeight: 100,
-                            columns: [
-                              DataColumn(
-                                label: Text("ایستگاه"),
-                                headingRowAlignment: MainAxisAlignment.center,
-                                columnWidth: FlexColumnWidth(),
-                              ),
-                              DataColumn(
-                                label: Text("تاریخ"),
-                                headingRowAlignment: MainAxisAlignment.center,
-                                columnWidth: FlexColumnWidth(),
-                              ),
-                              DataColumn(
-                                label: Text("شیفت ها"),
-                                headingRowAlignment: MainAxisAlignment.center,
-                                columnWidth: FlexColumnWidth(),
-                              ),
-                              DataColumn(
-                                label: Text("مصرف"),
-                                headingRowAlignment: MainAxisAlignment.center,
-                                columnWidth: FlexColumnWidth(),
-                              ),
-                              DataColumn(
-                                label: Text("مصرف میانگین"),
-                                headingRowAlignment: MainAxisAlignment.center,
-                                columnWidth: FlexColumnWidth(),
-                              ),
-                            ],
-                            source: MonitoringFullReportDataSource(
-                              context,
-                              localizations,
-                              snapshot.data!,
-                            ),
-                          ),
+                          // child: PaginatedDataTable(
+                          //   headingRowColor: WidgetStatePropertyAll(
+                          //     Theme.of(context).colorScheme.inversePrimary,
+                          //   ),
+                          //   rowsPerPage:
+                          //       snapshot.data!.results.length <= 5 &&
+                          //               snapshot.data!.results.isNotEmpty
+                          //           ? snapshot.data!.results.length
+                          //           : 5,
+                          //   showEmptyRows: false,
+                          //   dataRowMaxHeight: 100,
+                          //   columns: [
+                          //     DataColumn(
+                          //       label: Text("ایستگاه"),
+                          //       headingRowAlignment: MainAxisAlignment.center,
+                          //       columnWidth: FlexColumnWidth(),
+                          //     ),
+                          //     DataColumn(
+                          //       label: Text("تاریخ"),
+                          //       headingRowAlignment: MainAxisAlignment.center,
+                          //       columnWidth: FlexColumnWidth(),
+                          //     ),
+                          //     DataColumn(
+                          //       label: Text("شیفت ها"),
+                          //       headingRowAlignment: MainAxisAlignment.center,
+                          //       columnWidth: FlexColumnWidth(),
+                          //     ),
+                          //     DataColumn(
+                          //       label: Text("مصرف"),
+                          //       headingRowAlignment: MainAxisAlignment.center,
+                          //       columnWidth: FlexColumnWidth(),
+                          //     ),
+                          //     DataColumn(
+                          //       label: Text("مصرف میانگین"),
+                          //       headingRowAlignment: MainAxisAlignment.center,
+                          //       columnWidth: FlexColumnWidth(),
+                          //     ),
+                          //   ],
+                          //   source: MonitoringFullReportDataSource(
+                          //     context,
+                          //     localizations,
+                          //     snapshot.data!,
+                          //   ),
+                          // ),
                         ),
                       ),
                     ),
@@ -251,7 +253,11 @@ class MonitoringFullReportDataSource extends DataTableSource {
                                     Text(shift.outputTemperature.toString()),
                                   ),
                                   DataCell(
-                                    Text(shift.registeredDatetime ?? ""),
+                                    Text(
+                                      shift.registeredDatetime
+                                              ?.toJalaliDateTime() ??
+                                          "",
+                                    ),
                                   ),
                                   DataCell(Text(shift.user ?? "")),
                                   DataCell(Text(shift.shift)),
@@ -292,7 +298,9 @@ class MonitoringFullReportDataSource extends DataTableSource {
       return DataRow(
         cells: [
           DataCell(Center(child: Text("${data.results[index].stationCode}"))),
-          DataCell(Center(child: Text(data.results[index].date))),
+          DataCell(
+            Center(child: Text(data.results[index].date.toJalaliDateTime())),
+          ),
           shiftsDatacell,
           DataCell(
             Center(
