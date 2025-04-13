@@ -99,7 +99,7 @@ final class Helpers {
     );
   }
 
-  /// Precache images and icons, process query strings, etc.
+  /// Precache images and icons, etc.
   /// Should be called in didChangeDependencies
   static void initialRouteSetup(BuildContext context) {
     precacheImage(iconAssetImage, context);
@@ -146,6 +146,11 @@ final class Helpers {
 
   /// Serialize a list of integers into an string. Used for queries.
   /// Example: [1234, 4532] ==> "1234,4532"
-  static String? serializeIntListIntoCommaSeperatedString(List<int>? list) =>
-      list?.join(",");
+  static String? serializeIntListIntoCommaSeperatedString(List<int>? list) {
+    if (list == null || list.isEmpty) {
+      return null;
+    } else {
+      return list.join(",");
+    }
+  }
 }

@@ -58,9 +58,11 @@ class _DatePickerRowState extends State<DatePickerRow> {
             padding: const EdgeInsets.all(32.0),
             child: Wrap(
               spacing: 64,
+              runSpacing: 16,
               children: [
                 Wrap(
                   crossAxisAlignment: WrapCrossAlignment.center,
+                  runSpacing: 16,
                   children: [
                     IconButton(
                       tooltip: localizations.removeFilter,
@@ -113,6 +115,7 @@ class _DatePickerRowState extends State<DatePickerRow> {
                 ),
                 Wrap(
                   crossAxisAlignment: WrapCrossAlignment.center,
+                  runSpacing: 16,
                   children: [
                     IconButton(
                       tooltip: localizations.removeFilter,

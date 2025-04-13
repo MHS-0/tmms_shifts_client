@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:intl/intl.dart';
+import 'package:logging/logging.dart';
 import 'package:persian_datetime_picker/persian_datetime_picker.dart';
 import 'package:provider/provider.dart';
+import 'package:tmms_shifts_client/consts.dart';
 import 'package:tmms_shifts_client/data/backend_types.dart';
 import 'package:tmms_shifts_client/helpers.dart';
 import 'package:tmms_shifts_client/l18n/app_localizations.dart';
+import 'package:tmms_shifts_client/network_interface.dart';
 import 'package:tmms_shifts_client/providers/date_picker_provider.dart';
 import 'package:tmms_shifts_client/providers/preferences.dart';
 import 'package:tmms_shifts_client/providers/selected_stations_provider.dart';
@@ -36,9 +38,6 @@ class PressureAndTempReportsRoute extends StatefulWidget {
 
 class _PressureAndTempReportsRouteState
     extends State<PressureAndTempReportsRoute> {
-  static final dateFormatterWithHour = DateFormat("HH:mm yyyy-MM-dd");
-  static final dateFormatter = DateFormat("dd-MM-yyyy");
-
   final _formKey = GlobalKey<FormState>();
 
   String? selectedShift;
@@ -59,54 +58,47 @@ class _PressureAndTempReportsRouteState
   Future<GetPressureAndTemperatureFullReportResponse> getPressureAndTempReports(
     BuildContext context,
   ) async {
-    // FIXME: Replace with network implementation
-
-    // await Future.delayed(Duration(seconds: 2));
-    if (!context.mounted) {
-      return Future.error("context isn't mounted anymore");
-    }
-
-    final data = MockData.mockGetPressureAndTemperatureFullReportResponse;
-    final localResults = data.results.toList();
-
     final datePickerState = context.read<DatePickerProvider>();
-    final fromDate = datePickerState.fromDate;
-    final toDate = datePickerState.toDate;
-    final selectedStations =
-        context.read<SelectedStationsProvider>().selectedStations;
+    final selectedStationsState = context.read<SelectedStationsProvider>();
+    final selectedStations = selectedStationsState.selectedStations;
 
-    if (fromDate != null) {
-      localResults.retainWhere((item) {
-        // final itemJalaliDate = helpers.dashDateToJalali(item.date);
-        // if (itemJalaliDate == null) return true;
-
-        final itemJalaliDate = item.date;
-        return itemJalaliDate.isAfter(fromDate) ||
-            itemJalaliDate.isAtSameMomentAs(fromDate);
-      });
+    final String? fromDateParam;
+    final String? toDateParam;
+    {
+      final fromDate = datePickerState.fromDate;
+      final toDate = datePickerState.toDate;
+      fromDateParam =
+          fromDate != null ? Helpers.jalaliToDashDate(fromDate) : null;
+      toDateParam = toDate != null ? Helpers.jalaliToDashDate(toDate) : null;
     }
+    final GetPressureAndTemperatureFullReportResponse result;
 
-    if (toDate != null) {
-      localResults.retainWhere((item) {
-        // final itemJalaliDate = helpers.dashDateToJalali(item.date);
-        // if (itemJalaliDate == null) return true;
+    // FIXME: Replace with network implementation
+    // try {
+    //   result = await NetworkInterface.instance()
+    //       .getPressureAndTemperatureFullReport(
+    //         query: ToFromDateStationsQuery(
+    //           fromDate: fromDateParam,
+    //           toDate: toDateParam,
+    //           stationCodes: selectedStations,
+    //         ),
+    //       );
+    // } catch (e) {
+    //   return Future.error(e);
+    // }
+    result = MockData.mockGetPressureAndTemperatureFullReportResponse;
 
-        final itemJalaliDate = item.date;
-        return itemJalaliDate.isBefore(toDate) ||
-            itemJalaliDate.isAtSameMomentAs(toDate);
-      });
-    }
+    return result;
+  }
 
-    if (selectedStations.isNotEmpty) {
-      localResults.retainWhere(
-        (item) => selectedStations.contains(item.stationCode),
-      );
-    }
-    final value = GetPressureAndTemperatureFullReportResponse(
-      count: 1,
-      results: localResults,
+  DataColumn _getDataColumn(String label, double maxWidthAvailable) {
+    return DataColumn(
+      label: Text(label, style: TextStyle(fontWeight: FontWeight.bold)),
+      columnWidth: MaxColumnWidth(
+        FixedColumnWidth(maxWidthAvailable / 8),
+        FixedColumnWidth(dataTableHeaderRowColumnWidthMinimum),
+      ),
     );
-    return value;
   }
 
   @override
@@ -127,208 +119,60 @@ class _PressureAndTempReportsRouteState
           builder: (context, snapshot) {
             if (!snapshot.hasData) {
               return Center(child: CircularProgressIndicator());
+            } else if (snapshot.hasError) {
+              // FIXME: In the future we can add a dialog where the user can see the error and try again.
+              // for now just log the error.
+              Preferences.log.log(
+                Level.SEVERE,
+                "Failed to receive data",
+                snapshot.error,
+              );
+              return Center();
             } else {
-              final results = snapshot.data!.results;
-
-              final cards =
-                  results.indexed.map((entry) {
-                    final index = entry.$1;
-                    final item = entry.$2;
-
-                    return InkWell(
-                      onTap: () {
-                        _currentlyEditingReport = item;
-                        if (item.shifts.isNotEmpty) {
-                          selectedShift = item.shifts.first.shift;
-                        } else {
-                          selectedShift = "06";
-                        }
-                        final selectedStationState =
-                            context.read<SelectedStationsProvider>();
-                        selectedStationState.setSingleSelectedStation(
-                          item.stationCode,
-                        );
-                        setupTextControllers();
-                        setState(() {});
-
-                        showDialog(
-                          context: context,
-                          builder: (context) {
-                            return reportEditDialog(
-                              selectedStationState,
-                              localizations,
-                            );
-                          },
-                        );
-                      },
-                      child: Padding(
-                        padding: const EdgeInsets.all(16.0),
-                        child: Card(
-                          margin: EdgeInsets.all(8),
-                          child: ExpansionTile(
-                            initiallyExpanded: true,
-                            title: Text(
-                              '${localizations.stationCode}: ${item.stationCode}\n\n${localizations.date}: ${dateFormatter.format(DateTime.parse(item.date.toJalaliDateTime()))}\n',
-                            ),
-                            children: [
-                              SingleChildScrollView(
-                                scrollDirection: Axis.horizontal,
-                                child: SizedBox(
-                                  width: 1400,
-                                  child: DataTable(
-                                    headingRowColor: WidgetStatePropertyAll(
-                                      Theme.of(
-                                        context,
-                                      ).colorScheme.inversePrimary,
-                                    ),
-                                    columns: [
-                                      DataColumn(
-                                        label: Text(localizations.shift),
-                                        columnWidth: FlexColumnWidth(),
-                                      ),
-                                      DataColumn(
-                                        label: Text(
-                                          localizations.inputPressure,
-                                        ),
-                                        columnWidth: FlexColumnWidth(),
-                                      ),
-                                      DataColumn(
-                                        label: Text(
-                                          localizations.outputPressure,
-                                        ),
-                                        columnWidth: FlexColumnWidth(),
-                                      ),
-                                      DataColumn(
-                                        label: Text(localizations.inputTemp),
-                                        columnWidth: FlexColumnWidth(),
-                                      ),
-                                      DataColumn(
-                                        label: Text(localizations.outputTemp),
-                                        columnWidth: FlexColumnWidth(),
-                                      ),
-                                      DataColumn(
-                                        label: Text(
-                                          localizations.registeredDate,
-                                        ),
-                                        columnWidth: FlexColumnWidth(),
-                                      ),
-                                      DataColumn(
-                                        label: Text(localizations.user),
-                                        columnWidth: FlexColumnWidth(),
-                                      ),
-                                    ],
-                                    rows:
-                                        item.shifts
-                                            .map<DataRow>(
-                                              (shift) => DataRow(
-                                                cells: [
-                                                  DataCell(Text(shift.shift)),
-                                                  DataCell(
-                                                    Text(
-                                                      shift.inputPressure
-                                                          .toString(),
-                                                    ),
-                                                  ),
-                                                  DataCell(
-                                                    Text(
-                                                      shift.outputPressure
-                                                          .toString(),
-                                                    ),
-                                                  ),
-                                                  DataCell(
-                                                    Text(
-                                                      shift.inputTemperature
-                                                          .toString(),
-                                                    ),
-                                                  ),
-                                                  DataCell(
-                                                    Text(
-                                                      shift.outputTemperature
-                                                          .toString(),
-                                                    ),
-                                                  ),
-                                                  DataCell(
-                                                    Text(
-                                                      shift.registeredDatetime !=
-                                                              null
-                                                          ? dateFormatterWithHour.format(
-                                                            DateTime.parse(
-                                                              shift
-                                                                  .registeredDatetime!
-                                                                  .toJalaliDateTime(),
-                                                            ),
-                                                          )
-                                                          : "",
-                                                    ),
-                                                  ),
-                                                  DataCell(
-                                                    Text(shift.user ?? ""),
-                                                  ),
-                                                ],
-                                              ),
-                                            )
-                                            .toList(),
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    );
-                  }).toList();
-
               return ListView(
-                padding: const EdgeInsets.all(16),
+                padding: offsetAll16p,
                 children: [
                   const SizedBox(),
                   const StationSelectionField(),
                   const DatePickerRow(),
                   Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 32),
-                    child: SizedBox(
-                      height: 100,
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.end,
-                        children: [
-                          SizedBox(
-                            height: 50,
-                            child: FilledButton(
-                              onPressed: () async {
-                                _currentlyEditingReport = null;
-                                selectedShift = null;
-                                final selectedStationState =
-                                    context.read<SelectedStationsProvider>();
-                                selectedStationState.setSingleSelectedStation(
-                                  null,
-                                );
-                                setupTextControllers();
-                                setState(() {});
+                    padding: const EdgeInsets.symmetric(horizontal: 48),
+                    child: Align(
+                      alignment: Alignment.centerLeft,
+                      child: SizedBox(
+                        height: 50,
+                        width: 165,
+                        child: FilledButton.icon(
+                          label: Text(localizations.newReport),
+                          icon: Icon(Icons.add),
+                          onPressed: () async {
+                            _currentlyEditingReport = null;
+                            selectedShift = null;
+                            final selectedStationState =
+                                context.read<SelectedStationsProvider>();
+                            setupTextControllers();
+                            selectedStationState.setSingleSelectedStation(null);
 
-                                showDialog(
-                                  context: context,
-                                  builder: (context) {
-                                    return reportEditDialog(
-                                      selectedStationState,
-                                      localizations,
-                                    );
-                                  },
+                            showDialog(
+                              context: context,
+                              builder: (context) {
+                                return reportEditDialog(
+                                  selectedStationState,
+                                  localizations,
                                 );
                               },
-                              child: Row(
-                                spacing: 16,
-                                children: [
-                                  Text(localizations.newReport),
-                                  Icon(Icons.add),
-                                ],
-                              ),
-                            ),
-                          ),
-                        ],
+                            );
+                          },
+                        ),
                       ),
                     ),
                   ),
-                  ...cards,
+                  ..._getCards(
+                    context,
+                    snapshot.data!.results,
+                    localizations,
+                    user,
+                  ),
                 ],
               );
             }
@@ -338,17 +182,129 @@ class _PressureAndTempReportsRouteState
     );
   }
 
+  List<Widget> _getCards(
+    BuildContext context,
+    List<GetPressureAndTemperatureFullReportResponseResultItem> results,
+    AppLocalizations localizations,
+    ActiveUser user,
+  ) {
+    return results.map((item) {
+      return InkWell(
+        onTap: () {
+          _currentlyEditingReport = item;
+          selectedShift = item.shifts.firstOrNull?.shift ?? "06";
+
+          final selectedStationState = context.read<SelectedStationsProvider>();
+          selectedStationState.setSingleSelectedStation(item.stationCode);
+          setupTextControllers();
+          setState(() {});
+
+          showDialog(
+            context: context,
+            builder: (context) {
+              return reportEditDialog(selectedStationState, localizations);
+            },
+          );
+        },
+        child: Padding(
+          padding: offsetAll16p,
+          child: Card(
+            margin: offsetAll16p,
+            child: ExpansionTile(
+              initiallyExpanded: true,
+              title: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    '${localizations.station}: ${user.stations.where((entry) => entry.code == item.stationCode).firstOrNull?.title ?? ""}',
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                  Text(
+                    '${localizations.date}: ${dateFormatter.format(DateTime.parse(item.date.toJalaliDateTime()))}',
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                  Text('${localizations.stationCode}: ${item.stationCode}'),
+                ],
+              ),
+              children: [
+                SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: LayoutBuilder(
+                    builder: (context, constraints) {
+                      final width = MediaQuery.of(context).size.width;
+                      // if (width >= 1200) {
+                      return DataTable(
+                        headingRowColor: WidgetStatePropertyAll(
+                          Theme.of(context).colorScheme.inversePrimary,
+                        ),
+                        columns: [
+                          _getDataColumn(localizations.shift, width),
+                          _getDataColumn(localizations.inputPressure, width),
+                          _getDataColumn(localizations.outputPressure, width),
+                          _getDataColumn(localizations.inputTemp, width),
+                          _getDataColumn(localizations.outputTemp, width),
+                          _getDataColumn(localizations.registeredDate, width),
+                          _getDataColumn(localizations.user, width),
+                        ],
+                        rows:
+                            item.shifts
+                                .map<DataRow>(
+                                  (shift) => DataRow(
+                                    cells: [
+                                      _getDataRowDataCell(shift.shift),
+                                      _getDataRowDataCell(shift.inputPressure),
+                                      _getDataRowDataCell(shift.outputPressure),
+                                      _getDataRowDataCell(
+                                        shift.inputTemperature,
+                                      ),
+                                      _getDataRowDataCell(
+                                        shift.outputTemperature,
+                                      ),
+                                      _getDataRowDataCell(
+                                        shift.registeredDatetime != null
+                                            ? dateFormatterWithHour.format(
+                                              DateTime.parse(
+                                                shift.registeredDatetime!
+                                                    .toJalaliDateTime(),
+                                              ),
+                                            )
+                                            : "",
+                                      ),
+                                      _getDataRowDataCell(shift.user ?? ""),
+                                    ],
+                                  ),
+                                )
+                                .toList(),
+                      );
+                      // } else {
+                      //   return Container();
+                      // }
+                    },
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    }).toList();
+  }
+
+  DataCell _getDataRowDataCell(Object content) {
+    return DataCell(Text("$content"));
+  }
+
   void setupTextControllers() {
     if (_currentlyEditingReport != null && selectedShift != null) {
-      final localShift = _currentlyEditingReport!.shifts.where(
-        (item) => item.shift.contains(selectedShift!),
-      );
-      if (localShift.isNotEmpty) {
-        final entry = localShift.first;
-        _inputPressureController.text = entry.inputPressure.toString();
-        _outputPressureController.text = entry.outputPressure.toString();
-        _inputTempController.text = entry.inputTemperature.toString();
-        _outputTempController.text = entry.outputTemperature.toString();
+      final shift =
+          _currentlyEditingReport!.shifts
+              .where((item) => item.shift.contains(selectedShift!))
+              .firstOrNull;
+      if (shift != null) {
+        _inputPressureController.text = shift.inputPressure.toString();
+        _outputPressureController.text = shift.outputPressure.toString();
+        _inputTempController.text = shift.inputTemperature.toString();
+        _outputTempController.text = shift.outputTemperature.toString();
       }
     } else {
       _inputPressureController.clear();
@@ -364,6 +320,7 @@ class _PressureAndTempReportsRouteState
   ) {
     return ChangeNotifierProvider.value(
       value: selectedStationState,
+      key: ObjectKey("Pressure and temp dialog provider"),
       child: AlertDialog(
         title: Text(localizations.newReport),
         content: SizedBox(
