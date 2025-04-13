@@ -34,15 +34,9 @@ class MonitoringFullReportRoute extends StatefulWidget {
 }
 
 class _MonitoringFullReportRouteState extends State<MonitoringFullReportRoute> {
-  bool _readyToCallDatabase = false;
-
   Future<GetMonitoringFullReportResponse> getData(BuildContext context) async {
     // FIXME: replace with network request in production.
     // final data = await NetworkInterface.instance().getMonitoringFullReport();
-
-    while (!_readyToCallDatabase) {
-      await Future.delayed(Duration(milliseconds: 50));
-    }
 
     if (!context.mounted) {
       return Future.error("context isn't mounted anymore");
@@ -94,17 +88,7 @@ class _MonitoringFullReportRouteState extends State<MonitoringFullReportRoute> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-
-    _readyToCallDatabase = false;
-    Helpers.initialRouteSetup(
-      context,
-      fromDate: widget.fromDate,
-      toDate: widget.toDate,
-      stationCodes: widget.stationCodes,
-    );
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _readyToCallDatabase = true;
-    });
+    Helpers.initialRouteSetup(context);
   }
 
   @override
@@ -115,7 +99,7 @@ class _MonitoringFullReportRouteState extends State<MonitoringFullReportRoute> {
 
     return SelectionArea(
       child: Scaffold(
-        appBar: AppBar(title: Text("داشبورد"), centerTitle: true),
+        appBar: AppBar(title: Text(localizations.dashboard), centerTitle: true),
         drawer: MyDrawer(),
         body: FutureBuilder(
           future: getData(context),

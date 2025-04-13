@@ -41,8 +41,6 @@ class _PressureAndTempReportsRouteState
 
   final _formKey = GlobalKey<FormState>();
 
-  // TODO: Make this neater.
-  bool _readyToCallDatabase = false;
   String? selectedShift;
   GetPressureAndTemperatureFullReportResponseResultItem?
   _currentlyEditingReport;
@@ -55,17 +53,7 @@ class _PressureAndTempReportsRouteState
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-
-    _readyToCallDatabase = false;
-    Helpers.initialRouteSetup(
-      context,
-      fromDate: widget.fromDate,
-      toDate: widget.toDate,
-      stationCodes: widget.stationCodes,
-    );
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _readyToCallDatabase = true;
-    });
+    Helpers.initialRouteSetup(context);
   }
 
   Future<GetPressureAndTemperatureFullReportResponse> getPressureAndTempReports(
@@ -74,11 +62,6 @@ class _PressureAndTempReportsRouteState
     // FIXME: Replace with network implementation
 
     // await Future.delayed(Duration(seconds: 2));
-
-    while (!_readyToCallDatabase) {
-      await Future.delayed(Duration(milliseconds: 50));
-    }
-
     if (!context.mounted) {
       return Future.error("context isn't mounted anymore");
     }

@@ -32,12 +32,12 @@ final class Helpers {
   }
 
   /// Convert from a [Jalali] class to a formatted string
-  /// like: "1404/08/02"
+  /// like: "1404-08-02"
   static String jalaliToDashDate(Jalali date) {
     return "${date.year}-${date.month}-${date.day}";
   }
 
-  /// Convert from an string with a format such as 1404/08/02 to
+  /// Convert from an string with a format such as 1404-08-02 to
   /// a [Jalali] class.
   static Jalali? dashDateToJalali(String dashDate) {
     final items = dashDate.split("-");
@@ -53,56 +53,57 @@ final class Helpers {
     return null;
   }
 
-  /// Precache images and icons, process query strings, etc.
-  /// Should be called in didChangeDependencies
-  static void initialRouteSetup(
-    BuildContext context, {
+  static DatePickerProvider getDatePickerProviderFromQueries(
     String? fromDate,
     String? toDate,
-    String? stationCodes,
-  }) {
-    precacheImage(iconAssetImage, context);
-    precacheImage(userIconAssetImage, context);
-
-    final datePickerState = context.read<DatePickerProvider>();
-    final selectedStationsState = context.read<SelectedStationsProvider>();
-
-    // Reset everything and start over.
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      datePickerState.setFromDate(null);
-      datePickerState.setToDate(null);
-      selectedStationsState.clearStations();
-    });
+  ) {
+    Jalali? fromDateParam;
+    Jalali? toDateParam;
 
     if (fromDate != null) {
       final input = fromDate;
       final date = dashDateToJalali(input);
-      if (date != null) {
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          datePickerState.setFromDate(date);
-        });
-      }
+      fromDateParam = date;
     }
     if (toDate != null) {
       final input = toDate;
       final date = dashDateToJalali(input);
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        datePickerState.setToDate(date);
-      });
+      toDateParam = date;
     }
+
+    return DatePickerProvider(
+      fromDateParam: fromDateParam,
+      toDateParam: toDateParam,
+    );
+  }
+
+  static SelectedStationsProvider getSelectedStationsProviderFromQueries(
+    String? stationCodes,
+  ) {
+    List<int> selectedStationsParam = [];
+
     if (stationCodes != null) {
       final stations = stationCodes.split(",");
       for (final station in stations) {
         final code = int.tryParse(station);
         if (code != null) {
-          WidgetsBinding.instance.addPostFrameCallback((_) {
-            selectedStationsState.addStation(code);
-          });
+          selectedStationsParam.add(code);
         } else {
           continue;
         }
       }
     }
+
+    return SelectedStationsProvider(
+      selectedStationsParam: selectedStationsParam,
+    );
+  }
+
+  /// Precache images and icons, process query strings, etc.
+  /// Should be called in didChangeDependencies
+  static void initialRouteSetup(BuildContext context) {
+    precacheImage(iconAssetImage, context);
+    precacheImage(userIconAssetImage, context);
   }
 
   /// Deserialize ISO 8601 formatted string into a Jalali instance

@@ -8,13 +8,25 @@ class DatePickerProvider extends ChangeNotifier {
   Jalali? _fromDate;
   Jalali? _toDate;
 
+  DatePickerProvider({Jalali? fromDateParam, Jalali? toDateParam})
+    : _fromDate = fromDateParam,
+      _toDate = toDateParam;
+
   void setFromDate(Jalali? date) {
-    _fromDate = date;
+    setFromDateNoStateUpdate(date);
     notifyListeners();
   }
 
+  void setFromDateNoStateUpdate(Jalali? date) {
+    _fromDate = date;
+  }
+
   void setToDate(Jalali? date) {
-    _toDate = date;
+    setToDateNoStateUpdate(date);
     notifyListeners();
+  }
+
+  void setToDateNoStateUpdate(Jalali? date) {
+    _toDate = date;
   }
 }

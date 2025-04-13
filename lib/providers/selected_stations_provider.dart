@@ -4,8 +4,14 @@ class SelectedStationsProvider extends ChangeNotifier {
   List<int> get selectedStations => _selectedStations;
   int? get singleSelectedStation => _singleSelectedStation;
 
-  final List<int> _selectedStations = [];
+  late final List<int> _selectedStations;
   int? _singleSelectedStation;
+
+  SelectedStationsProvider({
+    List<int>? selectedStationsParam,
+    int? singleSelectedStationParam,
+  }) : _selectedStations = selectedStationsParam ?? [],
+       _singleSelectedStation = singleSelectedStationParam;
 
   void setSingleSelectedStation(int? code) {
     _singleSelectedStation = code;

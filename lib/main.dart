@@ -4,9 +4,8 @@ import 'package:go_router/go_router.dart';
 import 'package:logging/logging.dart';
 import 'package:persian_datetime_picker/persian_datetime_picker.dart';
 import 'package:provider/provider.dart';
+import 'package:tmms_shifts_client/helpers.dart';
 import 'package:tmms_shifts_client/network_interface.dart';
-import 'package:tmms_shifts_client/providers/date_picker_provider.dart';
-import 'package:tmms_shifts_client/providers/selected_stations_provider.dart';
 import 'package:tmms_shifts_client/routes/corrector_replacement_event_register.dart';
 import 'package:tmms_shifts_client/routes/counter_corrector_report_view.dart';
 import 'package:tmms_shifts_client/routes/counter_corrector_reports.dart';
@@ -47,16 +46,39 @@ final GoRouter _router = GoRouter(
       name: MonitoringFullReportRoute.routingName,
       pageBuilder: (_, state) {
         final queries = state.uri.queryParameters;
+        final stationCodes = queries["stationCodes"];
+        final fromDate = queries["fromDate"];
+        final toDate = queries["toDate"];
+
         return MaterialPage(
           child: MultiProvider(
             providers: [
-              ChangeNotifierProvider(create: (_) => SelectedStationsProvider()),
-              ChangeNotifierProvider(create: (_) => DatePickerProvider()),
+              ChangeNotifierProvider(
+                create:
+                    (_) => Helpers.getSelectedStationsProviderFromQueries(
+                      stationCodes,
+                    ),
+                // IMPORTANT: We use keys for the providers because otherwise, they might be reused on different routes
+                // creating state bugs where an stale state from a past route gets used on a new route
+                key: ObjectKey(
+                  "${MonitoringFullReportRoute.routingName} SelectedStationProvider",
+                ),
+              ),
+              ChangeNotifierProvider(
+                create:
+                    (_) => Helpers.getDatePickerProviderFromQueries(
+                      fromDate,
+                      toDate,
+                    ),
+                key: ObjectKey(
+                  "${MonitoringFullReportRoute.routingName} DatePickerProvider",
+                ),
+              ),
             ],
             child: MonitoringFullReportRoute(
-              stationCodes: queries["stationCodes"],
-              fromDate: queries["fromDate"],
-              toDate: queries["toDate"],
+              stationCodes: stationCodes,
+              fromDate: fromDate,
+              toDate: toDate,
             ),
           ),
         );
@@ -98,16 +120,37 @@ final GoRouter _router = GoRouter(
       name: PressureAndTempReportsRoute.routingName,
       pageBuilder: (_, state) {
         final queries = state.uri.queryParameters;
+        final stationCodes = queries["stationCodes"];
+        final fromDate = queries["fromDate"];
+        final toDate = queries["toDate"];
+
         return MaterialPage(
           child: MultiProvider(
             providers: [
-              ChangeNotifierProvider(create: (_) => SelectedStationsProvider()),
-              ChangeNotifierProvider(create: (_) => DatePickerProvider()),
+              ChangeNotifierProvider(
+                create:
+                    (_) => Helpers.getSelectedStationsProviderFromQueries(
+                      stationCodes,
+                    ),
+                key: ObjectKey(
+                  "${PressureAndTempReportsRoute.routingName} SelectedStationProvider",
+                ),
+              ),
+              ChangeNotifierProvider(
+                create:
+                    (_) => Helpers.getDatePickerProviderFromQueries(
+                      fromDate,
+                      toDate,
+                    ),
+                key: ObjectKey(
+                  "${PressureAndTempReportsRoute.routingName} DatePickerProvider",
+                ),
+              ),
             ],
             child: PressureAndTempReportsRoute(
-              stationCodes: queries["stationCodes"],
-              fromDate: queries["fromDate"],
-              toDate: queries["toDate"],
+              stationCodes: stationCodes,
+              fromDate: fromDate,
+              toDate: toDate,
             ),
           ),
         );
