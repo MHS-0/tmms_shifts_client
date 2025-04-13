@@ -15,6 +15,11 @@ import 'package:tmms_shifts_client/widgets/error_alert_dialog.dart';
 class MyDrawer extends StatefulWidget {
   const MyDrawer({super.key});
 
+  @override
+  State<MyDrawer> createState() => _MyDrawerState();
+}
+
+class _MyDrawerState extends State<MyDrawer> {
   static const _divider = Divider(
     color: Colors.grey,
     indent: 10,
@@ -22,14 +27,9 @@ class MyDrawer extends StatefulWidget {
   );
 
   @override
-  State<MyDrawer> createState() => _MyDrawerState();
-}
-
-class _MyDrawerState extends State<MyDrawer> {
-  @override
   Widget build(BuildContext context) {
     final localizations = AppLocalizations.of(context)!;
-    final user = context.read<Preferences>().activeUser;
+    final user = context.watch<Preferences>().activeUser;
     if (user == null) return Drawer();
 
     return Drawer(
@@ -67,18 +67,13 @@ class _MyDrawerState extends State<MyDrawer> {
               radius: 20,
               child: Image.asset(userIconAssetPath),
             ),
-            title: Text(context.read<Preferences>().activeUser!.username),
+            title: Text(user.username),
             // TODO: Replace with some actual relevant data?
-            subtitle: user.fullname != null ? Text(user.fullname!) : null,
+            subtitle: Text(user.fullname ?? ""),
             trailing: IconButton(
               tooltip: localizations.logout,
-              icon: Icon(Icons.logout),
+              icon: const Icon(Icons.logout),
               onPressed: () async {
-                final user = Preferences.instance().activeUser;
-                if (user == null) {
-                  context.pop();
-                  return;
-                }
                 try {
                   // FIX
                   // TODO
@@ -90,10 +85,10 @@ class _MyDrawerState extends State<MyDrawer> {
                     builder: (context) {
                       return AlertDialog(
                         content: Row(
+                          spacing: 32,
                           children: [
                             Text(localizations.youHaveBeenLoggedOut),
-                            SizedBox(width: 32),
-                            Icon(Icons.check_rounded, size: 80),
+                            const Icon(Icons.check_rounded, size: 80),
                           ],
                         ),
                       );
@@ -124,9 +119,9 @@ class _MyDrawerState extends State<MyDrawer> {
               },
             ),
           ),
-          MyDrawer._divider,
+          _divider,
           ListTile(
-            leading: Icon(Icons.thermostat_rounded),
+            leading: const Icon(Icons.thermostat_rounded),
             title: Text(localizations.reportPressureAndTemp),
             onTap: () {
               final routingState = GoRouter.of(context).state;
@@ -139,7 +134,7 @@ class _MyDrawerState extends State<MyDrawer> {
             },
           ),
           ListTile(
-            leading: Icon(Icons.numbers),
+            leading: const Icon(Icons.numbers),
             title: Text(localizations.reportCorrectorNumbers),
             onTap: () {
               final routingState = GoRouter.of(context).state;
@@ -152,12 +147,12 @@ class _MyDrawerState extends State<MyDrawer> {
             },
           ),
           ListTile(
-            leading: Icon(Icons.sync),
+            leading: const Icon(Icons.sync),
             title: Text(localizations.reportCounterChangeEvents),
             onTap: () {},
           ),
           ListTile(
-            leading: Icon(Icons.sync_alt),
+            leading: const Icon(Icons.sync_alt),
             title: Text(localizations.reportCorrectorChangeEvents),
             onTap: () {},
           ),

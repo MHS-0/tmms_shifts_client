@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 import 'package:tmms_shifts_client/l18n/app_localizations.dart';
+import 'package:tmms_shifts_client/widgets/ok_button.dart';
 
 class ErrorAlertDialog extends StatelessWidget {
   const ErrorAlertDialog(this.error, {super.key, this.isUnknownError = false});
@@ -11,24 +11,17 @@ class ErrorAlertDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final localizations = AppLocalizations.of(context)!;
+
     return AlertDialog(
       title: Text(localizations.errorDialogTitle),
-      contentTextStyle: TextStyle(fontSize: 20),
       content:
           isUnknownError
               ? Text(
                 "${localizations.errorDialogDescBegin}\n\n$error \n\n${localizations.errorDialogDescEnd}",
               )
-              : Text(error.toString()),
+              : Text("$error"),
 
-      actions: [
-        ElevatedButton(
-          child: Text(localizations.okButtonText),
-          onPressed: () {
-            context.pop();
-          },
-        ),
-      ],
+      actions: [const OkButton()],
     );
   }
 }

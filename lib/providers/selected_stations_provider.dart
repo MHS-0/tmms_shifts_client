@@ -4,7 +4,7 @@ class SelectedStationsProvider extends ChangeNotifier {
   List<int> get selectedStations => _selectedStations;
   int? get singleSelectedStation => _singleSelectedStation;
 
-  late final List<int> _selectedStations;
+  List<int> _selectedStations = [];
   int? _singleSelectedStation;
 
   SelectedStationsProvider({
@@ -18,18 +18,8 @@ class SelectedStationsProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  void addStation(int code) {
-    _selectedStations.add(code);
-    notifyListeners();
-  }
-
-  void removeStation(int code) {
-    _selectedStations.remove(code);
-    notifyListeners();
-  }
-
-  void clearStations() {
-    _selectedStations.clear();
+  void setSelectedStations(List<int> list) {
+    _selectedStations = list;
     notifyListeners();
   }
 }

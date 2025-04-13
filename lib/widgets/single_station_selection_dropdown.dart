@@ -17,15 +17,14 @@ class _SingleStationSelectionDropdownState
   @override
   Widget build(BuildContext context) {
     final localizations = AppLocalizations.of(context)!;
-    final user = context.read<Preferences>().activeUser;
-    final selectedStationState = context.read<SelectedStationsProvider>();
+    final user = context.watch<Preferences>().activeUser;
+    final selectedStationState = context.watch<SelectedStationsProvider>();
     if (user == null) return Container();
 
     return DropdownMenu(
       initialSelection: selectedStationState.singleSelectedStation,
       onSelected: (code) {
         selectedStationState.setSingleSelectedStation(code);
-        setState(() {});
       },
       width: 300,
       hintText: localizations.chooseStation,

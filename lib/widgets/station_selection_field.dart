@@ -15,51 +15,41 @@ class StationSelectionField extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final localizations = AppLocalizations.of(context)!;
-    final user = context.read<Preferences>().activeUser;
+    final user = context.watch<Preferences>().activeUser;
     if (user == null || user.stations.isEmpty) return Container();
 
-    return Consumer<SelectedStationsProvider>(
-      builder: (context, value, _) {
-        final selectedStations = value.selectedStations;
-
-        return Center(
-          child: SizedBox(
-            width: 300,
-            child: MultiSelectDialogField(
-              confirmText: Text(localizations.okButtonText),
-              cancelText: Text(localizations.cancelButtonText),
-              searchHint: localizations.searchFieldLabel,
-              buttonText: Text(localizations.chooseStation),
-              dialogHeight: 500,
-              dialogWidth: 500,
-              title: Text(localizations.chooseStation),
-              initialValue:
-                  user.stations
-                      .where((e) => selectedStations.contains(e.code))
-                      .toList(),
-              items:
-                  user.stations
-                      .map((Station e) => MultiSelectItem(e, e.title))
-                      .toList(),
-              onConfirm: (list) {
-                value.clearStations();
-                for (final station in list) {
-                  value.addStation(station.code);
-                }
-                if (list.isEmpty) {
-                  Helpers.removeQueryFromPath(context, "stationCodes");
-                } else {
-                  Helpers.addQueryToPath(
-                    context,
-                    "stationCodes",
-                    selectedStations.join(","),
-                  );
-                }
-              },
-            ),
-          ),
-        );
-      },
+    final selectedStationsState = context.watch<SelectedStationsProvider>();
+    final selectedStations = selectedStationsState.selectedStations;
+    return Center(
+      child: SizedBox(
+        width: 300,
+        child: MultiSelectDialogField(
+          confirmText: Text(localizations.okButtonText),
+          cancelText: Text(localizations.cancelButtonText),
+          searchHint: localizations.searchFieldLabel,
+          buttonText: Text(localizations.chooseStation),
+          dialogHeight: 500,
+          dialogWidth: 500,
+          title: Text(localizations.chooseStation),
+          initialValue:
+              user.stations
+                  .where((e) => selectedStations.contains(e.code))
+                  .toList(),
+          items:
+              user.stations
+                  .map((Station e) => MultiSelectItem(e, e.title))
+                  .toList(),
+          onConfirm: (list) {
+            final codes = list.map((entry) => entry.code).toList();
+            selectedStationsState.setSelectedStations(codes);
+            if (codes.isEmpty) {
+              Helpers.removeQueryFromPath(context, "stationCodes");
+            } else {
+              Helpers.addQueryToPath(context, "stationCodes", codes.join(","));
+            }
+          },
+        ),
+      ),
     );
   }
 }

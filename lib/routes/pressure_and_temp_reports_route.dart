@@ -11,8 +11,10 @@ import 'package:tmms_shifts_client/network_interface.dart';
 import 'package:tmms_shifts_client/providers/date_picker_provider.dart';
 import 'package:tmms_shifts_client/providers/preferences.dart';
 import 'package:tmms_shifts_client/providers/selected_stations_provider.dart';
+import 'package:tmms_shifts_client/widgets/cancel_button.dart';
 import 'package:tmms_shifts_client/widgets/date_picker_row.dart';
 import 'package:tmms_shifts_client/widgets/drawer.dart';
+import 'package:tmms_shifts_client/widgets/ok_button.dart';
 import 'package:tmms_shifts_client/widgets/single_station_selection_dropdown.dart';
 import 'package:tmms_shifts_client/widgets/station_selection_field.dart';
 import 'package:tmms_shifts_client/widgets/title_and_text_field_row.dart';
@@ -104,7 +106,8 @@ class _PressureAndTempReportsRouteState
   @override
   Widget build(BuildContext context) {
     final localizations = AppLocalizations.of(context)!;
-    final user = context.read<Preferences>().activeUser;
+    final user = context.watch<Preferences>().activeUser;
+    final selectedStationState = context.watch<SelectedStationsProvider>();
     if (user == null || user.stations.isEmpty) return Scaffold();
 
     return SelectionArea(
@@ -148,8 +151,6 @@ class _PressureAndTempReportsRouteState
                           onPressed: () async {
                             _currentlyEditingReport = null;
                             selectedShift = null;
-                            final selectedStationState =
-                                context.read<SelectedStationsProvider>();
                             setupTextControllers();
                             selectedStationState.setSingleSelectedStation(null);
 
@@ -195,9 +196,8 @@ class _PressureAndTempReportsRouteState
           selectedShift = item.shifts.firstOrNull?.shift ?? "06";
 
           final selectedStationState = context.read<SelectedStationsProvider>();
-          selectedStationState.setSingleSelectedStation(item.stationCode);
           setupTextControllers();
-          setState(() {});
+          selectedStationState.setSingleSelectedStation(item.stationCode);
 
           showDialog(
             context: context,
@@ -295,23 +295,17 @@ class _PressureAndTempReportsRouteState
   }
 
   void setupTextControllers() {
-    if (_currentlyEditingReport != null && selectedShift != null) {
-      final shift =
-          _currentlyEditingReport!.shifts
+    Shift? shift;
+    if (selectedShift != null) {
+      shift =
+          _currentlyEditingReport?.shifts
               .where((item) => item.shift.contains(selectedShift!))
               .firstOrNull;
-      if (shift != null) {
-        _inputPressureController.text = shift.inputPressure.toString();
-        _outputPressureController.text = shift.outputPressure.toString();
-        _inputTempController.text = shift.inputTemperature.toString();
-        _outputTempController.text = shift.outputTemperature.toString();
-      }
-    } else {
-      _inputPressureController.clear();
-      _outputPressureController.clear();
-      _inputTempController.clear();
-      _outputTempController.clear();
     }
+    _inputPressureController.text = shift?.inputPressure.toString() ?? "";
+    _outputPressureController.text = shift?.outputPressure.toString() ?? "";
+    _inputTempController.text = shift?.inputTemperature.toString() ?? "";
+    _outputTempController.text = shift?.outputTemperature.toString() ?? "";
   }
 
   Widget reportEditDialog(
@@ -320,7 +314,7 @@ class _PressureAndTempReportsRouteState
   ) {
     return ChangeNotifierProvider.value(
       value: selectedStationState,
-      key: ObjectKey("Pressure and temp dialog provider"),
+      key: const ObjectKey("Pressure and temp dialog provider"),
       child: AlertDialog(
         title: Text(localizations.newReport),
         content: SizedBox(
@@ -339,7 +333,7 @@ class _PressureAndTempReportsRouteState
                     mainAxisAlignment: MainAxisAlignment.center,
                     spacing: 16,
                     children: [
-                      SingleStationSelectionDropdown(),
+                      const SingleStationSelectionDropdown(),
                       DropdownMenu(
                         initialSelection: selectedShift,
                         onSelected: (shift) {
@@ -387,24 +381,26 @@ class _PressureAndTempReportsRouteState
           ),
         ),
         actions: [
-          ElevatedButton(
-            onPressed: () {
-              // FIXME: Replace with network request.
-              if (_formKey.currentState != null &&
-                  _formKey.currentState!.validate()) {
+          OkButton(
+            onPressed: () async {
+              // FIXME: Do network call here in production.
+              if (_formKey.currentState!.validate()) {
                 context.pop();
               }
             },
-            child: Text(localizations.okButtonText),
           ),
-          FilledButton(
-            child: Text(localizations.cancelButtonText),
-            onPressed: () {
-              context.pop();
-            },
-          ),
+          const CancelButton(),
         ],
       ),
     );
+  }
+
+  @override
+  void dispose() {
+    _inputPressureController.dispose();
+    _outputPressureController.dispose();
+    _inputTempController.dispose();
+    _outputTempController.dispose();
+    super.dispose();
   }
 }

@@ -56,7 +56,7 @@ class TitleAndTextFieldRow extends StatelessWidget {
               decoration: InputDecoration(hintText: title, labelText: title),
 
               keyboardType:
-                  numbersOnly ? TextInputType.numberWithOptions() : null,
+                  numbersOnly ? const TextInputType.numberWithOptions() : null,
               inputFormatters:
                   numbersOnly ? [FilteringTextInputFormatter.digitsOnly] : null,
               validator: localValidator,
