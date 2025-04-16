@@ -4,20 +4,22 @@ import 'package:tmms_shifts_client/l18n/app_localizations.dart';
 import 'package:tmms_shifts_client/providers/preferences.dart';
 import 'package:tmms_shifts_client/widgets/drawer.dart';
 
-class CorrectorReplacementEventRegisterRoute extends StatefulWidget {
-  const CorrectorReplacementEventRegisterRoute({super.key});
+class CorrectorReplacementEventsRoute extends StatefulWidget {
+  static const routingName = "CorrectorReplacementEventsRoute";
+
+  const CorrectorReplacementEventsRoute({super.key});
 
   @override
-  State<CorrectorReplacementEventRegisterRoute> createState() =>
-      _CorrectorReplacementEventRegisterRouteState();
+  State<CorrectorReplacementEventsRoute> createState() =>
+      _CorrectorReplacementEventsRouteState();
 }
 
-class _CorrectorReplacementEventRegisterRouteState
-    extends State<CorrectorReplacementEventRegisterRoute> {
+class _CorrectorReplacementEventsRouteState
+    extends State<CorrectorReplacementEventsRoute> {
   @override
   Widget build(BuildContext context) {
     final localizations = AppLocalizations.of(context)!;
-    final user = context.read<Preferences>().activeUser;
+    final user = context.watch<Preferences>().activeUser;
     if (user == null || user.stations.isEmpty) return Scaffold();
 
     return Consumer<Preferences>(

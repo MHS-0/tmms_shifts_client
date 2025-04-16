@@ -4,11 +4,14 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:tmms_shifts_client/consts.dart';
 import 'package:tmms_shifts_client/data/backend_types.dart';
+import 'package:tmms_shifts_client/helpers.dart';
 import 'package:tmms_shifts_client/l18n/app_localizations.dart';
 import 'package:tmms_shifts_client/network_interface.dart';
 import 'package:tmms_shifts_client/providers/preferences.dart';
 import 'package:tmms_shifts_client/routes/monitoring_full_report_route.dart';
 import 'package:tmms_shifts_client/widgets/error_alert_dialog.dart';
+import 'package:tmms_shifts_client/widgets/success_dialog.dart';
+import 'package:tmms_shifts_client/widgets/wait_dialog.dart';
 
 class LoginRoute extends StatefulWidget {
   static const routingName = "login";
@@ -32,7 +35,7 @@ class _LoginRouteState extends State<LoginRoute> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    precacheImage(const AssetImage(iconAssetPath), context);
+    Helpers.initialRouteSetup(context);
   }
 
   @override
@@ -42,13 +45,13 @@ class _LoginRouteState extends State<LoginRoute> {
       child: Scaffold(
         body: SingleChildScrollView(
           child: Padding(
-            padding: EdgeInsets.symmetric(vertical: 72),
+            padding: const EdgeInsets.symmetric(vertical: 72),
             child: Center(
               child: Card(
                 color: Theme.of(context).colorScheme.inversePrimary,
                 elevation: 16,
                 child: Padding(
-                  padding: const EdgeInsets.all(32.0),
+                  padding: offsetAll32p,
                   child: Form(
                     key: _formKey,
                     child: Column(
@@ -56,13 +59,13 @@ class _LoginRouteState extends State<LoginRoute> {
                       crossAxisAlignment: CrossAxisAlignment.center,
                       spacing: 16,
                       children: [
-                        SizedBox(height: 50),
+                        const SizedBox(height: 50),
                         Image.asset(iconAssetPath, width: 200, height: 200),
                         Text(
                           localizations.longTitle,
                           style: const TextStyle(fontSize: 20),
                         ),
-                        SizedBox(),
+                        const SizedBox(),
                         TextFormField(
                           controller: _usernameController,
                           decoration: InputDecoration(
@@ -92,6 +95,7 @@ class _LoginRouteState extends State<LoginRoute> {
                             labelText: localizations.passwordTextFieldLabel,
                             hintText: localizations.passwordTextFieldHint,
                           ),
+                          textInputAction: TextInputAction.done,
                           maxLines: 1,
                           validator: (value) {
                             if (value == null || value.isEmpty) {
@@ -100,7 +104,9 @@ class _LoginRouteState extends State<LoginRoute> {
                             return null;
                           },
                         ),
-                        ElevatedButton(
+                        ElevatedButton.icon(
+                          label: Text(localizations.sign_in),
+                          icon: const Icon(Icons.login),
                           onPressed: () async {
                             final loginInfo = LoginRequest(
                               username: _usernameController.text,
@@ -108,22 +114,7 @@ class _LoginRouteState extends State<LoginRoute> {
                             );
                             if (_formKey.currentState!.validate()) {
                               try {
-                                showDialog(
-                                  barrierDismissible: false,
-                                  context: context,
-                                  builder: (context) {
-                                    return AlertDialog(
-                                      content: Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.spaceBetween,
-                                        children: [
-                                          Text(localizations.pleaseWait),
-                                          CircularProgressIndicator(),
-                                        ],
-                                      ),
-                                    );
-                                  },
-                                );
+                                Helpers.showCustomDialog(context, WaitDialog());
                                 // TODO
                                 // FIX: Actually implement it with the final backend responses.
                                 //
@@ -151,24 +142,11 @@ class _LoginRouteState extends State<LoginRoute> {
 
                                 if (!context.mounted) return;
                                 context.pop();
-                                showDialog(
-                                  barrierDismissible: false,
-                                  context: context,
-                                  builder: (context) {
-                                    return AlertDialog(
-                                      content: Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.spaceBetween,
-                                        children: [
-                                          Text(
-                                            localizations.youHaveBeenLoggedIn,
-                                          ),
-                                          SizedBox(width: 32),
-                                          Icon(Icons.check_rounded, size: 80),
-                                        ],
-                                      ),
-                                    );
-                                  },
+                                Helpers.showCustomDialog(
+                                  context,
+                                  SuccessDialog(
+                                    content: localizations.youHaveBeenLoggedIn,
+                                  ),
                                 );
                                 await Future.delayed(Duration(seconds: 2));
                                 if (!context.mounted) return;
@@ -198,13 +176,12 @@ class _LoginRouteState extends State<LoginRoute> {
 
                                 // Handle other network errors too, besides invalid auth
                                 if (context.mounted) {
-                                  showDialog(
-                                    context: context,
-                                    builder: (context) {
-                                      return ErrorAlertDialog(
-                                        "${localizations.logInFailed} \n $e",
-                                      );
-                                    },
+                                  Helpers.showCustomDialog(
+                                    context,
+                                    ErrorAlertDialog(
+                                      "${localizations.logInFailed} \n $e",
+                                    ),
+                                    barrierDismissable: true,
                                   );
                                 }
                                 return;
@@ -212,28 +189,19 @@ class _LoginRouteState extends State<LoginRoute> {
                                 // Handle other kinds of errors besides network ones.
                                 // For example, failure in deserialization of the response.
                                 if (context.mounted) {
-                                  showDialog(
-                                    context: context,
-                                    builder: (context) {
-                                      return ErrorAlertDialog(
-                                        "${localizations.logInFailed} \n $e",
-                                        isUnknownError: true,
-                                      );
-                                    },
+                                  Helpers.showCustomDialog(
+                                    context,
+                                    ErrorAlertDialog(
+                                      "${localizations.logInFailed} \n $e",
+                                      isUnknownError: true,
+                                    ),
+                                    barrierDismissable: true,
                                   );
                                 }
                                 return;
                               }
                             }
                           },
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            spacing: 8,
-                            children: [
-                              Icon(Icons.login),
-                              Text(localizations.sign_in),
-                            ],
-                          ),
                         ),
                       ],
                     ),

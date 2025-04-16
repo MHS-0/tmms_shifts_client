@@ -13,10 +13,16 @@ const userIconAssetImage = AssetImage(userIconAssetPath);
 
 const dataTableHeaderRowColumnWidthMinimum = 150.0;
 
+const boldTextStyle = TextStyle(fontWeight: FontWeight.bold);
+
 const offsetAll16p = EdgeInsets.all(16);
 const offsetAll32p = EdgeInsets.all(32);
 
 const trashcanIcon = Icon(Icons.delete);
+
+const centeredCircularProgressIndicator = Center(
+  child: CircularProgressIndicator(),
+);
 
 final dateFormatterWithHour = DateFormat("HH:mm yyyy-MM-dd");
 final dateFormatter = DateFormat("dd-MM-yyyy");

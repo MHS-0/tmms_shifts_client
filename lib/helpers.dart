@@ -153,4 +153,54 @@ final class Helpers {
       return list.join(",");
     }
   }
+
+  static Future<void> showCustomDialog(
+    BuildContext context,
+    Widget widget, {
+    bool barrierDismissable = false,
+  }) async {
+    await showDialog(
+      barrierDismissible: barrierDismissable,
+      context: context,
+      builder: (context) {
+        return widget;
+      },
+    );
+  }
+
+  static List<DataColumn> getDataColumns(
+    BuildContext context,
+    List<String> labels,
+    double divisionNumber,
+    double minimumWidth,
+  ) {
+    // unused for now. needs more testing.
+    final maxWidthAvailable = MediaQuery.of(context).size.width;
+    final List<DataColumn> result = [];
+
+    for (final label in labels) {
+      result.add(
+        DataColumn(
+          label: Text(
+            label,
+            style: const TextStyle(fontWeight: FontWeight.bold),
+          ),
+          // columnWidth: MaxColumnWidth(
+          //   FixedColumnWidth(maxWidthAvailable / divisionNumber),
+          //   FixedColumnWidth(minimumWidth),
+          // ),
+          columnWidth: FixedColumnWidth(minimumWidth),
+        ),
+      );
+    }
+    return result;
+  }
+
+  static List<DataCell> getDataCells(List<Object> contents) {
+    final List<DataCell> result = [];
+    for (final entry in contents) {
+      result.add(DataCell(Text("$entry")));
+    }
+    return result;
+  }
 }

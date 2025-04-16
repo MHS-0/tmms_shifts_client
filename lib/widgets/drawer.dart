@@ -3,14 +3,18 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:tmms_shifts_client/consts.dart';
+import 'package:tmms_shifts_client/helpers.dart';
 import 'package:tmms_shifts_client/l18n/app_localizations.dart';
 import 'package:tmms_shifts_client/network_interface.dart';
 import 'package:tmms_shifts_client/providers/preferences.dart';
+import 'package:tmms_shifts_client/routes/corrector_replacement_event_register.dart';
 import 'package:tmms_shifts_client/routes/counter_corrector_reports.dart';
+import 'package:tmms_shifts_client/routes/counter_replacement_event_register.dart';
 import 'package:tmms_shifts_client/routes/login.dart';
 import 'package:tmms_shifts_client/routes/monitoring_full_report_route.dart';
 import 'package:tmms_shifts_client/routes/pressure_and_temp_reports_route.dart';
 import 'package:tmms_shifts_client/widgets/error_alert_dialog.dart';
+import 'package:tmms_shifts_client/widgets/success_dialog.dart';
 
 class MyDrawer extends StatefulWidget {
   const MyDrawer({super.key});
@@ -36,14 +40,10 @@ class _MyDrawerState extends State<MyDrawer> {
       child: ListView(
         children: [
           InkWell(
-            onTap: () {
-              final routerState = GoRouter.of(context).state;
-              if (routerState.name != MonitoringFullReportRoute.routingName) {
-                context.goNamed(MonitoringFullReportRoute.routingName);
-              } else {
-                context.pop();
-              }
-            },
+            onTap:
+                () => navigateIfNotCurrentPage(
+                  MonitoringFullReportRoute.routingName,
+                ),
             child: DrawerHeader(
               decoration: BoxDecoration(
                 color: Theme.of(context).colorScheme.inversePrimary,
@@ -79,20 +79,9 @@ class _MyDrawerState extends State<MyDrawer> {
                   // TODO
                   // await NetworkInterface.instance().logout();
                   if (!context.mounted) return;
-                  showDialog(
-                    barrierDismissible: false,
-                    context: context,
-                    builder: (context) {
-                      return AlertDialog(
-                        content: Row(
-                          spacing: 32,
-                          children: [
-                            Text(localizations.youHaveBeenLoggedOut),
-                            const Icon(Icons.check_rounded, size: 80),
-                          ],
-                        ),
-                      );
-                    },
+                  Helpers.showCustomDialog(
+                    context,
+                    SuccessDialog(content: localizations.youHaveBeenLoggedOut),
                   );
                   await Future.delayed(Duration(seconds: 2));
                   await Preferences.instance().unsetActiveUser();
@@ -107,11 +96,10 @@ class _MyDrawerState extends State<MyDrawer> {
                   // future.
                 } catch (e) {
                   if (context.mounted) {
-                    showDialog(
-                      context: context,
-                      builder: (context) {
-                        return ErrorAlertDialog(e, isUnknownError: true);
-                      },
+                    Helpers.showCustomDialog(
+                      context,
+                      ErrorAlertDialog(e, isUnknownError: true),
+                      barrierDismissable: true,
                     );
                   }
                   return;
@@ -123,41 +111,46 @@ class _MyDrawerState extends State<MyDrawer> {
           ListTile(
             leading: const Icon(Icons.thermostat_rounded),
             title: Text(localizations.reportPressureAndTemp),
-            onTap: () {
-              final routingState = GoRouter.of(context).state;
-              if (routingState.name !=
-                  PressureAndTempReportsRoute.routingName) {
-                context.goNamed(PressureAndTempReportsRoute.routingName);
-              } else {
-                context.pop();
-              }
-            },
+            onTap:
+                () => navigateIfNotCurrentPage(
+                  PressureAndTempReportsRoute.routingName,
+                ),
           ),
           ListTile(
             leading: const Icon(Icons.numbers),
             title: Text(localizations.reportCorrectorNumbers),
-            onTap: () {
-              final routingState = GoRouter.of(context).state;
-              if (routingState.name !=
-                  CounterCorrectorReportsRoute.routingName) {
-                context.goNamed(CounterCorrectorReportsRoute.routingName);
-              } else {
-                context.pop();
-              }
-            },
+            onTap:
+                () => navigateIfNotCurrentPage(
+                  CounterCorrectorReportsRoute.routingName,
+                ),
           ),
           ListTile(
             leading: const Icon(Icons.sync),
             title: Text(localizations.reportCounterChangeEvents),
-            onTap: () {},
+            onTap:
+                () => navigateIfNotCurrentPage(
+                  CounterReplacementEventsRoute.routingName,
+                ),
           ),
           ListTile(
             leading: const Icon(Icons.sync_alt),
             title: Text(localizations.reportCorrectorChangeEvents),
-            onTap: () {},
+            onTap:
+                () => navigateIfNotCurrentPage(
+                  CorrectorReplacementEventsRoute.routingName,
+                ),
           ),
         ],
       ),
     );
+  }
+
+  void navigateIfNotCurrentPage(String routeName) {
+    final routingState = GoRouter.of(context).state;
+    if (routingState.name != routeName) {
+      context.goNamed(routeName);
+    } else {
+      context.pop();
+    }
   }
 }

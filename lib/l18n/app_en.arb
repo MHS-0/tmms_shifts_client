@@ -73,5 +73,13 @@
   "pleaseFillTheField": "Please fill this field",
   "onlyNumbersAllowed": "Only numbers are allowed",
   "dashboard": "Dashboard",
+  "refresh": "Refresh",
+  "ran": "Ran",
+  "ranSequence": "Ran sequence",
+  "meterAmount": "Meter amount",
+  "correctorAmount": "Corrector amount",
+  "correctorMeterAmount": "Corrector meter amount",
+  "errorFetchingDataTryAgainLater": "Error fetching data! Please try again later.",
+  "lastAction": "آخرین فعالیت",
   "pageNotFound": "Page not found!"
 }

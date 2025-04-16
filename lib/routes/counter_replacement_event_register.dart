@@ -4,20 +4,22 @@ import 'package:tmms_shifts_client/l18n/app_localizations.dart';
 import 'package:tmms_shifts_client/providers/preferences.dart';
 import 'package:tmms_shifts_client/widgets/drawer.dart';
 
-class CounterReplacementEventRegisterRoute extends StatefulWidget {
-  const CounterReplacementEventRegisterRoute({super.key});
+class CounterReplacementEventsRoute extends StatefulWidget {
+  static const routingName = "CounterReplacementEventsRoute";
+
+  const CounterReplacementEventsRoute({super.key});
 
   @override
-  State<CounterReplacementEventRegisterRoute> createState() =>
-      _CounterReplacementEventRegisterRouteState();
+  State<CounterReplacementEventsRoute> createState() =>
+      _CounterReplacementEventsRouteState();
 }
 
-class _CounterReplacementEventRegisterRouteState
-    extends State<CounterReplacementEventRegisterRoute> {
+class _CounterReplacementEventsRouteState
+    extends State<CounterReplacementEventsRoute> {
   @override
   Widget build(BuildContext context) {
     final localizations = AppLocalizations.of(context)!;
-    final user = context.read<Preferences>().activeUser;
+    final user = context.watch<Preferences>().activeUser;
     if (user == null || user.stations.isEmpty) return Scaffold();
 
     return Consumer<Preferences>(

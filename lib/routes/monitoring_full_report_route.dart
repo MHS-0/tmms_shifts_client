@@ -99,8 +99,8 @@ class _MonitoringFullReportRouteState extends State<MonitoringFullReportRoute> {
 
     return SelectionArea(
       child: Scaffold(
-        appBar: AppBar(title: Text(localizations.dashboard), centerTitle: true),
-        drawer: MyDrawer(),
+        appBar: AppBar(title: Text(localizations.dashboard)),
+        drawer: const MyDrawer(),
         body: FutureBuilder(
           future: getData(context),
           builder: (context, snapshot) {

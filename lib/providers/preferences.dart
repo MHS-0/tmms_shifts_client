@@ -200,6 +200,12 @@ class Preferences extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// Refresh anything that depends on Preferences.
+  /// Used for now for buttons that refresh the page when an error occurs.
+  void refreshRoute() {
+    notifyListeners();
+  }
+
   /// The factory that returns the singleton instance.
   factory Preferences.instance() => _preferences;
 }

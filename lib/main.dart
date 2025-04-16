@@ -7,7 +7,6 @@ import 'package:provider/provider.dart';
 import 'package:tmms_shifts_client/helpers.dart';
 import 'package:tmms_shifts_client/network_interface.dart';
 import 'package:tmms_shifts_client/routes/corrector_replacement_event_register.dart';
-import 'package:tmms_shifts_client/routes/counter_corrector_report_view.dart';
 import 'package:tmms_shifts_client/routes/counter_corrector_reports.dart';
 import 'package:tmms_shifts_client/routes/counter_replacement_event_register.dart';
 import 'package:tmms_shifts_client/routes/login.dart';
@@ -100,19 +99,16 @@ final GoRouter _router = GoRouter(
     ),
     GoRoute(
       path: '/corrector-replacement-event-register',
-      name: "correctorReplacementEventRegister",
+      name: CorrectorReplacementEventsRoute.routingName,
       pageBuilder: (_, __) {
-        return const MaterialPage(
-          child: CorrectorReplacementEventRegisterRoute(),
-        );
+        return const MaterialPage(child: CorrectorReplacementEventsRoute());
       },
     ),
     GoRoute(
       path: '/counter-replacement-event-register',
+      name: CounterReplacementEventsRoute.routingName,
       pageBuilder: (_, __) {
-        return const MaterialPage(
-          child: CounterReplacementEventRegisterRoute(),
-        );
+        return const MaterialPage(child: CounterReplacementEventsRoute());
       },
     ),
     GoRoute(
@@ -178,28 +174,43 @@ final GoRouter _router = GoRouter(
     GoRoute(
       path: '/counter-corrector-reports',
       name: CounterCorrectorReportsRoute.routingName,
-      pageBuilder: (_, __) {
-        return const MaterialPage(child: CounterCorrectorReportsRoute());
+      pageBuilder: (_, state) {
+        final queries = state.uri.queryParameters;
+        final stationCodes = queries["stationCodes"];
+        final fromDate = queries["fromDate"];
+        final toDate = queries["toDate"];
+
+        return MaterialPage(
+          child: MultiProvider(
+            providers: [
+              ChangeNotifierProvider(
+                create:
+                    (_) => Helpers.getSelectedStationsProviderFromQueries(
+                      stationCodes,
+                    ),
+                key: ObjectKey(
+                  "${CounterCorrectorReportsRoute.routingName} SelectedStationProvider",
+                ),
+              ),
+              ChangeNotifierProvider(
+                create:
+                    (_) => Helpers.getDatePickerProviderFromQueries(
+                      fromDate,
+                      toDate,
+                    ),
+                key: ObjectKey(
+                  "${CounterCorrectorReportsRoute.routingName} DatePickerProvider",
+                ),
+              ),
+            ],
+            child: CounterCorrectorReportsRoute(
+              stationCodes: stationCodes,
+              fromDate: fromDate,
+              toDate: toDate,
+            ),
+          ),
+        );
       },
-      routes: [
-        GoRoute(
-          path: '/:report',
-          name: CounterCorrectorReportViewRoute.routingName,
-          pageBuilder: (_, state) {
-            final report = state.pathParameters["report"];
-            if (report == null) {
-              return const MaterialPage(child: CounterCorrectorReportsRoute());
-            }
-            final reportNumber = int.tryParse(report);
-            if (reportNumber == null) {
-              return const MaterialPage(child: CounterCorrectorReportsRoute());
-            }
-            return MaterialPage(
-              child: CounterCorrectorReportViewRoute(report: reportNumber),
-            );
-          },
-        ),
-      ],
     ),
   ],
   redirect: (context, state) async {

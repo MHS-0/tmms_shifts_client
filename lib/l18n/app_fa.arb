@@ -73,5 +73,13 @@
   "pleaseFillTheField": "لطفا این فیلد را پر کنید",
   "onlyNumbersAllowed": "این فیلد باید با اعداد پر شود",
   "dashboard": "داشبورد",
+  "refresh": "بازخوانی صفحه",
+  "ran": "ران",
+  "ranSequence": "ترتیب ران",
+  "meterAmount": "رقم کنتور",
+  "correctorAmount": "رقم تصحیح کننده",
+  "correctorMeterAmount": "رقم تصحیح کننده کنتور",
+  "lastAction": "آخرین فعالیت",
+  "errorFetchingDataTryAgainLater": "خطا در برقراری ارتباط! لطفا دوباره تلاش کنید.",
   "pageNotFound": "صفحه مورد نظر یافت نشد!"
 }

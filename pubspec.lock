@@ -10,7 +10,7 @@ packages:
     source: hosted
     version: "80.0.0"
   analyzer:
-    dependency: transitive
+    dependency: "direct dev"
     description:
       name: analyzer
       sha256: "192d1c5b944e7e53b24b5586db760db934b177d4147c42fbca8c8c5f1eb8d11e"
@@ -347,10 +347,10 @@ packages:
     dependency: "direct main"
     description:
       name: go_router
-      sha256: f02fd7d2a4dc512fec615529824fdd217fecb3a3d3de68360293a551f21634b3
+      sha256: "4cdfcc6a178632d1dbb7a728f8e84a1466211354704b9cdc03eee661d3277732"
       url: "https://pub.dev"
     source: hosted
-    version: "14.8.1"
+    version: "15.0.0"
   graphs:
     dependency: transitive
     description:
