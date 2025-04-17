@@ -81,5 +81,8 @@
   "correctorMeterAmount": "رقم تصحیح کننده کنتور",
   "lastAction": "آخرین فعالیت",
   "errorFetchingDataTryAgainLater": "خطا در برقراری ارتباط! لطفا دوباره تلاش کنید.",
+  "wrongUsernameAndPassword": "نام کاربری یا کلمه عبور اشتباه می باشد",
+  "errorStatusCode": "کد خطا:",
+  "responseDetails": "جزییات پاسخ سرور:",
   "pageNotFound": "صفحه مورد نظر یافت نشد!"
 }

@@ -63,22 +63,16 @@ void main() {
 
       final respDeserialized = await networkInterface.login(req);
       assert(
-        DeepCollectionEquality().equals(respDeserialized.toJson(), respJson),
+        DeepCollectionEquality().equals(respDeserialized!.toJson(), respJson),
       );
     });
 
     test("Logout", () async {
-      final req = MockData.mockLogoutRequest;
-      dioAdapter.onPost(
-        "/user/logout",
-        (server) {
-          server.reply(204, null, delay: oneSecDelay);
-        },
-        data: req.toJson(),
-        headers: NetworkInterface.filledHeaderMap,
-      );
+      dioAdapter.onPost("/user/logout", (server) {
+        server.reply(204, null, delay: oneSecDelay);
+      }, headers: NetworkInterface.filledHeaderMap);
 
-      await networkInterface.logout(req);
+      await networkInterface.logout();
     });
 
     test("Get Profile", () async {
@@ -91,7 +85,7 @@ void main() {
         MockData.mockLoginResponse.token,
       );
       assert(
-        DeepCollectionEquality().equals(respDeserialized.toJson(), respJson),
+        DeepCollectionEquality().equals(respDeserialized!.toJson(), respJson),
       );
     });
 

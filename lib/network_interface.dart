@@ -1,53 +1,107 @@
+import 'dart:io';
+
 import 'package:dio/dio.dart';
 import 'package:tmms_shifts_client/data/backend_types.dart';
+import 'package:tmms_shifts_client/l18n/app_localizations_fa.dart';
 import 'package:tmms_shifts_client/providers/preferences.dart';
 
 const authHeaderKey = "Authorization";
+const contentTypeKey = "Content-Type";
+const applicationJsonValue = "application/json";
 
 class NetworkInterface {
   final Dio dio;
 
-  /// Private constructor to use when instantiating an instance inside the file.
-  const NetworkInterface._privateConstructor(this.dio);
+  String? lastErrorUserFriendly;
+  Object? lastError;
 
-  static const emptyHeaderMap = {authHeaderKey: ""};
+  /// Private constructor to use when instantiating an instance inside the file.
+  NetworkInterface._privateConstructor(this.dio);
+
+  static const emptyHeaderMap = {
+    contentTypeKey: applicationJsonValue,
+    authHeaderKey: "",
+  };
   static final filledHeaderMap = {
+    contentTypeKey: applicationJsonValue,
     authHeaderKey: "Token ${Preferences.instance().activeUser?.token}",
   };
 
   static final Options authHeaderEmpty = Options(headers: emptyHeaderMap);
   static final Options authHeaderWithToken = Options(headers: filledHeaderMap);
 
+  static final persianLocale = AppLocalizationsFa();
+
   /// The singleton instance of this class
   static NetworkInterface? _interface;
 
-  Future<LoginResponse> login(LoginRequest loginInfo) async {
-    final Response<Map<String, dynamic>> resp = await dio.post(
-      "/user/login",
-      options: authHeaderEmpty,
-      data: loginInfo.toJson(),
-    );
-    final finalResp = LoginResponse.fromJson(resp.data!);
-    return finalResp;
+  // TODO: Refactor this into something cleaner.
+  Future<T?> sendRequest<T>(
+    Future<T> Function() request, [
+    List<(int, String)>? statusResponses,
+  ]) async {
+    try {
+      return await request();
+    } on DioException catch (e) {
+      lastError = e;
+      lastErrorUserFriendly =
+          "${persianLocale.errorDialogDescBegin}\n\n$e\n\n${persianLocale.errorDialogDescEnd}";
+
+      if (e.error is SocketException) {
+        lastErrorUserFriendly = persianLocale.errorFetchingDataTryAgainLater;
+      } else if (e.response != null) {
+        final response = e.response!;
+        if (statusResponses != null) {
+          final errorResponse =
+              statusResponses
+                  .where((e) => e.$1 == response.statusCode)
+                  .firstOrNull
+                  ?.$2;
+          if (errorResponse != null) {
+            lastErrorUserFriendly = errorResponse;
+          }
+        } else {
+          lastErrorUserFriendly =
+              "${persianLocale.errorDialogDescBegin}\n\n${persianLocale.errorStatusCode}: ${response.statusCode}\n${persianLocale.responseDetails}: ${response.data}\n\n${persianLocale.errorDialogDescEnd}";
+        }
+      }
+    } catch (e) {
+      lastError = e;
+    }
+
+    return null;
+  }
+
+  Future<LoginResponse?> login(LoginRequest loginInfo) async {
+    return await sendRequest(() async {
+      final Response<Map<String, dynamic>> resp = await dio.post(
+        "/user/login",
+        options: authHeaderEmpty,
+        data: loginInfo.toJson(),
+      );
+      final finalResp = LoginResponse.fromJson(resp.data!);
+      return finalResp;
+    }, [(400, persianLocale.wrongUsernameAndPassword)]);
   }
 
   // This function takes the token string directly instead of using preferences, becuase it might
   // be used before OR after the active user is actually set through preferences.
-  Future<GetProfileResponse> getProfile(String token) async {
-    final Response<Map<String, dynamic>> resp = await dio.get(
-      "/user/profile/",
-      options: authHeaderWithToken,
-    );
-    final finalResp = GetProfileResponse.fromJson(resp.data!);
-    return finalResp;
+  Future<GetProfileResponse?> getProfile(String token) async {
+    return await sendRequest(() async {
+      final Response<Map<String, dynamic>> resp = await dio.get(
+        "/user/profile",
+        options: authHeaderWithToken,
+      );
+      final finalResp = GetProfileResponse.fromJson(resp.data!);
+      return finalResp;
+    });
   }
 
-  Future<void> logout(LoginRequest req) async {
-    await dio.post(
-      "/user/logout",
-      options: authHeaderWithToken,
-      data: req.toJson(),
-    );
+  Future<bool?> logout() async {
+    return sendRequest(() async {
+      await dio.post("/user/logout", options: authHeaderWithToken);
+      return true;
+    });
   }
 
   Future<CreateShiftDataResponse> createShiftData(
@@ -96,11 +150,14 @@ class NetworkInterface {
     return finalResp;
   }
 
-  Future<void> destroyShiftData(int shift) async {
-    await dio.delete(
-      "/pressure_and_temperature/shift/$shift",
-      options: authHeaderWithToken,
-    );
+  Future<bool?> destroyShiftData(int shift) async {
+    return await sendRequest(() async {
+      await dio.delete(
+        "/pressure_and_temperature/shift/$shift",
+        options: authHeaderWithToken,
+      );
+      return true;
+    });
   }
 
   Future<GetShiftsDataListResponse> getShiftsDataList({
@@ -527,7 +584,7 @@ class NetworkInterface {
       } else {
         dioInstance = Dio(
           BaseOptions(
-            baseUrl: "localhost:8000",
+            baseUrl: "http://0.0.0.0:8000",
             extra: {"withCredentials": true},
             preserveHeaderCase: true,
           ),

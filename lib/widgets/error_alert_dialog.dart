@@ -14,12 +14,18 @@ class ErrorAlertDialog extends StatelessWidget {
 
     return AlertDialog(
       title: Text(localizations.errorDialogTitle),
-      content:
-          isUnknownError
-              ? Text(
-                "${localizations.errorDialogDescBegin}\n\n$error \n\n${localizations.errorDialogDescEnd}",
-              )
-              : Text("$error"),
+      content: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            isUnknownError
+                ? Text(
+                  "${localizations.errorDialogDescBegin}\n\n$error \n\n${localizations.errorDialogDescEnd}",
+                )
+                : Text("$error"),
+          ],
+        ),
+      ),
 
       actions: [const OkButton()],
     );

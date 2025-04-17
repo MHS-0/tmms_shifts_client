@@ -2039,7 +2039,6 @@ final class MockData {
   static final mockActiveUser = ActiveUser.fromLoginResponse(
     mockLoginResponse,
     mockGetProfileResponse,
-    "abc123!@#",
   );
 
   // Same structure as the login request

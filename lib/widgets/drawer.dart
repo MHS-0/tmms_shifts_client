@@ -74,6 +74,13 @@ class _MyDrawerState extends State<MyDrawer> {
               tooltip: localizations.logout,
               icon: const Icon(Icons.logout),
               onPressed: () async {
+                final networkInterface = NetworkInterface.instance();
+                final result = await networkInterface.logout();
+                if (!context.mounted) return;
+
+                if (result == null) {
+                  Helpers.showNetworkErrorAlertDialog(context, localizations);
+                }
                 try {
                   // FIX
                   // TODO

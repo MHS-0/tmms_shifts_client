@@ -3,8 +3,11 @@ import 'package:go_router/go_router.dart';
 import 'package:persian_datetime_picker/persian_datetime_picker.dart';
 import 'package:provider/provider.dart';
 import 'package:tmms_shifts_client/consts.dart';
+import 'package:tmms_shifts_client/l18n/app_localizations.dart';
+import 'package:tmms_shifts_client/network_interface.dart';
 import 'package:tmms_shifts_client/providers/date_picker_provider.dart';
 import 'package:tmms_shifts_client/providers/selected_stations_provider.dart';
+import 'package:tmms_shifts_client/widgets/error_alert_dialog.dart';
 
 final class Helpers {
   /// Remove a query from the current path shown in the Browser's
@@ -202,5 +205,21 @@ final class Helpers {
       result.add(DataCell(Text("$entry")));
     }
     return result;
+  }
+
+  static Future<void> showNetworkErrorAlertDialog(
+    BuildContext context,
+    AppLocalizations localizations,
+  ) async {
+    final netInterface = NetworkInterface.instance();
+    await Helpers.showCustomDialog(
+      context,
+      ErrorAlertDialog(
+        netInterface.lastErrorUserFriendly ??
+            localizations.errorFetchingDataTryAgainLater,
+      ),
+      barrierDismissable: true,
+    );
+    return;
   }
 }

@@ -80,6 +80,9 @@
   "correctorAmount": "Corrector amount",
   "correctorMeterAmount": "Corrector meter amount",
   "errorFetchingDataTryAgainLater": "Error fetching data! Please try again later.",
-  "lastAction": "آخرین فعالیت",
+  "lastAction": "Last action",
+  "wrongUsernameAndPassword": "Incorrect username or password",
+  "errorStatusCode": "Error code:",
+  "responseDetails": "Error details from server:",
   "pageNotFound": "Page not found!"
 }

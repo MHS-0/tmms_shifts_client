@@ -1,4 +1,3 @@
-import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
@@ -9,7 +8,6 @@ import 'package:tmms_shifts_client/l18n/app_localizations.dart';
 import 'package:tmms_shifts_client/network_interface.dart';
 import 'package:tmms_shifts_client/providers/preferences.dart';
 import 'package:tmms_shifts_client/routes/monitoring_full_report_route.dart';
-import 'package:tmms_shifts_client/widgets/error_alert_dialog.dart';
 import 'package:tmms_shifts_client/widgets/success_dialog.dart';
 import 'package:tmms_shifts_client/widgets/wait_dialog.dart';
 
@@ -113,93 +111,66 @@ class _LoginRouteState extends State<LoginRoute> {
                               password: _passwordController.text,
                             );
                             if (_formKey.currentState!.validate()) {
-                              try {
-                                Helpers.showCustomDialog(context, WaitDialog());
-                                // TODO
-                                // FIX: Actually implement it with the final backend responses.
-                                //
-                                // final loginResp =
-                                //     await NetworkInterface.instance().login(
-                                //       loginInfo,
-                                //     );
-                                // final profileResp =
-                                //     await NetworkInterface.instance()
-                                //         .getProfile(loginResp.token);
-                                // final activeUser = ActiveUser(
-                                //   username: profileResp.username,
-                                //   password: _passwordController.text,
-                                //   token: loginResp.token,
-                                //   isStaff: profileResp.isStaff,
-                                //   expiry: loginResp.expiry,
-                                //   stations: profileResp.stations,
-                                // );
-                                //
-                                // FIX: Actually implement it with the final backend responses.
-                                await Future.delayed(Duration(seconds: 3));
+                              Helpers.showCustomDialog(context, WaitDialog());
+                              final networkInterface =
+                                  NetworkInterface.instance();
 
-                                // FIX: REMOVE before production deploy.
-                                final mockActiveUser = MockData.mockActiveUser;
+                              final loginResp = await networkInterface.login(
+                                loginInfo,
+                              );
 
-                                if (!context.mounted) return;
+                              if (!context.mounted) return;
+
+                              if (loginResp == null) {
                                 context.pop();
-                                Helpers.showCustomDialog(
+                                Helpers.showNetworkErrorAlertDialog(
                                   context,
-                                  SuccessDialog(
-                                    content: localizations.youHaveBeenLoggedIn,
-                                  ),
+                                  localizations,
                                 );
-                                await Future.delayed(Duration(seconds: 2));
-                                if (!context.mounted) return;
-                                await context.read<Preferences>().setActiveUser(
-                                  mockActiveUser,
-                                );
-                                if (!context.mounted) return;
-                                context.pop();
-                                context.goNamed(
-                                  MonitoringFullReportRoute.routingName,
-                                );
-                              } on DioException catch (e) {
-                                if (e.response?.statusCode == 400) {
-                                  if (context.mounted) {
-                                    showDialog(
-                                      context: context,
-                                      builder: (context) {
-                                        return ErrorAlertDialog(
-                                          localizations
-                                              .invalidUsernameOrPassword,
-                                        );
-                                      },
-                                    );
-                                  }
-                                  return;
-                                }
-
-                                // Handle other network errors too, besides invalid auth
-                                if (context.mounted) {
-                                  Helpers.showCustomDialog(
-                                    context,
-                                    ErrorAlertDialog(
-                                      "${localizations.logInFailed} \n $e",
-                                    ),
-                                    barrierDismissable: true,
-                                  );
-                                }
-                                return;
-                              } catch (e) {
-                                // Handle other kinds of errors besides network ones.
-                                // For example, failure in deserialization of the response.
-                                if (context.mounted) {
-                                  Helpers.showCustomDialog(
-                                    context,
-                                    ErrorAlertDialog(
-                                      "${localizations.logInFailed} \n $e",
-                                      isUnknownError: true,
-                                    ),
-                                    barrierDismissable: true,
-                                  );
-                                }
                                 return;
                               }
+
+                              final profileResp = await networkInterface
+                                  .getProfile(loginResp.token);
+
+                              if (!context.mounted) return;
+
+                              if (profileResp == null) {
+                                context.pop();
+                                Helpers.showNetworkErrorAlertDialog(
+                                  context,
+                                  localizations,
+                                );
+                                return;
+                              }
+                              context.pop();
+                              Helpers.showCustomDialog(
+                                context,
+                                SuccessDialog(
+                                  content: localizations.youHaveBeenLoggedIn,
+                                ),
+                              );
+
+                              final activeUser = ActiveUser(
+                                username: profileResp.username,
+                                token: loginResp.token,
+                                isStaff: profileResp.isStaff,
+                                expiry: loginResp.expiry,
+                                stations: profileResp.stations,
+                              );
+
+                              // TODO: Remove this maybe?
+                              // It might look good but it slown down the UX.
+                              await Future.delayed(Duration(seconds: 1));
+                              if (!context.mounted) return;
+                              await context.read<Preferences>().setActiveUser(
+                                activeUser,
+                              );
+                              if (!context.mounted) return;
+                              context.pop();
+                              context.goNamed(
+                                MonitoringFullReportRoute.routingName,
+                              );
                             }
                           },
                         ),

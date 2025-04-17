@@ -23,7 +23,6 @@ const persianLocaleValue = 'persian';
 class ActiveUser {
   const ActiveUser({
     required this.username,
-    required this.password,
     required this.token,
     required this.isStaff,
     required this.expiry,
@@ -32,18 +31,14 @@ class ActiveUser {
   });
 
   final String username;
-  final String password;
   final String? fullname;
   final List<Station> stations;
   final String token;
   final bool isStaff;
   final DateTime expiry;
 
-  ActiveUser.fromLoginResponse(
-    LoginResponse resp,
-    GetProfileResponse profile,
-    this.password,
-  ) : username = profile.username,
+  ActiveUser.fromLoginResponse(LoginResponse resp, GetProfileResponse profile)
+    : username = profile.username,
       token = resp.token,
       isStaff = resp.user.isStaff,
       expiry = resp.expiry,
