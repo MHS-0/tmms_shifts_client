@@ -43,9 +43,9 @@ class StationSelectionField extends StatelessWidget {
             final codes = list.map((entry) => entry.code).toList();
             selectedStationsState.setSelectedStations(codes);
             if (codes.isEmpty) {
-              Helpers.removeQueryFromPath(context, "stationCodes");
+              Helpers.removeQueryFromPath(context, stationCodesKey);
             } else {
-              Helpers.addQueryToPath(context, "stationCodes", codes.join(","));
+              Helpers.addQueryToPath(context, stationCodesKey, codes.join(","));
             }
           },
         ),

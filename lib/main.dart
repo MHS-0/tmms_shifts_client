@@ -4,11 +4,13 @@ import 'package:go_router/go_router.dart';
 import 'package:logging/logging.dart';
 import 'package:persian_datetime_picker/persian_datetime_picker.dart';
 import 'package:provider/provider.dart';
+import 'package:tmms_shifts_client/consts.dart';
+import 'package:tmms_shifts_client/data/backend_types.dart';
 import 'package:tmms_shifts_client/helpers.dart';
 import 'package:tmms_shifts_client/network_interface.dart';
-import 'package:tmms_shifts_client/routes/corrector_replacement_event_register.dart';
+import 'package:tmms_shifts_client/routes/corrector_replacement_events.dart';
 import 'package:tmms_shifts_client/routes/counter_corrector_reports.dart';
-import 'package:tmms_shifts_client/routes/counter_replacement_event_register.dart';
+import 'package:tmms_shifts_client/routes/counter_replacement_events.dart';
 import 'package:tmms_shifts_client/routes/login.dart';
 import 'package:tmms_shifts_client/routes/monitoring_full_report_route.dart';
 import 'package:tmms_shifts_client/routes/page_not_found_route.dart';
@@ -37,178 +39,128 @@ void main() async {
   );
 }
 
+const monitoringFullReportPath = "/";
+const pressureAndTempReportsPath = "/pressure-and-temp-reports";
+const counterCorrectorReportsPath = '/counter-corrector-reports';
+const correctorReplacementEventsPath = '/corrector-replacement-events';
+const counterReplacementEventsPath = '/counter-replacement-events';
+const pageNotFoundPath = '/404';
+const loginPath = '/login';
+
 /// The route configuration.
 final GoRouter _router = GoRouter(
   routes: <RouteBase>[
     GoRoute(
-      path: '/',
+      path: monitoringFullReportPath,
       name: MonitoringFullReportRoute.routingName,
       pageBuilder: (_, state) {
         final queries = state.uri.queryParameters;
-        final stationCodes = queries["stationCodes"];
-        final fromDate = queries["fromDate"];
-        final toDate = queries["toDate"];
+        final stationCodes = queries[stationCodesKey];
+        final fromDate = queries[fromDateKey];
+        final toDate = queries[toDateKey];
 
-        return MaterialPage(
-          child: MultiProvider(
-            providers: [
-              ChangeNotifierProvider(
-                create:
-                    (_) => Helpers.getSelectedStationsProviderFromQueries(
-                      stationCodes,
-                    ),
-                // IMPORTANT: We use keys for the providers because otherwise, they might be reused on different routes
-                // creating state bugs where an stale state from a past route gets used on a new route
-                key: ObjectKey(
-                  "${MonitoringFullReportRoute.routingName} SelectedStationProvider",
-                ),
-              ),
-              ChangeNotifierProvider(
-                create:
-                    (_) => Helpers.getDatePickerProviderFromQueries(
-                      fromDate,
-                      toDate,
-                    ),
-                key: ObjectKey(
-                  "${MonitoringFullReportRoute.routingName} DatePickerProvider",
-                ),
-              ),
-            ],
-            child: MonitoringFullReportRoute(
-              stationCodes: stationCodes,
-              fromDate: fromDate,
-              toDate: toDate,
-            ),
+        return Helpers.materialPageWithMultiProviders(
+          state,
+          MonitoringFullReportRoute(
+            stationCodes: stationCodes,
+            fromDate: fromDate,
+            toDate: toDate,
           ),
+          MonitoringFullReportRoute.routingName,
         );
       },
     ),
     GoRoute(
-      path: '/404',
+      path: pageNotFoundPath,
       name: PageNotFoundRoute.routingName,
       pageBuilder: (_, __) {
         return const MaterialPage(child: PageNotFoundRoute());
       },
     ),
     GoRoute(
-      path: '/login',
+      path: loginPath,
       name: LoginRoute.routingName,
       pageBuilder: (_, __) {
         return const MaterialPage(child: LoginRoute());
       },
     ),
     GoRoute(
-      path: '/corrector-replacement-event-register',
+      path: correctorReplacementEventsPath,
       name: CorrectorReplacementEventsRoute.routingName,
-      pageBuilder: (_, __) {
-        return const MaterialPage(child: CorrectorReplacementEventsRoute());
-      },
-    ),
-    GoRoute(
-      path: '/counter-replacement-event-register',
-      name: CounterReplacementEventsRoute.routingName,
-      pageBuilder: (_, __) {
-        return const MaterialPage(child: CounterReplacementEventsRoute());
-      },
-    ),
-    GoRoute(
-      path: '/pressure-and-temp-reports',
-      name: PressureAndTempReportsRoute.routingName,
       pageBuilder: (_, state) {
         final queries = state.uri.queryParameters;
-        final stationCodes = queries["stationCodes"];
-        final fromDate = queries["fromDate"];
-        final toDate = queries["toDate"];
+        final stationCodes = queries[stationCodesKey];
+        final fromDate = queries[fromDateKey];
+        final toDate = queries[toDateKey];
 
-        return MaterialPage(
-          child: MultiProvider(
-            providers: [
-              ChangeNotifierProvider(
-                create:
-                    (_) => Helpers.getSelectedStationsProviderFromQueries(
-                      stationCodes,
-                    ),
-                key: ObjectKey(
-                  "${PressureAndTempReportsRoute.routingName} SelectedStationProvider",
-                ),
-              ),
-              ChangeNotifierProvider(
-                create:
-                    (_) => Helpers.getDatePickerProviderFromQueries(
-                      fromDate,
-                      toDate,
-                    ),
-                key: ObjectKey(
-                  "${PressureAndTempReportsRoute.routingName} DatePickerProvider",
-                ),
-              ),
-            ],
-            child: PressureAndTempReportsRoute(
-              stationCodes: stationCodes,
-              fromDate: fromDate,
-              toDate: toDate,
-            ),
+        return Helpers.materialPageWithMultiProviders(
+          state,
+          CorrectorReplacementEventsRoute(
+            stationCodes: stationCodes,
+            fromDate: fromDate,
+            toDate: toDate,
           ),
+          CorrectorReplacementEventsRoute.routingName,
         );
       },
-      routes: [
-        // GoRoute(
-        //   path: '/:report',
-        //   name: CounterCorrectorReportViewRoute.routingName,
-        //   pageBuilder: (_, state) {
-        //     final report = state.pathParameters["report"];
-        //     if (report == null) {
-        //       return const MaterialPage(child: CounterCorrectorReportsRoute());
-        //     }
-        //     final reportNumber = int.tryParse(report);
-        //     if (reportNumber == null) {
-        //       return const MaterialPage(child: CounterCorrectorReportsRoute());
-        //     }
-        //     return MaterialPage(
-        //       child: CounterCorrectorReportViewRoute(report: reportNumber),
-        //     );
-        //   },
-        // ),
-      ],
     ),
     GoRoute(
-      path: '/counter-corrector-reports',
+      path: counterReplacementEventsPath,
+      name: CounterReplacementEventsRoute.routingName,
+      pageBuilder: (_, state) {
+        final queries = state.uri.queryParameters;
+        final stationCodes = queries[stationCodesKey];
+        final fromDate = queries[fromDateKey];
+        final toDate = queries[toDateKey];
+
+        return Helpers.materialPageWithMultiProviders(
+          state,
+          CounterReplacementEventsRoute(
+            stationCodes: stationCodes,
+            fromDate: fromDate,
+            toDate: toDate,
+          ),
+          CounterReplacementEventsRoute.routingName,
+        );
+      },
+    ),
+    GoRoute(
+      path: counterCorrectorReportsPath,
       name: CounterCorrectorReportsRoute.routingName,
       pageBuilder: (_, state) {
         final queries = state.uri.queryParameters;
-        final stationCodes = queries["stationCodes"];
-        final fromDate = queries["fromDate"];
-        final toDate = queries["toDate"];
+        final stationCodes = queries[stationCodesKey];
+        final fromDate = queries[fromDateKey];
+        final toDate = queries[toDateKey];
 
-        return MaterialPage(
-          child: MultiProvider(
-            providers: [
-              ChangeNotifierProvider(
-                create:
-                    (_) => Helpers.getSelectedStationsProviderFromQueries(
-                      stationCodes,
-                    ),
-                key: ObjectKey(
-                  "${CounterCorrectorReportsRoute.routingName} SelectedStationProvider",
-                ),
-              ),
-              ChangeNotifierProvider(
-                create:
-                    (_) => Helpers.getDatePickerProviderFromQueries(
-                      fromDate,
-                      toDate,
-                    ),
-                key: ObjectKey(
-                  "${CounterCorrectorReportsRoute.routingName} DatePickerProvider",
-                ),
-              ),
-            ],
-            child: CounterCorrectorReportsRoute(
-              stationCodes: stationCodes,
-              fromDate: fromDate,
-              toDate: toDate,
-            ),
+        return Helpers.materialPageWithMultiProviders(
+          state,
+          CounterCorrectorReportsRoute(
+            stationCodes: stationCodes,
+            fromDate: fromDate,
+            toDate: toDate,
           ),
+          CounterCorrectorReportsRoute.routingName,
+        );
+      },
+    ),
+    GoRoute(
+      path: pressureAndTempReportsPath,
+      name: PressureAndTempReportsRoute.routingName,
+      pageBuilder: (_, state) {
+        final queries = state.uri.queryParameters;
+        final stationCodes = queries[stationCodesKey];
+        final fromDate = queries[fromDateKey];
+        final toDate = queries[toDateKey];
+
+        return Helpers.materialPageWithMultiProviders(
+          state,
+          PressureAndTempReportsRoute(
+            stationCodes: stationCodes,
+            fromDate: fromDate,
+            toDate: toDate,
+          ),
+          PressureAndTempReportsRoute.routingName,
         );
       },
     ),
@@ -216,25 +168,52 @@ final GoRouter _router = GoRouter(
   redirect: (context, state) async {
     final user = context.read<Preferences>().activeUser;
     final loggedIn = user != null;
+
+    final instance = NetworkInterface.instance();
+
+    final statePath = state.uri.path;
+    final queryParameters = state.uri.queryParameters.map(
+      (k, v) => MapEntry(k, v),
+    );
+
+    /// Redirect to login if needed.
     if (!loggedIn) {
       return "/login";
     }
+    // Logout if session is expired. For example if the auth token has expired.
+    final result = await instance.getProfile(user.token);
+    if (result == null) {
+      sharedLogger.info("User isn't logged in. Logging out...");
+      await Preferences.instance().unsetActiveUser();
+      return "/login";
+    }
 
-    // FIXME: Enable this again in production!!!
-    // // Logout if session is expired. For example if the password of the user
-    // // has been changed.
-    // try {
-    // await NetworkInterface.instance().getProfile(user.token);
-    // } catch (e) {
-    //   Preferences.log.warning(e);
-    //   Preferences.log.info("Logging out");
-    //   await Preferences.instance().unsetActiveUser();
-    //   return "/login";
-    // }
-
+    /// Redirect from login to home if already logged in.
     if (loggedIn && state.uri.path.contains("login")) {
       return "/";
     }
+
+    /// Some paths require some queries such as from_date and to_date.
+    /// If routed without those queries, add those queries for the user and redirect.
+    final queryRequiredPaths = [
+      pressureAndTempReportsPath,
+      monitoringFullReportPath,
+      counterCorrectorReportsPath,
+    ];
+    if (queryRequiredPaths.contains(statePath)) {
+      if (!queryParameters.containsKey(fromDateKey)) {
+        queryParameters[fromDateKey] = Helpers.jalaliToDashDate(
+          Jalali.now().addDays(-1),
+        );
+      }
+
+      if (!queryParameters.containsKey(toDateKey)) {
+        queryParameters[toDateKey] = Helpers.jalaliToDashDate(Jalali.now());
+      }
+
+      return state.uri.replace(queryParameters: queryParameters).toString();
+    }
+
     return null;
   },
   errorPageBuilder: (_, __) {

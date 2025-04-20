@@ -84,5 +84,6 @@
   "wrongUsernameAndPassword": "نام کاربری یا کلمه عبور اشتباه می باشد",
   "errorStatusCode": "کد خطا:",
   "responseDetails": "جزییات پاسخ سرور:",
+  "lastActionDoesNotExist": "آخرین فعالیت یافت نشد!",
   "pageNotFound": "صفحه مورد نظر یافت نشد!"
 }

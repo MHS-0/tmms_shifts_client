@@ -7,7 +7,16 @@ import 'package:tmms_shifts_client/widgets/drawer.dart';
 class CounterReplacementEventsRoute extends StatefulWidget {
   static const routingName = "CounterReplacementEventsRoute";
 
-  const CounterReplacementEventsRoute({super.key});
+  final String? fromDate;
+  final String? toDate;
+  final String? stationCodes;
+
+  const CounterReplacementEventsRoute({
+    super.key,
+    this.fromDate,
+    this.toDate,
+    this.stationCodes,
+  });
 
   @override
   State<CounterReplacementEventsRoute> createState() =>

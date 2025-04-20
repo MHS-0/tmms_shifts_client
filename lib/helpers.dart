@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:persian_datetime_picker/persian_datetime_picker.dart';
 import 'package:provider/provider.dart';
 import 'package:tmms_shifts_client/consts.dart';
+import 'package:tmms_shifts_client/data/backend_types.dart';
 import 'package:tmms_shifts_client/l18n/app_localizations.dart';
 import 'package:tmms_shifts_client/network_interface.dart';
 import 'package:tmms_shifts_client/providers/date_picker_provider.dart';
@@ -54,6 +55,12 @@ final class Helpers {
       }
     }
     return null;
+  }
+
+  /// Convert from an string with a format such as 1404-08-02 to
+  /// a [Jalali] class.
+  static Jalali dashDateToJalaliNonNull(String dashDate) {
+    return Helpers.dashDateToJalali(dashDate)!;
   }
 
   static DatePickerProvider getDatePickerProviderFromQueries(
@@ -157,12 +164,28 @@ final class Helpers {
     }
   }
 
-  static Future<void> showCustomDialog(
+  /// Serialize a comma seperated String of numbers into a List\<int\>. Used for queries.
+  /// Example: "1234,4532" ==> [1234, 4532]
+  static List<int> serializeStringIntoIntList(String? input) {
+    if (input == null) return [];
+
+    final output =
+        input.split(",").map((e) {
+          final result = int.tryParse(e);
+          if (result == null) return -1;
+          return result;
+        }).toList();
+
+    output.removeWhere((e) => e == -1);
+    return output;
+  }
+
+  static Future<String?> showCustomDialog(
     BuildContext context,
     Widget widget, {
     bool barrierDismissable = false,
   }) async {
-    await showDialog(
+    return await showDialog(
       barrierDismissible: barrierDismissable,
       context: context,
       builder: (context) {
@@ -214,12 +237,51 @@ final class Helpers {
     final netInterface = NetworkInterface.instance();
     await Helpers.showCustomDialog(
       context,
-      ErrorAlertDialog(
-        netInterface.lastErrorUserFriendly ??
-            localizations.errorFetchingDataTryAgainLater,
-      ),
+      ErrorAlertDialog(netInterface.lastErrorUserFriendly),
       barrierDismissable: true,
     );
     return;
+  }
+
+  static MaterialPage materialPageWithMultiProviders(
+    GoRouterState state,
+    Widget route,
+    String routingName,
+  ) {
+    final queries = state.uri.queryParameters;
+    final stationCodes = queries[stationCodesKey];
+    final fromDate = queries[fromDateKey];
+    final toDate = queries[toDateKey];
+
+    return MaterialPage(
+      child: MultiProvider(
+        providers: [
+          ChangeNotifierProvider(
+            create:
+                (_) => Helpers.getSelectedStationsProviderFromQueries(
+                  stationCodes,
+                ),
+            key: ObjectKey("$routingName SelectedStationProvider"),
+          ),
+          ChangeNotifierProvider(
+            create:
+                (_) =>
+                    Helpers.getDatePickerProviderFromQueries(fromDate, toDate),
+            key: ObjectKey("$routingName DatePickerProvider"),
+          ),
+        ],
+        child: route,
+      ),
+    );
+  }
+
+  // TODO: Refactor & Clean up
+  static Future<T> returnWithErrorIfNeeded<T>(T? value) async {
+    final instance = NetworkInterface.instance();
+    if (value == null) {
+      return Future.error(instance.lastErrorUserFriendly);
+    } else {
+      return value;
+    }
   }
 }

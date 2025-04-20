@@ -84,5 +84,6 @@
   "wrongUsernameAndPassword": "Incorrect username or password",
   "errorStatusCode": "Error code:",
   "responseDetails": "Error details from server:",
+  "lastActionDoesNotExist": "Last action not found!",
   "pageNotFound": "Page not found!"
 }

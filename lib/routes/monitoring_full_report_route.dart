@@ -2,13 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:persian_datetime_picker/persian_datetime_picker.dart';
 import 'package:provider/provider.dart';
+import 'package:tmms_shifts_client/consts.dart';
 import 'package:tmms_shifts_client/data/backend_types.dart';
 import 'package:tmms_shifts_client/helpers.dart';
 import 'package:tmms_shifts_client/l18n/app_localizations.dart';
 import 'package:tmms_shifts_client/network_interface.dart';
-import 'package:tmms_shifts_client/providers/date_picker_provider.dart';
 import 'package:tmms_shifts_client/providers/preferences.dart';
-import 'package:tmms_shifts_client/providers/selected_stations_provider.dart';
+import 'package:tmms_shifts_client/widgets/data_fetch_error.dart';
 import 'package:tmms_shifts_client/widgets/date_picker_row.dart';
 import 'package:tmms_shifts_client/widgets/drawer.dart';
 import 'package:tmms_shifts_client/widgets/station_selection_field.dart';
@@ -20,7 +20,7 @@ class MonitoringFullReportRoute extends StatefulWidget {
   final String? toDate;
   final String? stationCodes;
 
-  /// Creates a new Main route for the app.
+  /// Creates a new home route for the app.
   const MonitoringFullReportRoute({
     super.key,
     this.fromDate,
@@ -35,54 +35,15 @@ class MonitoringFullReportRoute extends StatefulWidget {
 
 class _MonitoringFullReportRouteState extends State<MonitoringFullReportRoute> {
   Future<GetMonitoringFullReportResponse> getData(BuildContext context) async {
-    // FIXME: replace with network request in production.
-    // final data = await NetworkInterface.instance().getMonitoringFullReport();
-
-    if (!context.mounted) {
-      return Future.error("context isn't mounted anymore");
-    }
-
-    final data = MockData.mockGetMonitoringFullReportResponse;
-    final localResults = data.results.toList();
-
-    final datePickerState = context.read<DatePickerProvider>();
-    final fromDate = datePickerState.fromDate;
-    final toDate = datePickerState.toDate;
-    final selectedStations =
-        context.read<SelectedStationsProvider>().selectedStations;
-
-    if (fromDate != null) {
-      localResults.retainWhere((item) {
-        // final itemJalaliDate = helpers.dashDateToJalali(item.date);
-        // if (itemJalaliDate == null) return true;
-
-        final itemJalaliDate = item.date;
-        return itemJalaliDate.isAfter(fromDate) ||
-            itemJalaliDate.isAtSameMomentAs(fromDate);
-      });
-    }
-
-    if (toDate != null) {
-      localResults.retainWhere((item) {
-        // final itemJalaliDate = helpers.dashDateToJalali(item.date);
-        // if (itemJalaliDate == null) return true;
-
-        final itemJalaliDate = item.date;
-        return itemJalaliDate.isBefore(toDate) ||
-            itemJalaliDate.isAtSameMomentAs(toDate);
-      });
-    }
-
-    if (selectedStations.isNotEmpty) {
-      localResults.retainWhere(
-        (item) => selectedStations.contains(item.stationCode),
-      );
-    }
-    final value = GetMonitoringFullReportResponse(
-      count: 1,
-      results: localResults,
+    final instance = NetworkInterface.instance();
+    final result = await instance.getMonitoringFullReport(
+      query: ToFromDateStationsQuery(
+        fromDate: widget.fromDate,
+        toDate: widget.toDate,
+        stationCodes: Helpers.serializeStringIntoIntList(widget.stationCodes),
+      ),
     );
-    return value;
+    return await Helpers.returnWithErrorIfNeeded(result);
   }
 
   @override
@@ -104,8 +65,10 @@ class _MonitoringFullReportRouteState extends State<MonitoringFullReportRoute> {
         body: FutureBuilder(
           future: getData(context),
           builder: (context, snapshot) {
-            if (!snapshot.hasData) {
-              return Center(child: CircularProgressIndicator());
+            if (snapshot.hasError) {
+              return DataFetchError(content: snapshot.error.toString());
+            } else if (!snapshot.hasData) {
+              return centeredCircularProgressIndicator;
             } else {
               return SingleChildScrollView(
                 child: Column(

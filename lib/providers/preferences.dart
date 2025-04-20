@@ -66,8 +66,6 @@ class Preferences extends ChangeNotifier {
   static const persianLocale = Locale('fa');
   static const persianIRLocale = Locale('fa', 'IR');
 
-  static final log = Logger("Shared logger");
-
   /// The SharedPreferences instance
   late SharedPreferences _sp;
 

@@ -19,7 +19,6 @@ class DataFetchError extends StatelessWidget {
           spacing: 32,
           children: [
             const Icon(Icons.error),
-            Text(localizations.errorFetchingDataTryAgainLater),
             Text(content),
             ElevatedButton(
               onPressed: () {

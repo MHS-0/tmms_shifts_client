@@ -7,7 +7,16 @@ import 'package:tmms_shifts_client/widgets/drawer.dart';
 class CorrectorReplacementEventsRoute extends StatefulWidget {
   static const routingName = "CorrectorReplacementEventsRoute";
 
-  const CorrectorReplacementEventsRoute({super.key});
+  final String? fromDate;
+  final String? toDate;
+  final String? stationCodes;
+
+  const CorrectorReplacementEventsRoute({
+    super.key,
+    this.fromDate,
+    this.toDate,
+    this.stationCodes,
+  });
 
   @override
   State<CorrectorReplacementEventsRoute> createState() =>

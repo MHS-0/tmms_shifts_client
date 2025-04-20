@@ -42,7 +42,6 @@ dev_dependencies:
   built_value_generator: ^8.9.4
   http_mock_adapter: ^0.6.1
   collection: ^1.19.1
-  analyzer: 7.3.0
 
 flutter:
   uses-material-design: true

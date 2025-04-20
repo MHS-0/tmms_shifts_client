@@ -1,18 +1,27 @@
+import 'package:flutter/material.dart';
 import 'package:json_annotation/json_annotation.dart';
 import 'package:persian_datetime_picker/persian_datetime_picker.dart';
+import 'package:provider/provider.dart';
 import 'package:tmms_shifts_client/helpers.dart';
+import 'package:tmms_shifts_client/providers/date_picker_provider.dart';
 import 'package:tmms_shifts_client/providers/preferences.dart';
+import 'package:tmms_shifts_client/providers/selected_stations_provider.dart';
 
 part 'backend_types.g.dart';
 
+const fromDateKey = "from_date";
+const toDateKey = "to_date";
+const stationCodesKey = "station_codes";
+const stationCodeKey = "station_code";
+
 @JsonSerializable(explicitToJson: true)
 class ToFromDateStationsQuery {
-  @JsonKey(name: 'to_date', includeIfNull: false)
+  @JsonKey(name: toDateKey, includeIfNull: false)
   final String? toDate;
-  @JsonKey(name: 'from_date', includeIfNull: false)
+  @JsonKey(name: fromDateKey, includeIfNull: false)
   final String? fromDate;
   @JsonKey(
-    name: 'station_codes',
+    name: stationCodesKey,
     includeIfNull: false,
     toJson: Helpers.serializeIntListIntoCommaSeperatedString,
   )
@@ -24,6 +33,28 @@ class ToFromDateStationsQuery {
     this.stationCodes,
   });
 
+  factory ToFromDateStationsQuery.fromContext(BuildContext context) {
+    final datePickerState = context.read<DatePickerProvider>();
+    final selectedStationsState = context.read<SelectedStationsProvider>();
+    final selectedStations = selectedStationsState.selectedStations;
+
+    final String? fromDateParam;
+    final String? toDateParam;
+    {
+      final fromDate = datePickerState.fromDate;
+      final toDate = datePickerState.toDate;
+      fromDateParam =
+          fromDate != null ? Helpers.jalaliToDashDate(fromDate) : null;
+      toDateParam = toDate != null ? Helpers.jalaliToDashDate(toDate) : null;
+    }
+
+    return ToFromDateStationsQuery(
+      fromDate: fromDateParam,
+      toDate: toDateParam,
+      stationCodes: selectedStations,
+    );
+  }
+
   factory ToFromDateStationsQuery.fromJson(Map<String, dynamic> json) =>
       _$ToFromDateStationsQueryFromJson(json);
   Map<String, dynamic> toJson() => _$ToFromDateStationsQueryToJson(this);
@@ -31,9 +62,9 @@ class ToFromDateStationsQuery {
 
 @JsonSerializable(explicitToJson: true)
 class ToFromDateQuery {
-  @JsonKey(name: 'to_date', includeIfNull: false)
+  @JsonKey(name: toDateKey, includeIfNull: false)
   final String? toDate;
-  @JsonKey(name: 'from_date', includeIfNull: false)
+  @JsonKey(name: fromDateKey, includeIfNull: false)
   final String? fromDate;
 
   const ToFromDateQuery({this.toDate, this.fromDate});
@@ -46,7 +77,7 @@ class ToFromDateQuery {
 @JsonSerializable(explicitToJson: true)
 class StationsQuery {
   @JsonKey(
-    name: 'station_codes',
+    name: stationCodesKey,
     includeIfNull: false,
     toJson: Helpers.serializeIntListIntoCommaSeperatedString,
   )
@@ -57,6 +88,18 @@ class StationsQuery {
   factory StationsQuery.fromJson(Map<String, dynamic> json) =>
       _$StationsQueryFromJson(json);
   Map<String, dynamic> toJson() => _$StationsQueryToJson(this);
+}
+
+@JsonSerializable(explicitToJson: true)
+class SingleStationQuery {
+  @JsonKey(name: stationCodeKey)
+  final int stationCode;
+
+  const SingleStationQuery(this.stationCode);
+
+  factory SingleStationQuery.fromJson(Map<String, dynamic> json) =>
+      _$SingleStationQueryFromJson(json);
+  Map<String, dynamic> toJson() => _$SingleStationQueryToJson(this);
 }
 
 @JsonSerializable(explicitToJson: true)
@@ -1093,8 +1136,8 @@ class GetMeterChangeEventLastActionResponse {
 @JsonSerializable(explicitToJson: true)
 class PostCreateCorrectorBulkRequest {
   @JsonKey(
-    fromJson: Helpers.parseJalaliFromIso8601,
-    toJson: Helpers.serializeJalaliIntoIso8601,
+    fromJson: Helpers.dashDateToJalaliNonNull,
+    toJson: Helpers.jalaliToDashDate,
   )
   final Jalali date;
   final List<Ran3> rans;
@@ -1177,8 +1220,8 @@ class Ran4 {
 @JsonSerializable(explicitToJson: true)
 class PutUpdateCorrectorBulkRequest {
   @JsonKey(
-    fromJson: Helpers.parseJalaliFromIso8601,
-    toJson: Helpers.serializeJalaliIntoIso8601,
+    fromJson: Helpers.dashDateToJalaliNonNull,
+    toJson: Helpers.jalaliToDashDate,
   )
   final Jalali date;
   final List<Ran3> rans;
@@ -1213,6 +1256,33 @@ class PutUpdateCorrectorBulkResponse {
       _$PutUpdateCorrectorBulkResponseFromJson(json);
 
   Map<String, dynamic> toJson() => _$PutUpdateCorrectorBulkResponseToJson(this);
+}
+
+@JsonSerializable(explicitToJson: true)
+class GetCorrectorDataBulkLastActionResponse {
+  @JsonKey(name: 'station_code')
+  final int stationCode;
+  @JsonKey(
+    fromJson: Helpers.dashDateToJalaliNonNull,
+    toJson: Helpers.jalaliToDashDate,
+  )
+  final Jalali date;
+  final List<Ran2> rans;
+  final String? user;
+
+  const GetCorrectorDataBulkLastActionResponse({
+    required this.stationCode,
+    required this.date,
+    required this.rans,
+    this.user,
+  });
+
+  factory GetCorrectorDataBulkLastActionResponse.fromJson(
+    Map<String, dynamic> json,
+  ) => _$GetCorrectorDataBulkLastActionResponseFromJson(json);
+
+  Map<String, dynamic> toJson() =>
+      _$GetCorrectorDataBulkLastActionResponseToJson(this);
 }
 
 /// IMPORTANT: The response is a list and not a json object that can be

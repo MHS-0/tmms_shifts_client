@@ -12,7 +12,7 @@ const applicationJsonValue = "application/json";
 class NetworkInterface {
   final Dio dio;
 
-  String? lastErrorUserFriendly;
+  String lastErrorUserFriendly = "";
   Object? lastError;
 
   /// Private constructor to use when instantiating an instance inside the file.
@@ -67,6 +67,8 @@ class NetworkInterface {
       }
     } catch (e) {
       lastError = e;
+      lastErrorUserFriendly =
+          "${persianLocale.errorDialogDescBegin}\n\n$e\n\n${persianLocale.errorDialogDescEnd}";
     }
 
     return null;
@@ -75,7 +77,7 @@ class NetworkInterface {
   Future<LoginResponse?> login(LoginRequest loginInfo) async {
     return await sendRequest(() async {
       final Response<Map<String, dynamic>> resp = await dio.post(
-        "/user/login",
+        "/user/login/",
         options: authHeaderEmpty,
         data: loginInfo.toJson(),
       );
@@ -89,8 +91,16 @@ class NetworkInterface {
   Future<GetProfileResponse?> getProfile(String token) async {
     return await sendRequest(() async {
       final Response<Map<String, dynamic>> resp = await dio.get(
-        "/user/profile",
-        options: authHeaderWithToken,
+        "/user/profile/",
+        options: Options(
+          headers: emptyHeaderMap.map((k, v) {
+            if (k == authHeaderKey) {
+              return MapEntry(k, "Token $token");
+            } else {
+              return MapEntry(k, v);
+            }
+          }),
+        ),
       );
       final finalResp = GetProfileResponse.fromJson(resp.data!);
       return finalResp;
@@ -99,7 +109,7 @@ class NetworkInterface {
 
   Future<bool?> logout() async {
     return sendRequest(() async {
-      await dio.post("/user/logout", options: authHeaderWithToken);
+      await dio.post("/user/logout/", options: authHeaderWithToken);
       return true;
     });
   }
@@ -225,42 +235,48 @@ class NetworkInterface {
     );
   }
 
-  Future<GetMeterAndCorrectorFullReportResponse>
+  Future<GetMeterAndCorrectorFullReportResponse?>
   getMeterAndCorrectorFullReport({ToFromDateStationsQuery? query}) async {
-    final Response<Map<String, dynamic>> resp = await dio.get(
-      "/reports/meter_and_corrector/full_report",
-      options: authHeaderWithToken,
-      queryParameters: query?.toJson(),
-    );
-    final finalResp = GetMeterAndCorrectorFullReportResponse.fromJson(
-      resp.data!,
-    );
-    return finalResp;
+    return await sendRequest(() async {
+      final Response<Map<String, dynamic>> resp = await dio.get(
+        "/reports/meter_and_corrector/full_report",
+        options: authHeaderWithToken,
+        queryParameters: query?.toJson(),
+      );
+      final finalResp = GetMeterAndCorrectorFullReportResponse.fromJson(
+        resp.data!,
+      );
+      return finalResp;
+    });
   }
 
-  Future<GetMonitoringFullReportResponse> getMonitoringFullReport({
+  Future<GetMonitoringFullReportResponse?> getMonitoringFullReport({
     ToFromDateStationsQuery? query,
   }) async {
-    final Response<Map<String, dynamic>> resp = await dio.get(
-      "/reports/monitoring/full_report",
-      options: authHeaderWithToken,
-      queryParameters: query?.toJson(),
-    );
-    final finalResp = GetMonitoringFullReportResponse.fromJson(resp.data!);
-    return finalResp;
+    return await sendRequest(() async {
+      final Response<Map<String, dynamic>> resp = await dio.get(
+        "/reports/monitoring/full_report",
+        options: authHeaderWithToken,
+        queryParameters: query?.toJson(),
+      );
+      final finalResp = GetMonitoringFullReportResponse.fromJson(resp.data!);
+      return finalResp;
+    });
   }
 
-  Future<GetPressureAndTemperatureFullReportResponse>
+  Future<GetPressureAndTemperatureFullReportResponse?>
   getPressureAndTemperatureFullReport({ToFromDateStationsQuery? query}) async {
-    final Response<Map<String, dynamic>> resp = await dio.get(
-      "/reports/pressure_and_temperature/full_report",
-      options: authHeaderWithToken,
-      queryParameters: query?.toJson(),
-    );
-    final finalResp = GetPressureAndTemperatureFullReportResponse.fromJson(
-      resp.data!,
-    );
-    return finalResp;
+    return sendRequest(() async {
+      final Response<Map<String, dynamic>> resp = await dio.get(
+        "/reports/pressure_and_temperature/full_report",
+        options: authHeaderWithToken,
+        queryParameters: query?.toJson(),
+      );
+      final finalResp = GetPressureAndTemperatureFullReportResponse.fromJson(
+        resp.data!,
+      );
+      return finalResp;
+    });
   }
 
   Future<GetMeterChangeEventResponse> getMeterChangeEventResponse() async {
@@ -329,46 +345,44 @@ class NetworkInterface {
     return finalResp;
   }
 
-  Future<PostCreateCorrectorBulkResponse> createCorrectorBulk(
+  Future<PostCreateCorrectorBulkResponse?> createCorrectorBulk(
     PostCreateCorrectorBulkRequest data,
   ) async {
-    final Response<Map<String, dynamic>> resp = await dio.post(
-      "/meter_and_corrector/bulk/",
-      options: authHeaderWithToken,
-      data: data.toJson(),
-    );
-    final finalResp = PostCreateCorrectorBulkResponse.fromJson(resp.data!);
-    return finalResp;
+    return await sendRequest(() async {
+      final Response<Map<String, dynamic>> resp = await dio.post(
+        "/meter_and_corrector/bulk/",
+        options: authHeaderWithToken,
+        data: data.toJson(),
+      );
+      return PostCreateCorrectorBulkResponse.fromJson(resp.data!);
+    });
   }
 
-  Future<void> putUpdateCorrectorBulk(
+  Future<PutUpdateCorrectorBulkResponse?> putUpdateCorrectorBulk(
     PutUpdateCorrectorBulkRequest data,
   ) async {
-    await dio.post(
-      "/meter_and_corrector/bulk/",
-      options: authHeaderWithToken,
-      data: data.toJson(),
-    );
+    return await sendRequest(() async {
+      final Response<Map<String, dynamic>> resp = await dio.put(
+        "/meter_and_corrector/bulk/",
+        options: authHeaderWithToken,
+        data: data.toJson(),
+      );
+      return PutUpdateCorrectorBulkResponse.fromJson(resp.data!);
+    });
   }
 
   // FIX
   // Could return something that's not a list maybe...?
-  Future<List<GetCorrectorDataBulkLastActionResponseListItem>>
-  getCorrectorDataBulkLastAction(StationsQuery? query) async {
-    final Response<List<dynamic>> resp = await dio.get(
-      "/meter_and_corrector/bulk/last-action",
-      options: authHeaderWithToken,
-      queryParameters: query?.toJson(),
-    );
-    final data = resp.data!;
-    final List<GetCorrectorDataBulkLastActionResponseListItem> list = [];
-    for (final item in data) {
-      final tempItem = GetCorrectorDataBulkLastActionResponseListItem.fromJson(
-        item as Map<String, dynamic>,
+  Future<GetCorrectorDataBulkLastActionResponse?>
+  getCorrectorDataBulkLastAction(SingleStationQuery query) async {
+    return await sendRequest(() async {
+      final Response<Map<String, dynamic>> resp = await dio.get(
+        "/meter_and_corrector/bulk/last-action",
+        options: authHeaderWithToken,
+        queryParameters: query.toJson(),
       );
-      list.add(tempItem);
-    }
-    return list;
+      return GetCorrectorDataBulkLastActionResponse.fromJson(resp.data!);
+    }, [(400, persianLocale.lastActionDoesNotExist)]);
   }
 
   Future<GetShiftDataBulkLastActionResponse> getShiftDataBulkLastAction({

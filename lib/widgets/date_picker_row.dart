@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:persian_datetime_picker/persian_datetime_picker.dart';
 import 'package:provider/provider.dart';
 import 'package:tmms_shifts_client/consts.dart';
+import 'package:tmms_shifts_client/data/backend_types.dart';
 import 'package:tmms_shifts_client/helpers.dart';
 import 'package:tmms_shifts_client/l18n/app_localizations.dart';
 import 'package:tmms_shifts_client/providers/date_picker_provider.dart';
@@ -48,8 +49,14 @@ class _DatePickerRowState extends State<DatePickerRow> {
                       fromDate == null
                           ? null
                           : () {
-                            datePickerState.setFromDate(null);
-                            Helpers.removeQueryFromPath(context, "fromDate");
+                            final date = Jalali.now().addDays(-1);
+                            final dateString = Helpers.jalaliToDashDate(date);
+                            datePickerState.setFromDate(date);
+                            Helpers.addQueryToPath(
+                              context,
+                              fromDateKey,
+                              dateString,
+                            );
                           },
                 ),
                 TextField(
@@ -74,7 +81,7 @@ class _DatePickerRowState extends State<DatePickerRow> {
                     }
                     final queryString = Helpers.jalaliToDashDate(date);
                     datePickerState.setFromDate(date);
-                    Helpers.addQueryToPath(context, "fromDate", queryString);
+                    Helpers.addQueryToPath(context, fromDateKey, queryString);
                   },
                 ),
               ],
@@ -92,8 +99,14 @@ class _DatePickerRowState extends State<DatePickerRow> {
                       toDate == null
                           ? null
                           : () {
-                            datePickerState.setToDate(null);
-                            Helpers.removeQueryFromPath(context, "toDate");
+                            final date = Jalali.now();
+                            final dateString = Helpers.jalaliToDashDate(date);
+                            datePickerState.setToDate(date);
+                            Helpers.addQueryToPath(
+                              context,
+                              toDateKey,
+                              dateString,
+                            );
                           },
                 ),
                 TextField(
@@ -118,7 +131,7 @@ class _DatePickerRowState extends State<DatePickerRow> {
                     }
                     final queryString = Helpers.jalaliToDashDate(date);
                     datePickerState.setToDate(date);
-                    Helpers.addQueryToPath(context, "toDate", queryString);
+                    Helpers.addQueryToPath(context, toDateKey, queryString);
                   },
                 ),
               ],

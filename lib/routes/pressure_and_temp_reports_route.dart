@@ -64,44 +64,22 @@ class _PressureAndTempReportsRouteState
   Future<GetPressureAndTemperatureFullReportResponse> getPressureAndTempReports(
     BuildContext context,
   ) async {
-    final datePickerState = context.read<DatePickerProvider>();
-    final selectedStationsState = context.read<SelectedStationsProvider>();
-    final selectedStations = selectedStationsState.selectedStations;
-
-    final String? fromDateParam;
-    final String? toDateParam;
-    {
-      final fromDate = datePickerState.fromDate;
-      final toDate = datePickerState.toDate;
-      fromDateParam =
-          fromDate != null ? Helpers.jalaliToDashDate(fromDate) : null;
-      toDateParam = toDate != null ? Helpers.jalaliToDashDate(toDate) : null;
-    }
-    final GetPressureAndTemperatureFullReportResponse result;
-
-    // FIXME: Replace with network implementation
-    // try {
-    //   result = await NetworkInterface.instance()
-    //       .getPressureAndTemperatureFullReport(
-    //         query: ToFromDateStationsQuery(
-    //           fromDate: fromDateParam,
-    //           toDate: toDateParam,
-    //           stationCodes: selectedStations,
-    //         ),
-    //       );
-    // } catch (e) {
-    //   return Future.error(e);
-    // }
-    result = MockData.mockGetPressureAndTemperatureFullReportResponse;
-
-    return result;
+    final instance = NetworkInterface.instance();
+    final result = await instance.getPressureAndTemperatureFullReport(
+      query: ToFromDateStationsQuery(
+        fromDate: widget.fromDate,
+        toDate: widget.toDate,
+        stationCodes: Helpers.serializeStringIntoIntList(widget.stationCodes),
+      ),
+    );
+    return await Helpers.returnWithErrorIfNeeded(result);
   }
 
   @override
   Widget build(BuildContext context) {
     final localizations = AppLocalizations.of(context)!;
     final user = context.watch<Preferences>().activeUser;
-    final selectedStationState = context.watch<SelectedStationsProvider>();
+    final selectedStationState = context.read<SelectedStationsProvider>();
     if (user == null || user.stations.isEmpty) return Scaffold();
 
     clearMainScrollControllers();

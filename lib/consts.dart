@@ -3,6 +3,7 @@
 // const robotoFontFamily = 'Roboto';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:logging/logging.dart';
 import 'package:persian_datetime_picker/persian_datetime_picker.dart';
 
 const iconAssetPath = "assets/images/logo.png";
@@ -23,6 +24,8 @@ const trashcanIcon = Icon(Icons.delete);
 const centeredCircularProgressIndicator = Center(
   child: CircularProgressIndicator(),
 );
+
+final sharedLogger = Logger("Shared Logger");
 
 final dateFormatterWithHour = DateFormat("HH:mm yyyy-MM-dd");
 final dateFormatter = DateFormat("dd-MM-yyyy");
