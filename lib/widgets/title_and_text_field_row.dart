@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:tmms_shifts_client/consts.dart';
 import 'package:tmms_shifts_client/l18n/app_localizations.dart';
 
 class TitleAndTextFieldRow extends StatelessWidget {
@@ -45,7 +46,11 @@ class TitleAndTextFieldRow extends StatelessWidget {
             width: 200,
             child: Align(
               alignment: Alignment.centerLeft,
-              child: Text(title, textAlign: TextAlign.end),
+              child: Text(
+                "$title :",
+                textAlign: TextAlign.end,
+                style: titleRowTextStyle,
+              ),
             ),
           ),
           SizedBox(

@@ -84,6 +84,12 @@
   "wrongUsernameAndPassword": "نام کاربری یا کلمه عبور اشتباه می باشد",
   "errorStatusCode": "کد خطا:",
   "responseDetails": "جزییات پاسخ سرور:",
+  "district": "ناحیه",
+  "area": "منطقه",
+  "capacity": "ظرفیت",
+  "consumption": "مصرف",
+  "averageConsumption": "مصرف میانگین",
   "lastActionDoesNotExist": "آخرین فعالیت یافت نشد!",
+  "dataNotFound": "محتوای مورد نظر یافت نشد!",
   "pageNotFound": "صفحه مورد نظر یافت نشد!"
 }

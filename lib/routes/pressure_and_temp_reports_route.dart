@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:logging/logging.dart';
 import 'package:persian_datetime_picker/persian_datetime_picker.dart';
 import 'package:provider/provider.dart';
 import 'package:tmms_shifts_client/consts.dart';
@@ -8,13 +7,13 @@ import 'package:tmms_shifts_client/data/backend_types.dart';
 import 'package:tmms_shifts_client/helpers.dart';
 import 'package:tmms_shifts_client/l18n/app_localizations.dart';
 import 'package:tmms_shifts_client/network_interface.dart';
-import 'package:tmms_shifts_client/providers/date_picker_provider.dart';
 import 'package:tmms_shifts_client/providers/preferences.dart';
 import 'package:tmms_shifts_client/providers/selected_stations_provider.dart';
 import 'package:tmms_shifts_client/widgets/cancel_button.dart';
 import 'package:tmms_shifts_client/widgets/data_fetch_error.dart';
 import 'package:tmms_shifts_client/widgets/date_picker_row.dart';
 import 'package:tmms_shifts_client/widgets/drawer.dart';
+import 'package:tmms_shifts_client/widgets/error_alert_dialog.dart';
 import 'package:tmms_shifts_client/widgets/ok_button.dart';
 import 'package:tmms_shifts_client/widgets/single_station_selection_dropdown.dart';
 import 'package:tmms_shifts_client/widgets/station_selection_field.dart';
@@ -117,16 +116,11 @@ class _PressureAndTempReportsRouteState
                             selectedShift = null;
                             setupTextControllers();
                             selectedStationState.setSingleSelectedStation(null);
-
-                            await Helpers.showCustomDialog(
+                            await showEditDialogAndHandleResult(
                               context,
-                              reportEditDialog(
-                                selectedStationState,
-                                localizations,
-                              ),
-                              barrierDismissable: true,
+                              selectedStationState,
+                              localizations,
                             );
-                            clearDialogScrollControllers();
                           },
                         ),
                       ),
@@ -155,6 +149,10 @@ class _PressureAndTempReportsRouteState
   ) {
     return results.map((item) {
       final controller = ScrollController();
+      final stationOfItem =
+          user.stations
+              .where((entry) => entry.code == item.stationCode)
+              .firstOrNull;
 
       return InkWell(
         onTap: () async {
@@ -165,12 +163,11 @@ class _PressureAndTempReportsRouteState
           setupTextControllers();
           selectedStationState.setSingleSelectedStation(item.stationCode);
 
-          await Helpers.showCustomDialog(
+          await showEditDialogAndHandleResult(
             context,
-            reportEditDialog(selectedStationState, localizations),
-            barrierDismissable: true,
+            selectedStationState,
+            localizations,
           );
-          clearDialogScrollControllers();
         },
         child: Padding(
           padding: offsetAll16p,
@@ -181,15 +178,20 @@ class _PressureAndTempReportsRouteState
               title: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Text(
-                    '${localizations.station}: ${user.stations.where((entry) => entry.code == item.stationCode).firstOrNull?.title ?? ""}',
-                    style: TextStyle(fontWeight: FontWeight.bold),
+                  Helpers.boldText(
+                    '${localizations.station}: ${stationOfItem?.title ?? ""}',
                   ),
-                  Text(
+                  Helpers.boldText(
                     '${localizations.date}: ${dateFormatter.format(DateTime.parse(item.date.toJalaliDateTime()))}',
-                    style: TextStyle(fontWeight: FontWeight.bold),
                   ),
-                  Text('${localizations.stationCode}: ${item.stationCode}'),
+                  Helpers.cardTitleDetailsRow([
+                    '${localizations.district}: ${stationOfItem?.district}',
+                    '${localizations.area}: ${stationOfItem?.area}',
+                  ]),
+                  Helpers.cardTitleDetailsRow([
+                    '${localizations.stationCode}: ${stationOfItem?.code}',
+                    '${localizations.capacity}: ${stationOfItem?.capacity}',
+                  ]),
                 ],
               ),
               children: [
@@ -274,99 +276,259 @@ class _PressureAndTempReportsRouteState
     _outputTempController.text = shift?.outputTemperature.toString() ?? "";
   }
 
+  Future<GetShiftDataBulkLastActionResponse> getShiftDataLastAction(
+    int stationCode,
+  ) async {
+    final instance = NetworkInterface.instance();
+    final result = await instance.getShiftDataBulkLastAction(
+      SingleStationQuery(stationCode),
+    );
+    return await Helpers.returnWithErrorIfNeeded(result);
+  }
+
   Widget reportEditDialog(
     SelectedStationsProvider selectedStationState,
     AppLocalizations localizations,
   ) {
-    final scrollController = ScrollController();
-    _dialogScrollControllers.add(scrollController);
-
     return ChangeNotifierProvider.value(
       value: selectedStationState,
       key: const ObjectKey("Pressure and temp dialog provider"),
-      child: AlertDialog(
-        title: Text(localizations.newReport),
-        content: SizedBox(
-          width: 800,
-          height: 600,
-          child: SingleChildScrollView(
-            child: Scrollbar(
-              thumbVisibility: true,
-              controller: scrollController,
-              child: SingleChildScrollView(
-                controller: scrollController,
-                scrollDirection: Axis.horizontal,
-                child: SizedBox(
-                  width: 800,
-                  child: Form(
-                    key: _formKey,
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      spacing: 16,
-                      children: [
-                        const SingleStationSelectionDropdown(),
-                        DropdownMenu(
-                          initialSelection: selectedShift,
-                          onSelected: (shift) {
-                            if (shift == null) return;
+      child: Consumer<SelectedStationsProvider>(
+        builder: (context, value, _) {
+          clearDialogScrollControllers();
+          final scrollController = ScrollController();
+          _dialogScrollControllers.add(scrollController);
 
-                            selectedShift = shift;
-                            setupTextControllers();
-                            setState(() {});
-                          },
-                          width: 300,
-                          hintText: localizations.shift,
-                          dropdownMenuEntries:
-                              ["06", "12", "18", "24"].map((entry) {
-                                return DropdownMenuEntry(
-                                  value: entry,
-                                  label: entry,
-                                );
-                              }).toList(),
+          // So that we can refresh it using the DataFetchError's refresh button
+          // if needed.
+          context.watch<Preferences>();
+
+          final singleStation = selectedStationState.singleSelectedStation;
+
+          FutureBuilder? lastActionFuture;
+          if (singleStation != null) {
+            lastActionFuture =
+                FutureBuilder<GetShiftDataBulkLastActionResponse>(
+                  future: getShiftDataLastAction(singleStation),
+                  builder: (context, snapshot) {
+                    if (snapshot.hasError) {
+                      return DataFetchError(content: snapshot.error.toString());
+                    } else if (!snapshot.hasData) {
+                      return SizedBox(
+                        height: 50,
+                        width: 50,
+                        child: centeredCircularProgressIndicator,
+                      );
+                    } else {
+                      final shift = snapshot.data!;
+
+                      return DataTable(
+                        headingRowColor: WidgetStatePropertyAll(
+                          Theme.of(context).colorScheme.inversePrimary,
                         ),
-                        TitleAndTextFieldRow(
-                          title: localizations.inputPressure,
-                          controller: _inputPressureController,
-                          numbersOnly: true,
+                        columns: Helpers.getDataColumns(
+                          context,
+                          [
+                            localizations.shift,
+                            localizations.date,
+                            localizations.registeredDate,
+                            localizations.inputPressure,
+                            localizations.outputPressure,
+                            localizations.inputTemp,
+                            localizations.outputTemp,
+                            localizations.stationCode,
+                          ],
+                          8,
+                          175,
                         ),
-                        TitleAndTextFieldRow(
-                          title: localizations.outputPressure,
-                          controller: _outputPressureController,
-                          numbersOnly: true,
+                        rows: [
+                          DataRow(
+                            cells: Helpers.getDataCells([
+                              shift.shift,
+                              Helpers.jalaliToDashDate(shift.date),
+                              Helpers.serializeJalaliIntoIso8601(
+                                shift.registeredDatetime,
+                              ),
+                              shift.inputPressure,
+                              shift.outputPressure,
+                              shift.inputTemperature,
+                              shift.outputTemperature,
+                              shift.station,
+                            ]),
+                          ),
+                        ],
+                      );
+                    }
+                  },
+                );
+          }
+
+          return AlertDialog(
+            title: Text(localizations.newReport),
+            content: SizedBox(
+              width: 1200,
+              height: 800,
+              child: SingleChildScrollView(
+                child: Scrollbar(
+                  thumbVisibility: true,
+                  controller: scrollController,
+                  child: SingleChildScrollView(
+                    controller: scrollController,
+                    scrollDirection: Axis.horizontal,
+                    child: SizedBox(
+                      width: 1200,
+                      child: Form(
+                        key: _formKey,
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          spacing: 16,
+                          children: [
+                            if (lastActionFuture != null) ...[
+                              Text(localizations.lastAction),
+                              lastActionFuture,
+                              SizedBox(),
+                            ],
+                            if (_currentlyEditingReport == null)
+                              Helpers.titleAndWidgetRow(
+                                localizations.station,
+                                const SingleStationSelectionDropdown(),
+                              ),
+                            Helpers.titleAndWidgetRow(
+                              localizations.shift,
+                              DropdownMenu(
+                                initialSelection: selectedShift,
+                                onSelected: (shift) {
+                                  if (shift == null) return;
+
+                                  selectedShift = shift;
+                                  setupTextControllers();
+                                  setState(() {});
+                                },
+                                width: 300,
+                                hintText: localizations.shift,
+                                dropdownMenuEntries:
+                                    ["06", "12", "18", "24"].map((entry) {
+                                      return DropdownMenuEntry(
+                                        value: entry,
+                                        label: entry,
+                                      );
+                                    }).toList(),
+                              ),
+                            ),
+                            TitleAndTextFieldRow(
+                              title: localizations.inputPressure,
+                              controller: _inputPressureController,
+                              numbersOnly: true,
+                            ),
+                            TitleAndTextFieldRow(
+                              title: localizations.outputPressure,
+                              controller: _outputPressureController,
+                              numbersOnly: true,
+                            ),
+                            TitleAndTextFieldRow(
+                              title: localizations.inputTemp,
+                              controller: _inputTempController,
+                              numbersOnly: true,
+                            ),
+                            TitleAndTextFieldRow(
+                              title: localizations.outputTemp,
+                              controller: _outputTempController,
+                              numbersOnly: true,
+                            ),
+                            const SizedBox(height: 8),
+                          ],
                         ),
-                        TitleAndTextFieldRow(
-                          title: localizations.inputTemp,
-                          controller: _inputTempController,
-                          numbersOnly: true,
-                        ),
-                        TitleAndTextFieldRow(
-                          title: localizations.outputTemp,
-                          controller: _outputTempController,
-                          numbersOnly: true,
-                        ),
-                      ],
+                      ),
                     ),
                   ),
                 ),
               ),
             ),
-          ),
-        ),
-        actions: [
-          OkButton(
-            onPressed: () async {
-              // FIXME: Do network call here in production.
-              if (_formKey.currentState!.validate()) {
-                context.pop();
-              }
-            },
-          ),
-          const CancelButton(),
-        ],
+            actions: [
+              OkButton(
+                onPressed: () async {
+                  if (_formKey.currentState!.validate() &&
+                      selectedShift != null &&
+                      selectedStationState.singleSelectedStation != null) {
+                    final instance = NetworkInterface.instance();
+                    final inputPressure = int.parse(
+                      _inputPressureController.text,
+                    );
+                    final outputPressure = int.parse(
+                      _outputPressureController.text,
+                    );
+                    final inputTemp = int.parse(_inputTempController.text);
+                    final outputTemp = int.parse(_outputTempController.text);
+
+                    final Object? result;
+
+                    if (_currentlyEditingReport != null) {
+                      final shift = _currentlyEditingReport!;
+                      result = await instance.updateShiftData(
+                        UpdateShiftDataRequest(
+                          station: shift.stationCode,
+                          shift: selectedShift!,
+                          date: shift.date,
+                          inputPressure: inputPressure,
+                          outputPressure: outputPressure,
+                          inputTemperature: inputTemp,
+                          outputTemperature: outputTemp,
+                        ),
+                        // FIXME: This should be the shift id, but right now, it's not provided in the response
+                        // Should ask for it to be included if possible.
+                        2,
+                      );
+                    } else {
+                      result = await instance.createShiftData(
+                        CreateShiftDataRequest(
+                          station: selectedStationState.singleSelectedStation!,
+                          shift: selectedShift!,
+                          date: Jalali.now(),
+                          inputPressure: inputPressure,
+                          outputPressure: outputPressure,
+                          inputTemperature: inputTemp,
+                          outputTemperature: outputTemp,
+                        ),
+                      );
+                    }
+                    if (context.mounted && result == null) {
+                      context.pop(instance.lastErrorUserFriendly);
+                    } else if (context.mounted) {
+                      context.pop();
+                    }
+                  }
+                },
+              ),
+              const CancelButton(),
+            ],
+          );
+        },
       ),
     );
+  }
+
+  Future<void> showEditDialogAndHandleResult(
+    BuildContext context,
+    SelectedStationsProvider selectedStationState,
+    AppLocalizations localizations,
+  ) async {
+    final String? result = await Helpers.showCustomDialog(
+      context,
+      reportEditDialog(selectedStationState, localizations),
+      barrierDismissable: true,
+    );
+    clearDialogScrollControllers();
+    if (context.mounted && result != null) {
+      await Helpers.showCustomDialog(
+        context,
+        ErrorAlertDialog(result),
+        barrierDismissable: true,
+      );
+    } else if (context.mounted) {
+      context.read<Preferences>().refreshRoute();
+    }
   }
 
   void clearDialogScrollControllers() {

@@ -229,8 +229,8 @@ class CreateShiftDataRequest {
   @JsonKey(name: 'output_temperature')
   final int outputTemperature;
   @JsonKey(
-    fromJson: Helpers.parseJalaliFromIso8601,
-    toJson: Helpers.serializeJalaliIntoIso8601,
+    fromJson: Helpers.dashDateToJalaliNonNull,
+    toJson: Helpers.jalaliToDashDate,
   )
   final Jalali date;
 
@@ -263,8 +263,8 @@ class CreateShiftDataResponse {
   @JsonKey(name: 'output_temperature')
   final int outputTemperature;
   @JsonKey(
-    fromJson: Helpers.parseJalaliFromIso8601,
-    toJson: Helpers.serializeJalaliIntoIso8601,
+    fromJson: Helpers.dashDateToJalaliNonNull,
+    toJson: Helpers.jalaliToDashDate,
   )
   final Jalali date;
   @JsonKey(
@@ -306,8 +306,8 @@ class UpdateShiftDataRequest {
   @JsonKey(name: 'output_temperature')
   final int outputTemperature;
   @JsonKey(
-    fromJson: Helpers.parseJalaliFromIso8601,
-    toJson: Helpers.serializeJalaliIntoIso8601,
+    fromJson: Helpers.dashDateToJalaliNonNull,
+    toJson: Helpers.jalaliToDashDate,
   )
   final Jalali date;
 
@@ -386,8 +386,8 @@ class GetShiftDataResponse {
   @JsonKey(name: 'output_temperature')
   final int outputTemperature;
   @JsonKey(
-    fromJson: Helpers.parseJalaliFromIso8601,
-    toJson: Helpers.serializeJalaliIntoIso8601,
+    fromJson: Helpers.dashDateToJalaliNonNull,
+    toJson: Helpers.jalaliToDashDate,
   )
   final Jalali date;
   @JsonKey(
@@ -779,8 +779,8 @@ class GetMonitoringFullReportResponseResultItem {
   @JsonKey(name: 'station_code')
   final int stationCode;
   @JsonKey(
-    fromJson: Helpers.parseJalaliFromIso8601,
-    toJson: Helpers.serializeJalaliIntoIso8601,
+    fromJson: Helpers.dashDateToJalaliNonNull,
+    toJson: Helpers.jalaliToDashDate,
   )
   final Jalali date;
   final List<Shift> shifts;
@@ -889,8 +889,8 @@ class GetPressureAndTemperatureFullReportResponseResultItem {
 class GetMeterChangeEventResponse {
   final int id;
   @JsonKey(
-    fromJson: Helpers.parseJalaliFromIso8601,
-    toJson: Helpers.serializeJalaliIntoIso8601,
+    fromJson: Helpers.dashDateToJalaliNonNull,
+    toJson: Helpers.jalaliToDashDate,
   )
   final Jalali date;
   @JsonKey(name: 'station_code')

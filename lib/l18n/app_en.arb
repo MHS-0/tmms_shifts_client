@@ -85,5 +85,11 @@
   "errorStatusCode": "Error code:",
   "responseDetails": "Error details from server:",
   "lastActionDoesNotExist": "Last action not found!",
+  "district": "Dsitrict",
+  "area": "Area",
+  "capacity": "Capacity",
+  "consumption": "Consumption",
+  "averageConsumption": "Average consumption",
+  "dataNotFound": "Data not found!",
   "pageNotFound": "Page not found!"
 }

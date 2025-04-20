@@ -103,7 +103,7 @@ void main() {
 
       final respDeserialized = await networkInterface.createShiftData(req);
       assert(
-        DeepCollectionEquality().equals(respDeserialized.toJson(), respJson),
+        DeepCollectionEquality().equals(respDeserialized!.toJson(), respJson),
       );
     });
 
@@ -121,7 +121,7 @@ void main() {
 
       final respDeserialized = await networkInterface.updateShiftData(req, 3);
       assert(
-        DeepCollectionEquality().equals(respDeserialized.toJson(), respJson),
+        DeepCollectionEquality().equals(respDeserialized!.toJson(), respJson),
       );
     });
 
@@ -208,7 +208,7 @@ void main() {
         ),
       );
       assert(
-        DeepCollectionEquality().equals(respDeserialized.toJson(), respJson),
+        DeepCollectionEquality().equals(respDeserialized!.toJson(), respJson),
       );
 
       dioAdapter.onGet(
@@ -224,7 +224,7 @@ void main() {
         query: ToFromDateStationsQuery(fromDate: "1402-01-01"),
       );
       assert(
-        DeepCollectionEquality().equals(respDeserialized2.toJson(), respJson),
+        DeepCollectionEquality().equals(respDeserialized2!.toJson(), respJson),
       );
 
       dioAdapter.onGet(
@@ -237,7 +237,7 @@ void main() {
 
       final respDeserialized3 = await networkInterface.getShiftsDataList();
       assert(
-        DeepCollectionEquality().equals(respDeserialized3.toJson(), respJson),
+        DeepCollectionEquality().equals(respDeserialized3!.toJson(), respJson),
       );
     });
 

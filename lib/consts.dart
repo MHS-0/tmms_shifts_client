@@ -14,7 +14,13 @@ const userIconAssetImage = AssetImage(userIconAssetPath);
 
 const dataTableHeaderRowColumnWidthMinimum = 150.0;
 
+const titleRowsFontSize = 18.0;
+
 const boldTextStyle = TextStyle(fontWeight: FontWeight.bold);
+const titleRowTextStyle = TextStyle(
+  fontWeight: FontWeight.bold,
+  fontSize: titleRowsFontSize,
+);
 
 const offsetAll16p = EdgeInsets.all(16);
 const offsetAll32p = EdgeInsets.all(32);

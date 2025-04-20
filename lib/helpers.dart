@@ -284,4 +284,45 @@ final class Helpers {
       return value;
     }
   }
+
+  static Row cardTitleDetailsRow(List<String> children, [bool bold = false]) {
+    final List<Widget> widgets = [];
+
+    for (final entry in children) {
+      widgets.add(
+        Expanded(
+          child: Center(child: Text(entry, style: bold ? boldTextStyle : null)),
+        ),
+      );
+    }
+
+    return Row(children: widgets);
+  }
+
+  static Text boldText(String content) {
+    return Text(content, style: boldTextStyle);
+  }
+
+  static Widget titleAndWidgetRow(String title, Widget widget) {
+    return SizedBox(
+      height: 80,
+      child: Row(
+        spacing: 32,
+        children: [
+          SizedBox(
+            width: 200,
+            child: Align(
+              alignment: Alignment.centerLeft,
+              child: Text(
+                title,
+                textAlign: TextAlign.end,
+                style: titleRowTextStyle,
+              ),
+            ),
+          ),
+          SizedBox(width: 400, child: widget),
+        ],
+      ),
+    );
+  }
 }

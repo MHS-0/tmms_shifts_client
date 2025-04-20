@@ -15,6 +15,10 @@ class NetworkInterface {
   String lastErrorUserFriendly = "";
   Object? lastError;
 
+  static final List<(int, String)> _defaultErrorResponses = [
+    (404, persianLocale.dataNotFound),
+  ];
+
   /// Private constructor to use when instantiating an instance inside the file.
   NetworkInterface._privateConstructor(this.dio);
 
@@ -51,6 +55,16 @@ class NetworkInterface {
         lastErrorUserFriendly = persianLocale.errorFetchingDataTryAgainLater;
       } else if (e.response != null) {
         final response = e.response!;
+        final errorResponseDefault =
+            _defaultErrorResponses
+                .where((e) => e.$1 == response.statusCode)
+                .firstOrNull
+                ?.$2;
+
+        if (errorResponseDefault != null) {
+          lastErrorUserFriendly = errorResponseDefault;
+        }
+
         if (statusResponses != null) {
           final errorResponse =
               statusResponses
@@ -60,7 +74,8 @@ class NetworkInterface {
           if (errorResponse != null) {
             lastErrorUserFriendly = errorResponse;
           }
-        } else {
+        }
+        if (errorResponseDefault == null && statusResponses == null) {
           lastErrorUserFriendly =
               "${persianLocale.errorDialogDescBegin}\n\n${persianLocale.errorStatusCode}: ${response.statusCode}\n${persianLocale.responseDetails}: ${response.data}\n\n${persianLocale.errorDialogDescEnd}";
         }
@@ -114,34 +129,38 @@ class NetworkInterface {
     });
   }
 
-  Future<CreateShiftDataResponse> createShiftData(
+  Future<CreateShiftDataResponse?> createShiftData(
     CreateShiftDataRequest data,
   ) async {
-    final Response<Map<String, dynamic>> resp = await dio.post(
-      "/pressure_and_temperature/shift/",
-      options: authHeaderWithToken,
-      data: data.toJson(),
-    );
-    final finalResp = CreateShiftDataResponse.fromJson(resp.data!);
-    return finalResp;
+    return await sendRequest(() async {
+      final Response<Map<String, dynamic>> resp = await dio.post(
+        "/pressure_and_temperature/shift/",
+        options: authHeaderWithToken,
+        data: data.toJson(),
+      );
+      final finalResp = CreateShiftDataResponse.fromJson(resp.data!);
+      return finalResp;
+    });
   }
 
-  Future<UpdateShiftDataResponse> updateShiftData(
+  Future<UpdateShiftDataResponse?> updateShiftData(
     UpdateShiftDataRequest data,
-    int shift,
+    int shiftId,
   ) async {
-    final Response<Map<String, dynamic>> resp = await dio.put(
-      "/pressure_and_temperature/shift/$shift/",
-      options: authHeaderWithToken,
-      data: data.toJson(),
-    );
-    final finalResp = UpdateShiftDataResponse.fromJson(resp.data!);
-    return finalResp;
+    return await sendRequest(() async {
+      final Response<Map<String, dynamic>> resp = await dio.put(
+        "/pressure_and_temperature/shift/$shiftId/",
+        options: authHeaderWithToken,
+        data: data.toJson(),
+      );
+      final finalResp = UpdateShiftDataResponse.fromJson(resp.data!);
+      return finalResp;
+    });
   }
 
-  Future<GetShiftDataResponse> getShiftData(int shift) async {
+  Future<GetShiftDataResponse> getShiftData(int shiftId) async {
     final Response<Map<String, dynamic>> resp = await dio.get(
-      "/pressure_and_temperature/shift/$shift",
+      "/pressure_and_temperature/shift/$shiftId/",
       options: authHeaderWithToken,
     );
     final finalResp = GetShiftDataResponse.fromJson(resp.data!);
@@ -170,16 +189,18 @@ class NetworkInterface {
     });
   }
 
-  Future<GetShiftsDataListResponse> getShiftsDataList({
+  Future<GetShiftsDataListResponse?> getShiftsDataList({
     ToFromDateStationsQuery? query,
   }) async {
-    final Response<Map<String, dynamic>> resp = await dio.get(
-      "/pressure_and_temperature/shift",
-      options: authHeaderWithToken,
-      queryParameters: query?.toJson(),
-    );
-    final finalResp = GetShiftsDataListResponse.fromJson(resp.data!);
-    return finalResp;
+    return await sendRequest(() async {
+      final Response<Map<String, dynamic>> resp = await dio.get(
+        "/pressure_and_temperature/shift",
+        options: authHeaderWithToken,
+        queryParameters: query?.toJson(),
+      );
+      final finalResp = GetShiftsDataListResponse.fromJson(resp.data!);
+      return finalResp;
+    });
   }
 
   Future<CreateCorrectorResponse> createCorrector(
@@ -300,16 +321,18 @@ class NetworkInterface {
     return finalResp;
   }
 
-  Future<GetMeterChangeEventsListResponse> getMeterChangeEventsList({
+  Future<GetMeterChangeEventsListResponse?> getMeterChangeEventsList({
     ToFromDateStationsQuery? query,
   }) async {
-    final Response<Map<String, dynamic>> resp = await dio.get(
-      "/equipment_replacement_events/meter",
-      options: authHeaderWithToken,
-      queryParameters: query?.toJson(),
-    );
-    final finalResp = GetMeterChangeEventsListResponse.fromJson(resp.data!);
-    return finalResp;
+    return await sendRequest(() async {
+      final Response<Map<String, dynamic>> resp = await dio.get(
+        "/equipment_replacement_events/meter/",
+        options: authHeaderWithToken,
+        queryParameters: query?.toJson(),
+      );
+      final finalResp = GetMeterChangeEventsListResponse.fromJson(resp.data!);
+      return finalResp;
+    });
   }
 
   Future<UpdateMeterChangeEventResponse> updateMeterChangeEventResponse(
@@ -385,16 +408,18 @@ class NetworkInterface {
     }, [(400, persianLocale.lastActionDoesNotExist)]);
   }
 
-  Future<GetShiftDataBulkLastActionResponse> getShiftDataBulkLastAction({
-    StationsQuery? query,
-  }) async {
-    final Response<Map<String, dynamic>> resp = await dio.get(
-      "/pressure_and_temperature/last-action",
-      options: authHeaderWithToken,
-      queryParameters: query?.toJson(),
-    );
-    final finalResp = GetShiftDataBulkLastActionResponse.fromJson(resp.data!);
-    return finalResp;
+  Future<GetShiftDataBulkLastActionResponse?> getShiftDataBulkLastAction(
+    SingleStationQuery query,
+  ) async {
+    return await sendRequest(() async {
+      final Response<Map<String, dynamic>> resp = await dio.get(
+        "/pressure_and_temperature/last-action",
+        options: authHeaderWithToken,
+        queryParameters: query.toJson(),
+      );
+      final finalResp = GetShiftDataBulkLastActionResponse.fromJson(resp.data!);
+      return finalResp;
+    });
   }
 
   Future<GetStationDataListResponse> getStationDataBulk() async {

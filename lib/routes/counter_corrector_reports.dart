@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:logging/logging.dart';
 import 'package:persian_datetime_picker/persian_datetime_picker.dart';
 import 'package:provider/provider.dart';
 import 'package:tmms_shifts_client/consts.dart';
@@ -8,7 +7,6 @@ import 'package:tmms_shifts_client/data/backend_types.dart';
 import 'package:tmms_shifts_client/helpers.dart';
 import 'package:tmms_shifts_client/l18n/app_localizations.dart';
 import 'package:tmms_shifts_client/network_interface.dart';
-import 'package:tmms_shifts_client/providers/date_picker_provider.dart';
 import 'package:tmms_shifts_client/providers/preferences.dart';
 import 'package:tmms_shifts_client/providers/selected_stations_provider.dart';
 import 'package:tmms_shifts_client/widgets/cancel_button.dart';
@@ -135,7 +133,12 @@ class _CounterCorrectorReportsRouteState
                       ),
                     ),
                   ),
-                  ..._getCards(context, data.results, localizations, user),
+                  ..._getCounterCorrectorReportCards(
+                    context,
+                    data.results,
+                    localizations,
+                    user,
+                  ),
                 ],
               );
             }
@@ -165,11 +168,12 @@ class _CounterCorrectorReportsRouteState
       key: const ObjectKey("Counter And Corrector dialog provider"),
       child: Consumer<SelectedStationsProvider>(
         builder: (context, value, _) {
-          final title = Text(localizations.newReport);
+          clearDialogControllers();
           final scrollController = ScrollController();
-          final singleStation = selectedStationState.singleSelectedStation;
-
           _dialogScrollControllers.add(scrollController);
+
+          final title = Text(localizations.newReport);
+          final singleStation = selectedStationState.singleSelectedStation;
 
           FutureBuilder? lastActionFuture;
           if (singleStation != null) {
@@ -237,11 +241,6 @@ class _CounterCorrectorReportsRouteState
           const meterTag = "Meter";
           const correctorTag = "Corrector";
           const correctorMeterTag = "CorrectorMeter";
-
-          for (final item in _textControllers) {
-            item.$3.dispose();
-          }
-          _textControllers.clear();
 
           for (final ran in stationRans) {
             final String? meterContent =
@@ -375,30 +374,26 @@ class _CounterCorrectorReportsRouteState
                     }
 
                     final instance = NetworkInterface.instance();
+                    final Object? result;
                     if (_currentlyEditingReport != null) {
-                      final result = await instance.putUpdateCorrectorBulk(
+                      result = await instance.putUpdateCorrectorBulk(
                         PutUpdateCorrectorBulkRequest(
                           date: _currentlyEditingReport!.date,
                           rans: rans,
                         ),
                       );
-                      if (context.mounted && result == null) {
-                        context.pop(instance.lastErrorUserFriendly);
-                      } else if (context.mounted) {
-                        context.pop();
-                      }
                     } else {
-                      final result = await instance.createCorrectorBulk(
+                      result = await instance.createCorrectorBulk(
                         PostCreateCorrectorBulkRequest(
                           date: Jalali.now(),
                           rans: rans,
                         ),
                       );
-                      if (context.mounted && result == null) {
-                        context.pop(instance.lastErrorUserFriendly);
-                      } else if (context.mounted) {
-                        context.pop();
-                      }
+                    }
+                    if (context.mounted && result == null) {
+                      context.pop(instance.lastErrorUserFriendly);
+                    } else if (context.mounted) {
+                      context.pop();
                     }
                   }
                 },
@@ -449,7 +444,7 @@ class _CounterCorrectorReportsRouteState
     );
   }
 
-  List<Widget> _getCards(
+  List<Widget> _getCounterCorrectorReportCards(
     BuildContext context,
     List<GetMeterAndCorrectorFullReportResponseResultItem> results,
     AppLocalizations localizations,
@@ -458,6 +453,10 @@ class _CounterCorrectorReportsRouteState
     return results.map((item) {
       final scrollController = ScrollController();
       _mainScrollControllers.add(scrollController);
+      final stationOfItem =
+          user.stations
+              .where((entry) => entry.code == item.stationCode)
+              .firstOrNull;
 
       return InkWell(
         onTap: () async {
@@ -488,15 +487,20 @@ class _CounterCorrectorReportsRouteState
               title: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Text(
-                    '${localizations.station}: ${user.stations.where((entry) => entry.code == item.stationCode).firstOrNull?.title ?? ""}',
-                    style: TextStyle(fontWeight: FontWeight.bold),
+                  Helpers.boldText(
+                    '${localizations.station}: ${stationOfItem?.title ?? ""}',
                   ),
-                  Text(
+                  Helpers.boldText(
                     '${localizations.date}: ${dateFormatter.format(DateTime.parse(item.date.toJalaliDateTime()))}',
-                    style: TextStyle(fontWeight: FontWeight.bold),
                   ),
-                  Text('${localizations.stationCode}: ${item.stationCode}'),
+                  Helpers.cardTitleDetailsRow([
+                    '${localizations.district}: ${stationOfItem?.district}',
+                    '${localizations.area}: ${stationOfItem?.area}',
+                  ]),
+                  Helpers.cardTitleDetailsRow([
+                    '${localizations.stationCode}: ${stationOfItem?.code}',
+                    '${localizations.capacity}: ${stationOfItem?.capacity}',
+                  ]),
                 ],
               ),
               children: [
