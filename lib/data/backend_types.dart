@@ -931,8 +931,8 @@ class GetMeterChangeEventResponse {
 @JsonSerializable(explicitToJson: true)
 class CreateMeterChangeEventRequest {
   @JsonKey(
-    fromJson: Helpers.parseJalaliFromIso8601,
-    toJson: Helpers.serializeJalaliIntoIso8601,
+    fromJson: Helpers.dashDateToJalaliNonNull,
+    toJson: Helpers.jalaliToDashDate,
   )
   final Jalali date;
   @JsonKey(name: 'old_meter_amount')
@@ -958,8 +958,8 @@ class CreateMeterChangeEventRequest {
 class CreateMeterChangeEventResponse {
   final int id;
   @JsonKey(
-    fromJson: Helpers.parseJalaliFromIso8601,
-    toJson: Helpers.serializeJalaliIntoIso8601,
+    fromJson: Helpers.dashDateToJalaliNonNull,
+    toJson: Helpers.jalaliToDashDate,
   )
   final Jalali date;
   @JsonKey(name: 'station_code')
@@ -1022,8 +1022,8 @@ class GetMeterChangeEventsListResponse {
 @JsonSerializable(explicitToJson: true)
 class UpdateMeterChangeEventRequest {
   @JsonKey(
-    fromJson: Helpers.parseJalaliFromIso8601,
-    toJson: Helpers.serializeJalaliIntoIso8601,
+    fromJson: Helpers.dashDateToJalaliNonNull,
+    toJson: Helpers.jalaliToDashDate,
   )
   final Jalali date;
   @JsonKey(name: 'old_meter_amount')
@@ -1049,8 +1049,8 @@ class UpdateMeterChangeEventRequest {
 class UpdateMeterChangeEventResponse {
   final int id;
   @JsonKey(
-    fromJson: Helpers.parseJalaliFromIso8601,
-    toJson: Helpers.serializeJalaliIntoIso8601,
+    fromJson: Helpers.dashDateToJalaliNonNull,
+    toJson: Helpers.jalaliToDashDate,
   )
   final Jalali date;
   @JsonKey(name: 'station_code')
@@ -1622,8 +1622,8 @@ class PutUpdateStationTypeDataResponse {
 class GetCorrectorChangeEventResponse {
   final int id;
   @JsonKey(
-    fromJson: Helpers.parseJalaliFromIso8601,
-    toJson: Helpers.serializeJalaliIntoIso8601,
+    fromJson: Helpers.dashDateToJalaliNonNull,
+    toJson: Helpers.jalaliToDashDate,
   )
   final Jalali date;
   @JsonKey(name: 'station_code')
@@ -1671,8 +1671,8 @@ class GetCorrectorChangeEventResponse {
 @JsonSerializable(explicitToJson: true)
 class PostCreateCorrectorChangeEventRequest {
   @JsonKey(
-    fromJson: Helpers.parseJalaliFromIso8601,
-    toJson: Helpers.serializeJalaliIntoIso8601,
+    fromJson: Helpers.dashDateToJalaliNonNull,
+    toJson: Helpers.jalaliToDashDate,
   )
   final Jalali date;
   @JsonKey(name: 'old_meter_amount')
@@ -1779,8 +1779,8 @@ class GetCorrectorChangeEventListResponse {
 class PutUpdateCorrectorChangeEventRequest {
   final int id;
   @JsonKey(
-    fromJson: Helpers.parseJalaliFromIso8601,
-    toJson: Helpers.serializeJalaliIntoIso8601,
+    fromJson: Helpers.dashDateToJalaliNonNull,
+    toJson: Helpers.jalaliToDashDate,
   )
   final Jalali date;
   @JsonKey(name: 'station_code')

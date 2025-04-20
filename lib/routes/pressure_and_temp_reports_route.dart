@@ -14,6 +14,7 @@ import 'package:tmms_shifts_client/widgets/data_fetch_error.dart';
 import 'package:tmms_shifts_client/widgets/date_picker_row.dart';
 import 'package:tmms_shifts_client/widgets/drawer.dart';
 import 'package:tmms_shifts_client/widgets/error_alert_dialog.dart';
+import 'package:tmms_shifts_client/widgets/excel_export_button.dart';
 import 'package:tmms_shifts_client/widgets/ok_button.dart';
 import 'package:tmms_shifts_client/widgets/single_station_selection_dropdown.dart';
 import 'package:tmms_shifts_client/widgets/station_selection_field.dart';
@@ -82,7 +83,6 @@ class _PressureAndTempReportsRouteState
     if (user == null || user.stations.isEmpty) return Scaffold();
 
     clearMainScrollControllers();
-
     return SelectionArea(
       child: Scaffold(
         appBar: AppBar(title: Text(localizations.reportPressureAndTemp)),
@@ -101,6 +101,11 @@ class _PressureAndTempReportsRouteState
                   const SizedBox(),
                   const StationSelectionField(),
                   const DatePickerRow(),
+                  ExcelExportButton(
+                    data:
+                        snapshot.data!.results.map((e) => e.toJson()).toList(),
+                  ),
+                  const SizedBox(height: 16),
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 48),
                     child: Align(
@@ -126,7 +131,7 @@ class _PressureAndTempReportsRouteState
                       ),
                     ),
                   ),
-                  ..._getCards(
+                  ..._getPressureAndTempReportCards(
                     context,
                     snapshot.data!.results,
                     localizations,
@@ -141,7 +146,7 @@ class _PressureAndTempReportsRouteState
     );
   }
 
-  List<Widget> _getCards(
+  List<Widget> _getPressureAndTempReportCards(
     BuildContext context,
     List<GetPressureAndTemperatureFullReportResponseResultItem> results,
     AppLocalizations localizations,

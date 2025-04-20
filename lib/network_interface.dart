@@ -309,16 +309,18 @@ class NetworkInterface {
     return finalResp;
   }
 
-  Future<CreateMeterChangeEventResponse> createMeterChangeEventResponse(
+  Future<CreateMeterChangeEventResponse?> createMeterChangeEvent(
     CreateMeterChangeEventRequest data,
   ) async {
-    final Response<Map<String, dynamic>> resp = await dio.post(
-      "/equipment_replacement_events/meter/",
-      options: authHeaderWithToken,
-      data: data.toJson(),
-    );
-    final finalResp = CreateMeterChangeEventResponse.fromJson(resp.data!);
-    return finalResp;
+    return await sendRequest(() async {
+      final Response<Map<String, dynamic>> resp = await dio.post(
+        "/equipment_replacement_events/meter/",
+        options: authHeaderWithToken,
+        data: data.toJson(),
+      );
+      final finalResp = CreateMeterChangeEventResponse.fromJson(resp.data!);
+      return finalResp;
+    });
   }
 
   Future<GetMeterChangeEventsListResponse?> getMeterChangeEventsList({
@@ -335,16 +337,19 @@ class NetworkInterface {
     });
   }
 
-  Future<UpdateMeterChangeEventResponse> updateMeterChangeEventResponse(
+  Future<UpdateMeterChangeEventResponse?> updateMeterChangeEvent(
     UpdateMeterChangeEventRequest data,
+    int id,
   ) async {
-    final Response<Map<String, dynamic>> resp = await dio.put(
-      "/equipment_replacement_events/meter/1/",
-      options: authHeaderWithToken,
-      data: data.toJson(),
-    );
-    final finalResp = UpdateMeterChangeEventResponse.fromJson(resp.data!);
-    return finalResp;
+    return await sendRequest(() async {
+      final Response<Map<String, dynamic>> resp = await dio.put(
+        "/equipment_replacement_events/meter/$id/",
+        options: authHeaderWithToken,
+        data: data.toJson(),
+      );
+      final finalResp = UpdateMeterChangeEventResponse.fromJson(resp.data!);
+      return finalResp;
+    });
   }
 
   Future<void> deleteMeterChangeEventResponse() async {
@@ -354,18 +359,20 @@ class NetworkInterface {
     );
   }
 
-  Future<GetMeterChangeEventLastActionResponse> getMeterChangeLastAction({
-    StationsQuery? query,
-  }) async {
-    final Response<Map<String, dynamic>> resp = await dio.get(
-      "/equipment_replacement_events/last-action/meter",
-      options: authHeaderWithToken,
-      queryParameters: query?.toJson(),
-    );
-    final finalResp = GetMeterChangeEventLastActionResponse.fromJson(
-      resp.data!,
-    );
-    return finalResp;
+  Future<GetMeterChangeEventLastActionResponse?> getMeterChangeLastAction(
+    SingleStationQuery query,
+  ) async {
+    return await sendRequest(() async {
+      final Response<Map<String, dynamic>> resp = await dio.get(
+        "/equipment_replacement_events/last-action/meter/",
+        options: authHeaderWithToken,
+        queryParameters: query.toJson(),
+      );
+      final finalResp = GetMeterChangeEventLastActionResponse.fromJson(
+        resp.data!,
+      );
+      return finalResp;
+    });
   }
 
   Future<PostCreateCorrectorBulkResponse?> createCorrectorBulk(
@@ -525,39 +532,48 @@ class NetworkInterface {
     return finalResp;
   }
 
-  Future<GetCorrectorChangeEventResponse> createCorrectorChangeEvent(
+  Future<GetCorrectorChangeEventResponse?> createCorrectorChangeEvent(
     PostCreateCorrectorChangeEventRequest data,
   ) async {
-    final Response<Map<String, dynamic>> resp = await dio.post(
-      "/equipment_replacement_events/corrector/",
-      options: authHeaderWithToken,
-      data: data.toJson(),
-    );
-    final finalResp = GetCorrectorChangeEventResponse.fromJson(resp.data!);
-    return finalResp;
+    return await sendRequest(() async {
+      final Response<Map<String, dynamic>> resp = await dio.post(
+        "/equipment_replacement_events/corrector/",
+        options: authHeaderWithToken,
+        data: data.toJson(),
+      );
+      final finalResp = GetCorrectorChangeEventResponse.fromJson(resp.data!);
+      return finalResp;
+    });
   }
 
-  Future<GetCorrectorChangeEventListResponse>
-  getCorrectorChangeEventListResponse({ToFromDateQuery? query}) async {
-    final Response<Map<String, dynamic>> resp = await dio.get(
-      "/equipment_replacement_events/corrector",
-      options: authHeaderWithToken,
-      queryParameters: query?.toJson(),
-    );
-    final finalResp = GetCorrectorChangeEventListResponse.fromJson(resp.data!);
-    return finalResp;
+  Future<GetCorrectorChangeEventListResponse?> getCorrectorChangeEventList({
+    ToFromDateQuery? query,
+  }) async {
+    return await sendRequest(() async {
+      final Response<Map<String, dynamic>> resp = await dio.get(
+        "/equipment_replacement_events/corrector",
+        options: authHeaderWithToken,
+        queryParameters: query?.toJson(),
+      );
+      final finalResp = GetCorrectorChangeEventListResponse.fromJson(
+        resp.data!,
+      );
+      return finalResp;
+    });
   }
 
-  Future<GetCorrectorChangeEventResponse> updateCorrectorChangeEvent(
-    PostCreateCorrectorChangeEventRequest data,
+  Future<GetCorrectorChangeEventResponse?> updateCorrectorChangeEvent(
+    PutUpdateCorrectorChangeEventRequest data,
   ) async {
-    final Response<Map<String, dynamic>> resp = await dio.put(
-      "/equipment_replacement_events/corrector/1/",
-      options: authHeaderWithToken,
-      data: data.toJson(),
-    );
-    final finalResp = GetCorrectorChangeEventResponse.fromJson(resp.data!);
-    return finalResp;
+    return await sendRequest(() async {
+      final Response<Map<String, dynamic>> resp = await dio.put(
+        "/equipment_replacement_events/corrector/${data.id}/",
+        options: authHeaderWithToken,
+        data: data.toJson(),
+      );
+      final finalResp = GetCorrectorChangeEventResponse.fromJson(resp.data!);
+      return finalResp;
+    });
   }
 
   Future<void> deleteCorrectorChangeEvent() async {

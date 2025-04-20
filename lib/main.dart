@@ -199,6 +199,8 @@ final GoRouter _router = GoRouter(
       pressureAndTempReportsPath,
       monitoringFullReportPath,
       counterCorrectorReportsPath,
+      counterReplacementEventsPath,
+      correctorReplacementEventsPath,
     ];
     if (queryRequiredPaths.contains(statePath)) {
       if (!queryParameters.containsKey(fromDateKey)) {

@@ -14,6 +14,7 @@ import 'package:tmms_shifts_client/widgets/data_fetch_error.dart';
 import 'package:tmms_shifts_client/widgets/date_picker_row.dart';
 import 'package:tmms_shifts_client/widgets/drawer.dart';
 import 'package:tmms_shifts_client/widgets/error_alert_dialog.dart';
+import 'package:tmms_shifts_client/widgets/excel_export_button.dart';
 import 'package:tmms_shifts_client/widgets/ok_button.dart';
 import 'package:tmms_shifts_client/widgets/single_station_selection_dropdown.dart';
 import 'package:tmms_shifts_client/widgets/station_selection_field.dart';
@@ -96,6 +97,11 @@ class _CounterCorrectorReportsRouteState
                   const SizedBox(),
                   const StationSelectionField(),
                   const DatePickerRow(),
+                  ExcelExportButton(
+                    data:
+                        snapshot.data!.results.map((e) => e.toJson()).toList(),
+                  ),
+                  const SizedBox(height: 16),
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 48),
                     child: Align(

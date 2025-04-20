@@ -1,3 +1,6 @@
+import 'dart:typed_data';
+
+import 'package:excel/excel.dart';
 import 'package:flutter/material.dart';
 import 'package:persian_datetime_picker/persian_datetime_picker.dart';
 import 'package:provider/provider.dart';
@@ -11,6 +14,7 @@ import 'package:tmms_shifts_client/providers/selected_stations_provider.dart';
 import 'package:tmms_shifts_client/widgets/data_fetch_error.dart';
 import 'package:tmms_shifts_client/widgets/date_picker_row.dart';
 import 'package:tmms_shifts_client/widgets/drawer.dart';
+import 'package:tmms_shifts_client/widgets/excel_export_button.dart';
 import 'package:tmms_shifts_client/widgets/station_selection_field.dart';
 
 class MonitoringFullReportRoute extends StatefulWidget {
@@ -80,6 +84,11 @@ class _MonitoringFullReportRouteState extends State<MonitoringFullReportRoute> {
                   const SizedBox(),
                   const StationSelectionField(),
                   const DatePickerRow(),
+                  ExcelExportButton(
+                    data:
+                        snapshot.data!.results.map((e) => e.toJson()).toList(),
+                  ),
+                  const SizedBox(height: 16),
                   ..._getMonitoringFullReportCards(
                     context,
                     snapshot.data!.results,

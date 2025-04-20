@@ -91,5 +91,12 @@
   "averageConsumption": "مصرف میانگین",
   "lastActionDoesNotExist": "آخرین فعالیت یافت نشد!",
   "dataNotFound": "محتوای مورد نظر یافت نشد!",
+  "oldMeterAmount": "مقدار کنتور قدیمی",
+  "newMeterAmount": "مقدار کنتور جدید",
+  "oldCorrectorAmount": "مقدار تصحیح کننده قدیمی",
+  "newCorrectorAmount": "مقدار تصحیح کننده جدید",
+  "pleaseSelectOutputFile": "لطفا فایل خروجی را انتخاب کنید",
+  "failedToSaveFile": "ذخیره فایل ناموفقیت آمیز بود!",
+  "exportToExcel": "خروجی اکسل",
   "pageNotFound": "صفحه مورد نظر یافت نشد!"
 }
