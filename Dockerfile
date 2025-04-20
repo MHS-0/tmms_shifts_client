@@ -1,20 +1,15 @@
-FROM cirrusci/flutter:stable AS builder
+FROM ubuntu AS build
+
+RUN apt-get update
+RUN apt-get install -y curl git unzip
+RUN git clone --branch stable --single-branch https://github.com/flutter/flutter.git 
+ENV PATH="/flutter/bin:${PATH}"
+COPY . /app
 WORKDIR /app
-
-COPY pubspec.* ./
-RUN flutter pub get
-
-COPY . .
-
-RUN flutter build web --release
-
-FROM nginx:alpine
-
-RUN rm -rf /usr/share/nginx/html/*
-
-COPY --from=builder /app/build/web /usr/share/nginx/html
-
-COPY nginx.conf /etc/nginx/nginx.conf
-
-EXPOSE 80 443
-CMD ["nginx", "-g", "daemon off;"]
+RUN flutter clean
+RUN flutter build web
+FROM ubuntu
+COPY --from=build /app /app
+COPY --from=build /flutter /
+ENV PATH="/flutter/bin:${PATH}"
+RUN flutter run -d web-server --web-port=80

@@ -94,6 +94,9 @@ class _LoginRouteState extends State<LoginRoute> {
                             hintText: localizations.passwordTextFieldHint,
                           ),
                           textInputAction: TextInputAction.done,
+                          onFieldSubmitted:
+                              (_) async =>
+                                  await _loginCallback(context, localizations),
                           maxLines: 1,
                           validator: (value) {
                             if (value == null || value.isEmpty) {
@@ -105,74 +108,9 @@ class _LoginRouteState extends State<LoginRoute> {
                         ElevatedButton.icon(
                           label: Text(localizations.sign_in),
                           icon: const Icon(Icons.login),
-                          onPressed: () async {
-                            final loginInfo = LoginRequest(
-                              username: _usernameController.text,
-                              password: _passwordController.text,
-                            );
-                            if (_formKey.currentState!.validate()) {
-                              Helpers.showCustomDialog(context, WaitDialog());
-                              final networkInterface =
-                                  NetworkInterface.instance();
-
-                              final loginResp = await networkInterface.login(
-                                loginInfo,
-                              );
-
-                              if (!context.mounted) return;
-
-                              if (loginResp == null) {
-                                context.pop();
-                                Helpers.showNetworkErrorAlertDialog(
-                                  context,
-                                  localizations,
-                                );
-                                return;
-                              }
-
-                              final profileResp = await networkInterface
-                                  .getProfile(loginResp.token);
-
-                              if (!context.mounted) return;
-
-                              if (profileResp == null) {
-                                context.pop();
-                                Helpers.showNetworkErrorAlertDialog(
-                                  context,
-                                  localizations,
-                                );
-                                return;
-                              }
-                              context.pop();
-                              Helpers.showCustomDialog(
-                                context,
-                                SuccessDialog(
-                                  content: localizations.youHaveBeenLoggedIn,
-                                ),
-                              );
-
-                              final activeUser = ActiveUser(
-                                username: profileResp.username,
-                                token: loginResp.token,
-                                isStaff: profileResp.isStaff,
-                                expiry: loginResp.expiry,
-                                stations: profileResp.stations,
-                              );
-
-                              // TODO: Remove this maybe?
-                              // It might look good but it slown down the UX.
-                              await Future.delayed(Duration(seconds: 1));
-                              if (!context.mounted) return;
-                              await context.read<Preferences>().setActiveUser(
-                                activeUser,
-                              );
-                              if (!context.mounted) return;
-                              context.pop();
-                              context.goNamed(
-                                MonitoringFullReportRoute.routingName,
-                              );
-                            }
-                          },
+                          onPressed:
+                              () async =>
+                                  await _loginCallback(context, localizations),
                         ),
                       ],
                     ),
@@ -184,6 +122,62 @@ class _LoginRouteState extends State<LoginRoute> {
         ),
       ),
     );
+  }
+
+  Future<void> _loginCallback(
+    BuildContext context,
+    AppLocalizations localizations,
+  ) async {
+    final loginInfo = LoginRequest(
+      username: _usernameController.text,
+      password: _passwordController.text,
+    );
+    if (_formKey.currentState!.validate()) {
+      Helpers.showCustomDialog(context, WaitDialog());
+      final networkInterface = NetworkInterface.instance();
+
+      final loginResp = await networkInterface.login(loginInfo);
+
+      if (!context.mounted) return;
+
+      if (loginResp == null) {
+        context.pop();
+        Helpers.showNetworkErrorAlertDialog(context, localizations);
+        return;
+      }
+
+      final profileResp = await networkInterface.getProfile(loginResp.token);
+
+      if (!context.mounted) return;
+
+      if (profileResp == null) {
+        context.pop();
+        Helpers.showNetworkErrorAlertDialog(context, localizations);
+        return;
+      }
+      context.pop();
+      Helpers.showCustomDialog(
+        context,
+        SuccessDialog(content: localizations.youHaveBeenLoggedIn),
+      );
+
+      final activeUser = ActiveUser(
+        username: profileResp.username,
+        token: loginResp.token,
+        isStaff: profileResp.isStaff,
+        expiry: loginResp.expiry,
+        stations: profileResp.stations,
+      );
+
+      // TODO: Remove this maybe?
+      // It might look good but it slown down the UX.
+      await Future.delayed(Duration(seconds: 1));
+      if (!context.mounted) return;
+      await context.read<Preferences>().setActiveUser(activeUser);
+      if (!context.mounted) return;
+      context.pop();
+      context.goNamed(MonitoringFullReportRoute.routingName);
+    }
   }
 
   @override
