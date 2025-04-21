@@ -98,5 +98,7 @@
   "pleaseSelectOutputFile": "لطفا فایل خروجی را انتخاب کنید",
   "failedToSaveFile": "ذخیره فایل ناموفقیت آمیز بود!",
   "exportToExcel": "خروجی اکسل",
+  "dataIsEmpty": "محتوا خالی است",
+  "dataEncodeError": "خطا در تبدیل محتوا",
   "pageNotFound": "صفحه مورد نظر یافت نشد!"
 }

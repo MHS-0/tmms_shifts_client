@@ -3,7 +3,6 @@ import 'dart:typed_data';
 import 'package:excel/excel.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:logging/logging.dart';
 import 'package:persian_datetime_picker/persian_datetime_picker.dart';
 import 'package:provider/provider.dart';
 import 'package:tmms_shifts_client/consts.dart';
@@ -332,14 +331,14 @@ final class Helpers {
 
   static Future<Uint8List> exportToExcelBytes(
     List<Map<String, dynamic>> data,
+    AppLocalizations localizations,
   ) async {
     try {
       var excel = Excel.createExcel();
       final Sheet sheet = excel['Sheet1'];
 
       if (data.isEmpty) {
-        sharedLogger.log(Level.WARNING, "Empty data");
-        return Uint8List(0);
+        return Future.error(localizations.dataIsEmpty);
       }
 
       List<String> headers = data.first.keys.toList();
@@ -368,18 +367,12 @@ final class Helpers {
       final List<int>? fileBytes = excel.encode();
 
       if (fileBytes == null) {
-        // Failure.
-        // FIXME: handle better. maybe a dialog.
-        sharedLogger.log(Level.WARNING, "Failed to encode data");
-        return Uint8List(0);
+        return Future.error(localizations.dataEncodeError);
       }
 
       return Uint8List.fromList(fileBytes);
     } catch (e) {
-      // Faliure
-      // FIXME: handle better. maybe a dialog.
-      sharedLogger.log(Level.WARNING, "Failed to encode data: $e");
-      return Uint8List(0);
+      return Future.error("${localizations.dataEncodeError}:\n$e");
     }
   }
 }

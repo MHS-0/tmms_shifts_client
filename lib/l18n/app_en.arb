@@ -98,5 +98,7 @@
   "pleaseSelectOutputFile": "Please select the output file's path",
   "failedToSaveFile": "Failed to save file!",
   "exportToExcel": "Export to Excel",
+  "dataIsEmpty": "Data is empty",
+  "dataEncodeError": "Data encode failure",
   "pageNotFound": "Page not found!"
 }

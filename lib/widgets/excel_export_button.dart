@@ -1,10 +1,6 @@
-import 'dart:typed_data';
-
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
-import 'package:logging/logging.dart';
 import 'package:provider/provider.dart';
-import 'package:tmms_shifts_client/consts.dart';
 import 'package:tmms_shifts_client/helpers.dart';
 import 'package:tmms_shifts_client/l18n/app_localizations.dart';
 import 'package:tmms_shifts_client/providers/preferences.dart';
@@ -33,7 +29,10 @@ class ExcelExportButton extends StatelessWidget {
             icon: Icon(Icons.calculate),
             onPressed: () async {
               try {
-                final bytes = await Helpers.exportToExcelBytes(data);
+                final bytes = await Helpers.exportToExcelBytes(
+                  data,
+                  localizations,
+                );
                 await FilePicker.platform.saveFile(
                   fileName: "output.xlsx",
                   type: FileType.custom,
