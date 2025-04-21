@@ -9,12 +9,14 @@ import 'package:tmms_shifts_client/l18n/app_localizations.dart';
 import 'package:tmms_shifts_client/network_interface.dart';
 import 'package:tmms_shifts_client/providers/preferences.dart';
 import 'package:tmms_shifts_client/providers/selected_stations_provider.dart';
+import 'package:tmms_shifts_client/providers/sort_provider.dart';
 import 'package:tmms_shifts_client/widgets/cancel_button.dart';
 import 'package:tmms_shifts_client/widgets/data_fetch_error.dart';
 import 'package:tmms_shifts_client/widgets/date_picker_row.dart';
 import 'package:tmms_shifts_client/widgets/drawer.dart';
 import 'package:tmms_shifts_client/widgets/error_alert_dialog.dart';
 import 'package:tmms_shifts_client/widgets/excel_export_button.dart';
+import 'package:tmms_shifts_client/widgets/new_report_button.dart';
 import 'package:tmms_shifts_client/widgets/ok_button.dart';
 import 'package:tmms_shifts_client/widgets/single_station_selection_dropdown.dart';
 import 'package:tmms_shifts_client/widgets/station_selection_field.dart';
@@ -26,12 +28,14 @@ class CounterCorrectorReportsRoute extends StatefulWidget {
   final String? fromDate;
   final String? toDate;
   final String? stationCodes;
+  final String? sortBy;
 
   const CounterCorrectorReportsRoute({
     super.key,
     this.fromDate,
     this.toDate,
     this.stationCodes,
+    this.sortBy,
   });
 
   @override
@@ -74,6 +78,7 @@ class _CounterCorrectorReportsRouteState
     final localizations = AppLocalizations.of(context)!;
     final user = context.watch<Preferences>().activeUser;
     final selectedStationState = context.watch<SelectedStationsProvider>();
+    final sortState = context.read<SortProvider>();
     if (user == null || user.stations.isEmpty) return Scaffold();
 
     clearMainControllers();
@@ -90,58 +95,50 @@ class _CounterCorrectorReportsRouteState
             } else if (!snapshot.hasData) {
               return centeredCircularProgressIndicator;
             } else {
-              final data = snapshot.data!;
+              final results = Helpers.sortResults(
+                sortState,
+                user.stations,
+                snapshot.data!.results,
+              );
+
               return ListView(
                 padding: offsetAll16p,
                 children: [
                   const SizedBox(),
                   const StationSelectionField(),
                   const DatePickerRow(),
-                  ExcelExportButton(
-                    data:
-                        snapshot.data!.results.map((e) => e.toJson()).toList(),
+                  Helpers.getExcelExportSortRow(
+                    results.map((e) => e.toJson()).toList(),
                   ),
                   const SizedBox(height: 16),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 48),
-                    child: Align(
-                      alignment: Alignment.centerLeft,
-                      child: SizedBox(
-                        height: 50,
-                        width: 165,
-                        child: FilledButton.icon(
-                          label: Text(localizations.newReport),
-                          icon: Icon(Icons.add),
-                          onPressed: () async {
-                            _currentlyEditingReport = null;
-                            selectedStationState.setSingleSelectedStation(null);
+                  NewReportButton(
+                    onPressed: () async {
+                      _currentlyEditingReport = null;
+                      selectedStationState.setSingleSelectedStation(null);
 
-                            final result = await Helpers.showCustomDialog(
-                              context,
-                              reportEditDialog(
-                                user,
-                                selectedStationState,
-                                localizations,
-                              ),
-                              barrierDismissable: true,
-                            );
-                            if (context.mounted && result != null) {
-                              await Helpers.showCustomDialog(
-                                context,
-                                ErrorAlertDialog(result),
-                                barrierDismissable: true,
-                              );
-                            } else if (context.mounted) {
-                              context.read<Preferences>().refreshRoute();
-                            }
-                          },
+                      final result = await Helpers.showCustomDialog(
+                        context,
+                        reportEditDialog(
+                          user,
+                          selectedStationState,
+                          localizations,
                         ),
-                      ),
-                    ),
+                        barrierDismissable: true,
+                      );
+                      if (context.mounted && result != null) {
+                        await Helpers.showCustomDialog(
+                          context,
+                          ErrorAlertDialog(result),
+                          barrierDismissable: true,
+                        );
+                      } else if (context.mounted) {
+                        context.read<Preferences>().refreshRoute();
+                      }
+                    },
                   ),
                   ..._getCounterCorrectorReportCards(
                     context,
-                    data.results,
+                    results,
                     localizations,
                     user,
                   ),

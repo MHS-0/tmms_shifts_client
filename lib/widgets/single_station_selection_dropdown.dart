@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:tmms_shifts_client/consts.dart';
+import 'package:tmms_shifts_client/helpers.dart';
 import 'package:tmms_shifts_client/l18n/app_localizations.dart';
 import 'package:tmms_shifts_client/providers/preferences.dart';
 import 'package:tmms_shifts_client/providers/selected_stations_provider.dart';
@@ -19,22 +21,32 @@ class _SingleStationSelectionDropdownState
     final localizations = AppLocalizations.of(context)!;
     final user = context.watch<Preferences>().activeUser;
     final selectedStationState = context.watch<SelectedStationsProvider>();
+    final selectedStation = selectedStationState.singleSelectedStation;
     if (user == null) return Container();
 
     return DropdownMenu(
-      initialSelection: selectedStationState.singleSelectedStation,
+      initialSelection: selectedStation,
       onSelected: (code) {
         selectedStationState.setSingleSelectedStation(code);
       },
       width: 300,
       hintText: localizations.chooseStation,
       dropdownMenuEntries:
-          user.stations
-              .map(
-                (item) =>
-                    DropdownMenuEntry(value: item.code, label: item.title),
-              )
-              .toList(),
+          user.stations.map((item) {
+            final thisStationIsSelected =
+                (selectedStation != null && selectedStation == item.code);
+
+            return DropdownMenuEntry(
+              value: item.code,
+              label: item.title,
+              leadingIcon:
+                  thisStationIsSelected
+                      ? selectedCheckIcon
+                      : unselectedCheckIcon,
+              labelWidget:
+                  thisStationIsSelected ? Helpers.boldText(item.title) : null,
+            );
+          }).toList(),
     );
   }
 }

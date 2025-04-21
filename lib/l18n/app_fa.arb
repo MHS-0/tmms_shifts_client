@@ -100,5 +100,10 @@
   "exportToExcel": "خروجی اکسل",
   "dataIsEmpty": "محتوا خالی است",
   "dataEncodeError": "خطا در تبدیل محتوا",
+  "itemSort": "مرتب سازی",
+  "byDateAsc": "بر اساس تاریخ (صعودی)",
+  "byDateDesc": "بر اساس تاریخ (نزولی)",
+  "byStationAsc": "بر اساس نام ایستگاه (صعودی)",
+  "byStationDesc": "بر اساس نام ایستگاه (نزولی)",
   "pageNotFound": "صفحه مورد نظر یافت نشد!"
 }

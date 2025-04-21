@@ -1,6 +1,3 @@
-import 'dart:typed_data';
-
-import 'package:excel/excel.dart';
 import 'package:flutter/material.dart';
 import 'package:persian_datetime_picker/persian_datetime_picker.dart';
 import 'package:provider/provider.dart';
@@ -10,7 +7,7 @@ import 'package:tmms_shifts_client/helpers.dart';
 import 'package:tmms_shifts_client/l18n/app_localizations.dart';
 import 'package:tmms_shifts_client/network_interface.dart';
 import 'package:tmms_shifts_client/providers/preferences.dart';
-import 'package:tmms_shifts_client/providers/selected_stations_provider.dart';
+import 'package:tmms_shifts_client/providers/sort_provider.dart';
 import 'package:tmms_shifts_client/widgets/data_fetch_error.dart';
 import 'package:tmms_shifts_client/widgets/date_picker_row.dart';
 import 'package:tmms_shifts_client/widgets/drawer.dart';
@@ -23,6 +20,7 @@ class MonitoringFullReportRoute extends StatefulWidget {
   final String? fromDate;
   final String? toDate;
   final String? stationCodes;
+  final String? sortBy;
 
   /// Creates a new home route for the app.
   const MonitoringFullReportRoute({
@@ -30,6 +28,7 @@ class MonitoringFullReportRoute extends StatefulWidget {
     this.fromDate,
     this.toDate,
     this.stationCodes,
+    this.sortBy,
   });
 
   @override
@@ -62,7 +61,7 @@ class _MonitoringFullReportRouteState extends State<MonitoringFullReportRoute> {
   Widget build(BuildContext context) {
     final localizations = AppLocalizations.of(context)!;
     final user = context.watch<Preferences>().activeUser;
-    final selectedStationState = context.read<SelectedStationsProvider>();
+    final sortState = context.read<SortProvider>();
     if (user == null || user.stations.isEmpty) return Scaffold();
 
     clearMainControllers();
@@ -78,20 +77,24 @@ class _MonitoringFullReportRouteState extends State<MonitoringFullReportRoute> {
             } else if (!snapshot.hasData) {
               return centeredCircularProgressIndicator;
             } else {
+              final results = Helpers.sortResults(
+                sortState,
+                user.stations,
+                snapshot.data!.results,
+              );
               return ListView(
                 padding: offsetAll16p,
                 children: [
                   const SizedBox(),
                   const StationSelectionField(),
                   const DatePickerRow(),
-                  ExcelExportButton(
-                    data:
-                        snapshot.data!.results.map((e) => e.toJson()).toList(),
+                  Helpers.getExcelExportSortRow(
+                    results.map((e) => e.toJson()).toList(),
                   ),
                   const SizedBox(height: 16),
                   ..._getMonitoringFullReportCards(
                     context,
-                    snapshot.data!.results,
+                    results,
                     localizations,
                     user,
                   ),

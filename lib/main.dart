@@ -8,6 +8,7 @@ import 'package:tmms_shifts_client/consts.dart';
 import 'package:tmms_shifts_client/data/backend_types.dart';
 import 'package:tmms_shifts_client/helpers.dart';
 import 'package:tmms_shifts_client/network_interface.dart';
+import 'package:tmms_shifts_client/providers/sort_provider.dart';
 import 'package:tmms_shifts_client/routes/corrector_replacement_events.dart';
 import 'package:tmms_shifts_client/routes/counter_corrector_reports.dart';
 import 'package:tmms_shifts_client/routes/counter_replacement_events.dart';
@@ -58,6 +59,7 @@ final GoRouter _router = GoRouter(
         final stationCodes = queries[stationCodesKey];
         final fromDate = queries[fromDateKey];
         final toDate = queries[toDateKey];
+        final sortBy = queries[sortByKey];
 
         return Helpers.materialPageWithMultiProviders(
           state,
@@ -65,6 +67,7 @@ final GoRouter _router = GoRouter(
             stationCodes: stationCodes,
             fromDate: fromDate,
             toDate: toDate,
+            sortBy: sortBy,
           ),
           MonitoringFullReportRoute.routingName,
         );
@@ -92,6 +95,7 @@ final GoRouter _router = GoRouter(
         final stationCodes = queries[stationCodesKey];
         final fromDate = queries[fromDateKey];
         final toDate = queries[toDateKey];
+        final sortBy = queries[sortByKey];
 
         return Helpers.materialPageWithMultiProviders(
           state,
@@ -99,6 +103,7 @@ final GoRouter _router = GoRouter(
             stationCodes: stationCodes,
             fromDate: fromDate,
             toDate: toDate,
+            sortBy: sortBy,
           ),
           CorrectorReplacementEventsRoute.routingName,
         );
@@ -112,6 +117,7 @@ final GoRouter _router = GoRouter(
         final stationCodes = queries[stationCodesKey];
         final fromDate = queries[fromDateKey];
         final toDate = queries[toDateKey];
+        final sortBy = queries[sortByKey];
 
         return Helpers.materialPageWithMultiProviders(
           state,
@@ -119,6 +125,7 @@ final GoRouter _router = GoRouter(
             stationCodes: stationCodes,
             fromDate: fromDate,
             toDate: toDate,
+            sortBy: sortBy,
           ),
           CounterReplacementEventsRoute.routingName,
         );
@@ -132,6 +139,7 @@ final GoRouter _router = GoRouter(
         final stationCodes = queries[stationCodesKey];
         final fromDate = queries[fromDateKey];
         final toDate = queries[toDateKey];
+        final sortBy = queries[sortByKey];
 
         return Helpers.materialPageWithMultiProviders(
           state,
@@ -139,6 +147,7 @@ final GoRouter _router = GoRouter(
             stationCodes: stationCodes,
             fromDate: fromDate,
             toDate: toDate,
+            sortBy: sortBy,
           ),
           CounterCorrectorReportsRoute.routingName,
         );
@@ -152,6 +161,7 @@ final GoRouter _router = GoRouter(
         final stationCodes = queries[stationCodesKey];
         final fromDate = queries[fromDateKey];
         final toDate = queries[toDateKey];
+        final sortBy = queries[sortByKey];
 
         return Helpers.materialPageWithMultiProviders(
           state,
@@ -159,6 +169,7 @@ final GoRouter _router = GoRouter(
             stationCodes: stationCodes,
             fromDate: fromDate,
             toDate: toDate,
+            sortBy: sortBy,
           ),
           PressureAndTempReportsRoute.routingName,
         );
@@ -211,6 +222,10 @@ final GoRouter _router = GoRouter(
 
       if (!queryParameters.containsKey(toDateKey)) {
         queryParameters[toDateKey] = Helpers.jalaliToDashDate(Jalali.now());
+      }
+
+      if (!queryParameters.containsKey(sortByKey)) {
+        queryParameters[sortByKey] = byDateDescQueryValue;
       }
 
       return state.uri.replace(queryParameters: queryParameters).toString();

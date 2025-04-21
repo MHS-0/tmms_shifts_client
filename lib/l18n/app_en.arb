@@ -100,5 +100,10 @@
   "exportToExcel": "Export to Excel",
   "dataIsEmpty": "Data is empty",
   "dataEncodeError": "Data encode failure",
+  "itemSort": "Sort",
+  "byDateAsc": "By date (ascending)",
+  "byDateDesc": "By date (descending)",
+  "byStationAsc": "By station (ascending)",
+  "byStationDesc": "By station (descending)",
   "pageNotFound": "Page not found!"
 }

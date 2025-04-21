@@ -3,6 +3,7 @@ import 'dart:typed_data';
 import 'package:excel/excel.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:logging/logging.dart';
 import 'package:persian_datetime_picker/persian_datetime_picker.dart';
 import 'package:provider/provider.dart';
 import 'package:tmms_shifts_client/consts.dart';
@@ -11,7 +12,10 @@ import 'package:tmms_shifts_client/l18n/app_localizations.dart';
 import 'package:tmms_shifts_client/network_interface.dart';
 import 'package:tmms_shifts_client/providers/date_picker_provider.dart';
 import 'package:tmms_shifts_client/providers/selected_stations_provider.dart';
+import 'package:tmms_shifts_client/providers/sort_provider.dart';
 import 'package:tmms_shifts_client/widgets/error_alert_dialog.dart';
+import 'package:tmms_shifts_client/widgets/excel_export_button.dart';
+import 'package:tmms_shifts_client/widgets/sort_selector.dart';
 
 final class Helpers {
   /// Remove a query from the current path shown in the Browser's
@@ -255,6 +259,7 @@ final class Helpers {
     final stationCodes = queries[stationCodesKey];
     final fromDate = queries[fromDateKey];
     final toDate = queries[toDateKey];
+    final sortBy = queries[sortByKey];
 
     return MaterialPage(
       child: MultiProvider(
@@ -271,6 +276,10 @@ final class Helpers {
                 (_) =>
                     Helpers.getDatePickerProviderFromQueries(fromDate, toDate),
             key: ObjectKey("$routingName DatePickerProvider"),
+          ),
+          ChangeNotifierProvider(
+            create: (_) => SortProvider.fromQuery(sortBy),
+            key: ObjectKey("$routingName SortProvider"),
           ),
         ],
         child: route,
@@ -374,5 +383,200 @@ final class Helpers {
     } catch (e) {
       return Future.error("${localizations.dataEncodeError}:\n$e");
     }
+  }
+
+  static Widget getExcelExportSortRow(List<Map<String, dynamic>> data) {
+    return Wrap(
+      alignment: WrapAlignment.spaceBetween,
+      runAlignment: WrapAlignment.center,
+      crossAxisAlignment: WrapCrossAlignment.center,
+      runSpacing: 16,
+      children: [
+        SizedBox(
+          width: 550,
+          child: Align(alignment: Alignment.centerRight, child: SortSelector()),
+        ),
+        SizedBox(
+          width: 300,
+          child: Align(
+            alignment: Alignment.centerLeft,
+            child: ExcelExportButton(data: data),
+          ),
+        ),
+      ],
+    );
+  }
+
+  static Map<int, String> getStationCodeTitleMap(
+    List<int> codes,
+    List<Station> stations,
+  ) {
+    final Map<int, String> stationCodeToTitleMap = {};
+    for (final entry in codes) {
+      if (stationCodeToTitleMap.containsKey(entry)) {
+        continue;
+      }
+      stationCodeToTitleMap[entry] =
+          stations.where((e) => e.code == entry).firstOrNull?.title ?? "";
+    }
+    return stationCodeToTitleMap;
+  }
+
+  // FIXME
+  // TODO
+  // Definitely refactor this into something cleaner!
+  static List<T> sortResults<T>(
+    SortProvider state,
+    List<Station> stations,
+    List<T> initial,
+  ) {
+    List<GetPressureAndTemperatureFullReportResponseResultItem>?
+    pressureAndTempList;
+    List<GetMonitoringFullReportResponseResultItem>? monitoringList;
+    List<GetMeterAndCorrectorFullReportResponseResultItem>? meterCorrectorList;
+    List<GetMeterChangeEventResponse>? meterChangeList;
+    List<GetCorrectorChangeEventResponse>? correctorChangeList;
+
+    Map<int, String> stationCodeTitleMap;
+
+    if (T == GetPressureAndTemperatureFullReportResponseResultItem) {
+      pressureAndTempList =
+          initial
+              as List<GetPressureAndTemperatureFullReportResponseResultItem>;
+      stationCodeTitleMap = Helpers.getStationCodeTitleMap(
+        pressureAndTempList.map((e) => e.stationCode).toList(),
+        stations,
+      );
+    } else if (T == GetMonitoringFullReportResponseResultItem) {
+      monitoringList =
+          initial as List<GetMonitoringFullReportResponseResultItem>;
+      stationCodeTitleMap = Helpers.getStationCodeTitleMap(
+        monitoringList.map((e) => e.stationCode).toList(),
+        stations,
+      );
+    } else if (T == GetMeterAndCorrectorFullReportResponseResultItem) {
+      meterCorrectorList =
+          initial as List<GetMeterAndCorrectorFullReportResponseResultItem>;
+      stationCodeTitleMap = Helpers.getStationCodeTitleMap(
+        meterCorrectorList.map((e) => e.stationCode).toList(),
+        stations,
+      );
+    } else if (T == GetMeterChangeEventResponse) {
+      meterChangeList = initial as List<GetMeterChangeEventResponse>;
+      stationCodeTitleMap = Helpers.getStationCodeTitleMap(
+        meterChangeList.map((e) => e.stationCode).toList(),
+        stations,
+      );
+    } else if (T == GetCorrectorChangeEventResponse) {
+      correctorChangeList = initial as List<GetCorrectorChangeEventResponse>;
+      stationCodeTitleMap = Helpers.getStationCodeTitleMap(
+        correctorChangeList.map((e) => e.stationCode).toList(),
+        stations,
+      );
+    } else {
+      sharedLogger.log(
+        Level.SEVERE,
+        "Failed to sort list, returning empty list",
+      );
+      return [];
+    }
+
+    switch (state.selectedSort) {
+      case SortSelection.byDateAsc:
+        pressureAndTempList?.sort(
+          (a, b) => a.date.julianDayNumber.compareTo(b.date.julianDayNumber),
+        );
+        monitoringList?.sort(
+          (a, b) => a.date.julianDayNumber.compareTo(b.date.julianDayNumber),
+        );
+        meterCorrectorList?.sort(
+          (a, b) => a.date.julianDayNumber.compareTo(b.date.julianDayNumber),
+        );
+        meterChangeList?.sort(
+          (a, b) => a.date.julianDayNumber.compareTo(b.date.julianDayNumber),
+        );
+        correctorChangeList?.sort(
+          (a, b) => a.date.julianDayNumber.compareTo(b.date.julianDayNumber),
+        );
+        break;
+      case SortSelection.byStationAlphabeticAsc:
+        pressureAndTempList?.sort(
+          (a, b) => stationCodeTitleMap[a.stationCode]!.compareTo(
+            stationCodeTitleMap[b.stationCode]!,
+          ),
+        );
+        monitoringList?.sort(
+          (a, b) => stationCodeTitleMap[a.stationCode]!.compareTo(
+            stationCodeTitleMap[b.stationCode]!,
+          ),
+        );
+        meterCorrectorList?.sort(
+          (a, b) => stationCodeTitleMap[a.stationCode]!.compareTo(
+            stationCodeTitleMap[b.stationCode]!,
+          ),
+        );
+        meterChangeList?.sort(
+          (a, b) => stationCodeTitleMap[a.stationCode]!.compareTo(
+            stationCodeTitleMap[b.stationCode]!,
+          ),
+        );
+        correctorChangeList?.sort(
+          (a, b) => stationCodeTitleMap[a.stationCode]!.compareTo(
+            stationCodeTitleMap[b.stationCode]!,
+          ),
+        );
+        break;
+      case SortSelection.byStationAlphabeticDesc:
+        pressureAndTempList?.sort(
+          (a, b) => stationCodeTitleMap[b.stationCode]!.compareTo(
+            stationCodeTitleMap[a.stationCode]!,
+          ),
+        );
+        monitoringList?.sort(
+          (a, b) => stationCodeTitleMap[b.stationCode]!.compareTo(
+            stationCodeTitleMap[a.stationCode]!,
+          ),
+        );
+        meterCorrectorList?.sort(
+          (a, b) => stationCodeTitleMap[b.stationCode]!.compareTo(
+            stationCodeTitleMap[a.stationCode]!,
+          ),
+        );
+        meterChangeList?.sort(
+          (a, b) => stationCodeTitleMap[b.stationCode]!.compareTo(
+            stationCodeTitleMap[a.stationCode]!,
+          ),
+        );
+        correctorChangeList?.sort(
+          (a, b) => stationCodeTitleMap[b.stationCode]!.compareTo(
+            stationCodeTitleMap[a.stationCode]!,
+          ),
+        );
+        break;
+      default:
+        pressureAndTempList?.sort(
+          (a, b) => b.date.julianDayNumber.compareTo(a.date.julianDayNumber),
+        );
+        monitoringList?.sort(
+          (a, b) => b.date.julianDayNumber.compareTo(a.date.julianDayNumber),
+        );
+        meterCorrectorList?.sort(
+          (a, b) => b.date.julianDayNumber.compareTo(a.date.julianDayNumber),
+        );
+        meterChangeList?.sort(
+          (a, b) => b.date.julianDayNumber.compareTo(a.date.julianDayNumber),
+        );
+        correctorChangeList?.sort(
+          (a, b) => b.date.julianDayNumber.compareTo(a.date.julianDayNumber),
+        );
+        break;
+    }
+    if (pressureAndTempList != null) return pressureAndTempList as List<T>;
+    if (monitoringList != null) return monitoringList as List<T>;
+    if (meterCorrectorList != null) return meterCorrectorList as List<T>;
+    if (meterChangeList != null) return meterChangeList as List<T>;
+    if (correctorChangeList != null) return correctorChangeList as List<T>;
+    sharedLogger.log(Level.SEVERE, "Invalid state");
+    return [];
   }
 }

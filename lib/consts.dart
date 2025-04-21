@@ -26,6 +26,8 @@ const offsetAll16p = EdgeInsets.all(16);
 const offsetAll32p = EdgeInsets.all(32);
 
 const trashcanIcon = Icon(Icons.delete);
+const selectedCheckIcon = Icon(Icons.check_circle, color: Colors.lightGreen);
+const unselectedCheckIcon = Icon(Icons.circle_outlined, color: Colors.red);
 
 const centeredCircularProgressIndicator = Center(
   child: CircularProgressIndicator(),
