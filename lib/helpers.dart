@@ -496,96 +496,132 @@ final class Helpers {
       return [];
     }
 
-    switch (state.selectedSort) {
-      case SortSelection.byDateAsc:
-        pressureAndTempList?.sort(
-          (a, b) => a.date.julianDayNumber.compareTo(b.date.julianDayNumber),
-        );
-        monitoringList?.sort(
-          (a, b) => a.date.julianDayNumber.compareTo(b.date.julianDayNumber),
-        );
-        meterCorrectorList?.sort(
-          (a, b) => a.date.julianDayNumber.compareTo(b.date.julianDayNumber),
-        );
-        meterChangeList?.sort(
-          (a, b) => a.date.julianDayNumber.compareTo(b.date.julianDayNumber),
-        );
-        correctorChangeList?.sort(
-          (a, b) => a.date.julianDayNumber.compareTo(b.date.julianDayNumber),
-        );
-        break;
-      case SortSelection.byStationAlphabeticAsc:
-        pressureAndTempList?.sort(
-          (a, b) => stationCodeTitleMap[a.stationCode]!.compareTo(
-            stationCodeTitleMap[b.stationCode]!,
-          ),
-        );
-        monitoringList?.sort(
-          (a, b) => stationCodeTitleMap[a.stationCode]!.compareTo(
-            stationCodeTitleMap[b.stationCode]!,
-          ),
-        );
-        meterCorrectorList?.sort(
-          (a, b) => stationCodeTitleMap[a.stationCode]!.compareTo(
-            stationCodeTitleMap[b.stationCode]!,
-          ),
-        );
-        meterChangeList?.sort(
-          (a, b) => stationCodeTitleMap[a.stationCode]!.compareTo(
-            stationCodeTitleMap[b.stationCode]!,
-          ),
-        );
-        correctorChangeList?.sort(
-          (a, b) => stationCodeTitleMap[a.stationCode]!.compareTo(
-            stationCodeTitleMap[b.stationCode]!,
-          ),
-        );
-        break;
-      case SortSelection.byStationAlphabeticDesc:
-        pressureAndTempList?.sort(
-          (a, b) => stationCodeTitleMap[b.stationCode]!.compareTo(
-            stationCodeTitleMap[a.stationCode]!,
-          ),
-        );
-        monitoringList?.sort(
-          (a, b) => stationCodeTitleMap[b.stationCode]!.compareTo(
-            stationCodeTitleMap[a.stationCode]!,
-          ),
-        );
-        meterCorrectorList?.sort(
-          (a, b) => stationCodeTitleMap[b.stationCode]!.compareTo(
-            stationCodeTitleMap[a.stationCode]!,
-          ),
-        );
-        meterChangeList?.sort(
-          (a, b) => stationCodeTitleMap[b.stationCode]!.compareTo(
-            stationCodeTitleMap[a.stationCode]!,
-          ),
-        );
-        correctorChangeList?.sort(
-          (a, b) => stationCodeTitleMap[b.stationCode]!.compareTo(
-            stationCodeTitleMap[a.stationCode]!,
-          ),
-        );
-        break;
-      default:
-        pressureAndTempList?.sort(
-          (a, b) => b.date.julianDayNumber.compareTo(a.date.julianDayNumber),
-        );
-        monitoringList?.sort(
-          (a, b) => b.date.julianDayNumber.compareTo(a.date.julianDayNumber),
-        );
-        meterCorrectorList?.sort(
-          (a, b) => b.date.julianDayNumber.compareTo(a.date.julianDayNumber),
-        );
-        meterChangeList?.sort(
-          (a, b) => b.date.julianDayNumber.compareTo(a.date.julianDayNumber),
-        );
-        correctorChangeList?.sort(
-          (a, b) => b.date.julianDayNumber.compareTo(a.date.julianDayNumber),
-        );
-        break;
+    if (state.selectedCustomSort == null) {
+      switch (state.selectedSort) {
+        case SortSelection.byDateAsc:
+          pressureAndTempList?.sort(
+            (a, b) => a.date.julianDayNumber.compareTo(b.date.julianDayNumber),
+          );
+          monitoringList?.sort(
+            (a, b) => a.date.julianDayNumber.compareTo(b.date.julianDayNumber),
+          );
+          meterCorrectorList?.sort(
+            (a, b) => a.date.julianDayNumber.compareTo(b.date.julianDayNumber),
+          );
+          meterChangeList?.sort(
+            (a, b) => a.date.julianDayNumber.compareTo(b.date.julianDayNumber),
+          );
+          correctorChangeList?.sort(
+            (a, b) => a.date.julianDayNumber.compareTo(b.date.julianDayNumber),
+          );
+          break;
+        case SortSelection.byStationAlphabeticAsc:
+          pressureAndTempList?.sort(
+            (a, b) => stationCodeTitleMap[a.stationCode]!.compareTo(
+              stationCodeTitleMap[b.stationCode]!,
+            ),
+          );
+          monitoringList?.sort(
+            (a, b) => stationCodeTitleMap[a.stationCode]!.compareTo(
+              stationCodeTitleMap[b.stationCode]!,
+            ),
+          );
+          meterCorrectorList?.sort(
+            (a, b) => stationCodeTitleMap[a.stationCode]!.compareTo(
+              stationCodeTitleMap[b.stationCode]!,
+            ),
+          );
+          meterChangeList?.sort(
+            (a, b) => stationCodeTitleMap[a.stationCode]!.compareTo(
+              stationCodeTitleMap[b.stationCode]!,
+            ),
+          );
+          correctorChangeList?.sort(
+            (a, b) => stationCodeTitleMap[a.stationCode]!.compareTo(
+              stationCodeTitleMap[b.stationCode]!,
+            ),
+          );
+          break;
+        case SortSelection.byStationAlphabeticDesc:
+          pressureAndTempList?.sort(
+            (a, b) => stationCodeTitleMap[b.stationCode]!.compareTo(
+              stationCodeTitleMap[a.stationCode]!,
+            ),
+          );
+          monitoringList?.sort(
+            (a, b) => stationCodeTitleMap[b.stationCode]!.compareTo(
+              stationCodeTitleMap[a.stationCode]!,
+            ),
+          );
+          meterCorrectorList?.sort(
+            (a, b) => stationCodeTitleMap[b.stationCode]!.compareTo(
+              stationCodeTitleMap[a.stationCode]!,
+            ),
+          );
+          meterChangeList?.sort(
+            (a, b) => stationCodeTitleMap[b.stationCode]!.compareTo(
+              stationCodeTitleMap[a.stationCode]!,
+            ),
+          );
+          correctorChangeList?.sort(
+            (a, b) => stationCodeTitleMap[b.stationCode]!.compareTo(
+              stationCodeTitleMap[a.stationCode]!,
+            ),
+          );
+          break;
+        default:
+          pressureAndTempList?.sort(
+            (a, b) => b.date.julianDayNumber.compareTo(a.date.julianDayNumber),
+          );
+          monitoringList?.sort(
+            (a, b) => b.date.julianDayNumber.compareTo(a.date.julianDayNumber),
+          );
+          meterCorrectorList?.sort(
+            (a, b) => b.date.julianDayNumber.compareTo(a.date.julianDayNumber),
+          );
+          meterChangeList?.sort(
+            (a, b) => b.date.julianDayNumber.compareTo(a.date.julianDayNumber),
+          );
+          correctorChangeList?.sort(
+            (a, b) => b.date.julianDayNumber.compareTo(a.date.julianDayNumber),
+          );
+          break;
+      }
+    } else {
+      print(1);
+      final sortList = state.selectedCustomSort!;
+      final userCustomSortList =
+          Preferences.instance().activeUser?.customStationSort
+              ?.where((e) => e.id == sortList)
+              .firstOrNull
+              ?.stations;
+
+      userCustomSortList?.sort((a, b) => a.priority.compareTo(b.priority));
+      if (userCustomSortList == null) return [];
+
+      monitoringList?.sort((a, b) {
+        final aPriority =
+            userCustomSortList
+                .where((e) => e.station == a.stationCode)
+                .firstOrNull
+                ?.priority;
+        final bPriority =
+            userCustomSortList
+                .where((e) => e.station == b.stationCode)
+                .firstOrNull
+                ?.priority;
+
+        if (aPriority != null && bPriority != null) {
+          return aPriority.compareTo(bPriority);
+        }
+        if (aPriority != null) return aPriority;
+        if (bPriority != null) return bPriority;
+
+        // else, put at the bottom of the sorted list.
+        return 99999;
+      });
     }
+
     if (pressureAndTempList != null) return pressureAndTempList as List<T>;
     if (monitoringList != null) return monitoringList as List<T>;
     if (meterCorrectorList != null) return meterCorrectorList as List<T>;

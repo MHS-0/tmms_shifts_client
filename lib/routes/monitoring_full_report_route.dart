@@ -62,7 +62,7 @@ class _MonitoringFullReportRouteState extends State<MonitoringFullReportRoute> {
   Widget build(BuildContext context) {
     final localizations = AppLocalizations.of(context)!;
     final user = context.watch<Preferences>().activeUser;
-    final sortState = context.read<SortProvider>();
+    final sortState = context.watch<SortProvider>();
     if (user == null || user.stations.isEmpty) return Scaffold();
 
     return SelectionArea(
