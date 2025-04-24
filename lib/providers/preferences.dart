@@ -20,21 +20,23 @@ const persianLocaleValue = 'persian';
 
 @JsonSerializable(explicitToJson: true)
 class ActiveUser {
-  const ActiveUser({
+  ActiveUser({
     required this.username,
     required this.token,
     required this.isStaff,
     required this.expiry,
     required this.stations,
+    required this.customStationSort,
     this.fullname,
   });
 
-  final String username;
-  final String? fullname;
-  final List<Station> stations;
-  final String token;
-  final bool isStaff;
-  final DateTime expiry;
+  String username;
+  String? fullname;
+  List<Station> stations;
+  String token;
+  bool isStaff;
+  DateTime expiry;
+  List<GetUsersCustomStationGroupResponseResultItem>? customStationSort;
 
   ActiveUser.fromLoginResponse(LoginResponse resp, GetProfileResponse profile)
     : username = profile.username,
@@ -43,6 +45,43 @@ class ActiveUser {
       expiry = resp.expiry,
       fullname = profile.fullname,
       stations = profile.stations;
+
+  ActiveUser copyWith({
+    String? username,
+    String? fullname,
+    List<Station>? stations,
+    String? token,
+    bool? isStaff,
+    DateTime? expiry,
+    List<GetUsersCustomStationGroupResponseResultItem>? customStationSort,
+  }) {
+    return ActiveUser(
+      username: username ?? this.username,
+      token: token ?? this.token,
+      isStaff: isStaff ?? this.isStaff,
+      expiry: expiry ?? this.expiry,
+      stations: stations ?? this.stations,
+      customStationSort: customStationSort ?? this.customStationSort,
+      fullname: fullname ?? this.fullname,
+    );
+  }
+
+  /// Create a new instance with the class values updated from the latest
+  /// GetProfile results.
+  void updateFromNewGetProfile(GetProfileResponse resp) {
+    username = resp.username;
+    fullname = resp.fullname;
+    isStaff = resp.isStaff;
+    stations = resp.stations;
+  }
+
+  /// Create a new instance with the class values updated from the latest
+  /// GetProfile results.
+  void updateFromNewGetCustomStationGroup(
+    GetUsersCustomStationGroupResponse resp,
+  ) {
+    customStationSort = resp.results;
+  }
 
   factory ActiveUser.fromJson(Map<String, dynamic> json) =>
       _$ActiveUserFromJson(json);
@@ -77,6 +116,8 @@ class Preferences extends ChangeNotifier {
   /// The user's stored authorization token
   ActiveUser? _activeUser;
 
+  GetUsersCustomStationGroupResponseResultItem? _selectedCustomSort;
+
   /// The user's preferred theme mode.
   ///
   /// Use the [setTheme] method to set a new ThemeMode.
@@ -89,6 +130,10 @@ class Preferences extends ChangeNotifier {
 
   /// The user's stored authorization token
   ActiveUser? get activeUser => _activeUser;
+
+  // FIXME: Create new provider for this.
+  GetUsersCustomStationGroupResponseResultItem? get selectedCustomSort =>
+      _selectedCustomSort;
 
   /// Loads the user's preferences and sets the necessary instance variables. Should
   /// be called and awaited before the instance can be used.
@@ -178,11 +223,19 @@ class Preferences extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// Sets the user's auth token to [token] and saves it to SharedPreferences.
+  /// Sets the user's details to SharedPreferences.
   Future<void> setActiveUser(ActiveUser user) async {
     await _sp.setString(activeUserKey, jsonEncode(user));
     _activeUser = user;
     notifyListeners();
+  }
+
+  /// Like setActiveUser, but doesn't call notifyListeners.
+  /// Used for refreshing account details in GoRouter's redirect function
+  /// when a page hasn't been loaded yet.
+  Future<void> setActiveUserNoNotify(ActiveUser user) async {
+    await _sp.setString(activeUserKey, jsonEncode(user));
+    _activeUser = user;
   }
 
   /// Unsets the user's auth token from SharedPreferences.
@@ -190,6 +243,19 @@ class Preferences extends ChangeNotifier {
     await _sp.remove(activeUserKey);
     _activeUser = null;
     notifyListeners();
+  }
+
+  void setSelectedCustomSort(
+    GetUsersCustomStationGroupResponseResultItem? sort,
+  ) {
+    _selectedCustomSort = sort;
+    notifyListeners();
+  }
+
+  void setSelectedCustomSortNoNotify(
+    GetUsersCustomStationGroupResponseResultItem? sort,
+  ) {
+    _selectedCustomSort = sort;
   }
 
   /// Refresh anything that depends on Preferences.

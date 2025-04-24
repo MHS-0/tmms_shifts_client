@@ -627,35 +627,56 @@ class NetworkInterface {
     });
   }
 
-  Future<void> removeCustomStationGroup() async {
-    await dio.delete(
-      "/reports/station_groups/3/",
-      options: authHeaderWithToken,
-    );
+  Future<bool?> removeCustomStationGroup(int id) async {
+    return await sendRequest(() async {
+      await dio.delete(
+        "/reports/station_groups/$id/",
+        options: authHeaderWithToken,
+      );
+      return true;
+    });
   }
 
-  Future<GetUsersCustomStationGroupResponse>
-  getUsersCustomStationsGroup() async {
-    final Response<Map<String, dynamic>> resp = await dio.get(
-      "/reports/station_groups",
-      options: authHeaderWithToken,
-    );
-    final finalResp = GetUsersCustomStationGroupResponse.fromJson(resp.data!);
-    return finalResp;
+  Future<GetUsersCustomStationGroupResponse?> getUsersCustomStationsGroup([
+    String? token,
+  ]) async {
+    return await sendRequest(() async {
+      final Options options;
+      if (token == null) {
+        options = authHeaderWithToken;
+      } else {
+        options = Options(
+          headers: emptyHeaderMap.map((k, v) {
+            if (k == authHeaderKey) {
+              return MapEntry(k, "Token $token");
+            } else {
+              return MapEntry(k, v);
+            }
+          }),
+        );
+      }
+
+      final Response<Map<String, dynamic>> resp = await dio.get(
+        "/reports/station_groups/",
+        options: options,
+      );
+      final finalResp = GetUsersCustomStationGroupResponse.fromJson(resp.data!);
+      return finalResp;
+    });
   }
 
-  Future<GetUsersCustomStationGroupResponseResultItem> createNewStationsGroup(
-    GetUsersCustomStationGroupResponseResultItem data,
+  Future<PostCreateNewStationGroupResponse?> createNewStationsGroup(
+    PostCreateNewStationGroupRequest data,
   ) async {
-    final Response<Map<String, dynamic>> resp = await dio.post(
-      "/reports/station_groups",
-      options: authHeaderWithToken,
-      data: data.toJson(),
-    );
-    final finalResp = GetUsersCustomStationGroupResponseResultItem.fromJson(
-      resp.data!,
-    );
-    return finalResp;
+    return await sendRequest(() async {
+      final Response<Map<String, dynamic>> resp = await dio.post(
+        "/reports/station_groups/",
+        options: authHeaderWithToken,
+        data: data.toJson(),
+      );
+      final finalResp = PostCreateNewStationGroupResponse.fromJson(resp.data!);
+      return finalResp;
+    });
   }
 
   /// The factory that returns the singleton instance.

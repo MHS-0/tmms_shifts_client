@@ -8,6 +8,7 @@ import 'package:tmms_shifts_client/l18n/app_localizations.dart';
 import 'package:tmms_shifts_client/network_interface.dart';
 import 'package:tmms_shifts_client/providers/preferences.dart';
 import 'package:tmms_shifts_client/providers/sort_provider.dart';
+import 'package:tmms_shifts_client/widgets/custom_station_sort_field.dart';
 import 'package:tmms_shifts_client/widgets/data_fetch_error.dart';
 import 'package:tmms_shifts_client/widgets/date_picker_row.dart';
 import 'package:tmms_shifts_client/widgets/drawer.dart';
@@ -21,6 +22,7 @@ class MonitoringFullReportRoute extends StatefulWidget {
   final String? toDate;
   final String? stationCodes;
   final String? sortBy;
+  final String? customSort;
 
   /// Creates a new home route for the app.
   const MonitoringFullReportRoute({
@@ -29,6 +31,7 @@ class MonitoringFullReportRoute extends StatefulWidget {
     this.toDate,
     this.stationCodes,
     this.sortBy,
+    this.customSort,
   });
 
   @override
@@ -88,6 +91,7 @@ class _MonitoringFullReportRouteState extends State<MonitoringFullReportRoute> {
                   Helpers.getExcelExportSortRow(
                     results.map((e) => e.toJson()).toList(),
                   ),
+                  const CustomStationSortField(),
                   const SizedBox(height: 16),
                   ..._getMonitoringFullReportCards(
                     context,

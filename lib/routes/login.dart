@@ -163,19 +163,14 @@ class _LoginRouteState extends State<LoginRoute> {
         Helpers.showNetworkErrorAlertDialog(context, localizations);
         return;
       }
+
       context.pop();
       Helpers.showCustomDialog(
         context,
         SuccessDialog(content: localizations.youHaveBeenLoggedIn),
       );
 
-      final activeUser = ActiveUser(
-        username: profileResp.username,
-        token: loginResp.token,
-        isStaff: profileResp.isStaff,
-        expiry: loginResp.expiry,
-        stations: profileResp.stations,
-      );
+      final activeUser = ActiveUser.fromLoginResponse(loginResp, profileResp);
 
       // TODO: Remove this maybe?
       // It might look good but it slown down the UX.

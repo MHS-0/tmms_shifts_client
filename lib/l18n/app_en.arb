@@ -106,5 +106,8 @@
   "byStationAsc": "By station (ascending)",
   "byStationDesc": "By station (descending)",
   "delete": "Delete",
+  "customSort": "Custom sort",
+  "none": "None",
+  "edit": "Edit",
   "pageNotFound": "Page not found!"
 }

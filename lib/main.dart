@@ -60,6 +60,7 @@ final GoRouter _router = GoRouter(
         final fromDate = queries[fromDateKey];
         final toDate = queries[toDateKey];
         final sortBy = queries[sortByKey];
+        final customSort = queries[customSortKey];
 
         return Helpers.materialPageWithMultiProviders(
           state,
@@ -68,6 +69,7 @@ final GoRouter _router = GoRouter(
             fromDate: fromDate,
             toDate: toDate,
             sortBy: sortBy,
+            customSort: customSort,
           ),
           MonitoringFullReportRoute.routingName,
         );
@@ -195,10 +197,15 @@ final GoRouter _router = GoRouter(
     }
     // Logout if session is expired. For example if the auth token has expired.
     final result = await instance.getProfile();
-    if (result == null) {
+    final stationSortResult = await instance.getUsersCustomStationsGroup();
+    if (result == null || stationSortResult == null) {
       sharedLogger.info("User isn't logged in. Logging out...");
       await Preferences.instance().unsetActiveUser();
       return "/login";
+    } else {
+      user.updateFromNewGetProfile(result);
+      user.updateFromNewGetCustomStationGroup(stationSortResult);
+      await Preferences.instance().setActiveUserNoNotify(user);
     }
 
     /// Redirect from login to home if already logged in.

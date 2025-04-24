@@ -197,9 +197,7 @@ final class Helpers {
     return await showDialog(
       barrierDismissible: barrierDismissable,
       context: context,
-      builder: (context) {
-        return widget;
-      },
+      builder: (context) => widget,
     );
   }
 
@@ -263,6 +261,15 @@ final class Helpers {
     final fromDate = queries[fromDateKey];
     final toDate = queries[toDateKey];
     final sortBy = queries[sortByKey];
+    final customSortId = queries[customSortKey];
+
+    if (customSortId != null) {
+      Preferences.instance().setSelectedCustomSortNoNotify(
+        Preferences.instance().activeUser?.customStationSort
+            ?.where((e) => e.id.toString() == customSortId)
+            .firstOrNull,
+      );
+    }
 
     return MaterialPage(
       child: MultiProvider(

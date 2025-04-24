@@ -12,6 +12,7 @@ part 'backend_types.g.dart';
 const fromDateKey = "from_date";
 const toDateKey = "to_date";
 const sortByKey = "sort_by";
+const customSortKey = "custom_sort";
 const stationCodesKey = "station_codes";
 const stationCodeKey = "station_code";
 
