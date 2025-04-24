@@ -11,6 +11,8 @@ import 'package:tmms_shifts_client/data/backend_types.dart';
 import 'package:tmms_shifts_client/l18n/app_localizations.dart';
 import 'package:tmms_shifts_client/network_interface.dart';
 import 'package:tmms_shifts_client/providers/date_picker_provider.dart';
+import 'package:tmms_shifts_client/providers/preferences.dart';
+import 'package:tmms_shifts_client/providers/selected_ran_provider.dart';
 import 'package:tmms_shifts_client/providers/selected_stations_provider.dart';
 import 'package:tmms_shifts_client/providers/sort_provider.dart';
 import 'package:tmms_shifts_client/widgets/error_alert_dialog.dart';
@@ -253,8 +255,9 @@ final class Helpers {
   static MaterialPage materialPageWithMultiProviders(
     GoRouterState state,
     Widget route,
-    String routingName,
-  ) {
+    String routingName, {
+    bool ranProvider = false,
+  }) {
     final queries = state.uri.queryParameters;
     final stationCodes = queries[stationCodesKey];
     final fromDate = queries[fromDateKey];
@@ -281,6 +284,11 @@ final class Helpers {
             create: (_) => SortProvider.fromQuery(sortBy),
             key: ObjectKey("$routingName SortProvider"),
           ),
+          if (ranProvider)
+            ChangeNotifierProvider(
+              create: (_) => SelectedRanProvider(),
+              key: ObjectKey("$routingName SelectedRanProvider"),
+            ),
         ],
         child: route,
       ),
@@ -315,16 +323,24 @@ final class Helpers {
     return Text(content, style: boldTextStyle);
   }
 
-  static Widget titleAndWidgetRow(String title, Widget widget) {
+  static Widget titleAndWidgetRow(
+    String title,
+    Widget widget, {
+    double width = 400,
+    bool center = false,
+    double titleWidth = 200,
+  }) {
     return SizedBox(
       height: 80,
       child: Row(
+        mainAxisAlignment:
+            center ? MainAxisAlignment.center : MainAxisAlignment.start,
         spacing: 32,
         children: [
           SizedBox(
-            width: 200,
+            width: titleWidth,
             child: Align(
-              alignment: Alignment.centerLeft,
+              alignment: center ? Alignment.center : Alignment.centerLeft,
               child: Text(
                 title,
                 textAlign: TextAlign.end,
@@ -332,7 +348,7 @@ final class Helpers {
               ),
             ),
           ),
-          SizedBox(width: 400, child: widget),
+          SizedBox(width: width, child: widget),
         ],
       ),
     );
@@ -578,5 +594,27 @@ final class Helpers {
     if (correctorChangeList != null) return correctorChangeList as List<T>;
     sharedLogger.log(Level.SEVERE, "Invalid state");
     return [];
+  }
+
+  static Future<void> showEditDialogAndHandleResult(
+    BuildContext context,
+    Widget dialog, {
+    bool barrierDismissable = true,
+  }) async {
+    context.read<DatePickerProvider>().setReportDate(Jalali.now());
+    final String? result = await Helpers.showCustomDialog(
+      context,
+      dialog,
+      barrierDismissable: barrierDismissable,
+    );
+    if (context.mounted && result != null) {
+      await Helpers.showCustomDialog(
+        context,
+        ErrorAlertDialog(result),
+        barrierDismissable: barrierDismissable,
+      );
+    } else if (context.mounted) {
+      context.read<Preferences>().refreshRoute();
+    }
   }
 }

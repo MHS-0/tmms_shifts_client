@@ -52,67 +52,75 @@ class _LoginRouteState extends State<LoginRoute> {
                   padding: offsetAll32p,
                   child: Form(
                     key: _formKey,
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      spacing: 16,
-                      children: [
-                        const SizedBox(height: 50),
-                        Image.asset(iconAssetPath, width: 200, height: 200),
-                        Text(
-                          localizations.longTitle,
-                          style: const TextStyle(fontSize: 20),
-                        ),
-                        const SizedBox(),
-                        TextFormField(
-                          controller: _usernameController,
-                          decoration: InputDecoration(
-                            constraints: BoxConstraints.loose(
-                              Size(300, double.infinity),
-                            ),
-                            labelText: localizations.usernameTextFieldLabel,
-                            hintText: localizations.usernameTextFieldHint,
+                    child: AutofillGroup(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        spacing: 16,
+                        children: [
+                          const SizedBox(height: 50),
+                          Image.asset(iconAssetPath, width: 200, height: 200),
+                          Text(
+                            localizations.longTitle,
+                            style: const TextStyle(fontSize: 20),
                           ),
-                          textInputAction: TextInputAction.next,
-                          autofocus: true,
-                          maxLines: 1,
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return localizations.fieldShouldBeFilled;
-                            }
-                            return null;
-                          },
-                        ),
-                        TextFormField(
-                          obscureText: true,
-                          controller: _passwordController,
-                          decoration: InputDecoration(
-                            constraints: BoxConstraints.loose(
-                              Size(300, double.infinity),
+                          const SizedBox(),
+                          TextFormField(
+                            controller: _usernameController,
+                            autofillHints: const [AutofillHints.username],
+                            decoration: InputDecoration(
+                              constraints: BoxConstraints.loose(
+                                Size(300, double.infinity),
+                              ),
+                              labelText: localizations.usernameTextFieldLabel,
+                              hintText: localizations.usernameTextFieldHint,
                             ),
-                            labelText: localizations.passwordTextFieldLabel,
-                            hintText: localizations.passwordTextFieldHint,
+                            textInputAction: TextInputAction.next,
+                            autofocus: true,
+                            maxLines: 1,
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return localizations.fieldShouldBeFilled;
+                              }
+                              return null;
+                            },
                           ),
-                          textInputAction: TextInputAction.done,
-                          onFieldSubmitted:
-                              (_) async =>
-                                  await _loginCallback(context, localizations),
-                          maxLines: 1,
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return localizations.fieldShouldBeFilled;
-                            }
-                            return null;
-                          },
-                        ),
-                        ElevatedButton.icon(
-                          label: Text(localizations.sign_in),
-                          icon: const Icon(Icons.login),
-                          onPressed:
-                              () async =>
-                                  await _loginCallback(context, localizations),
-                        ),
-                      ],
+                          TextFormField(
+                            controller: _passwordController,
+                            autofillHints: const [AutofillHints.password],
+                            obscureText: true,
+                            decoration: InputDecoration(
+                              constraints: BoxConstraints.loose(
+                                Size(300, double.infinity),
+                              ),
+                              labelText: localizations.passwordTextFieldLabel,
+                              hintText: localizations.passwordTextFieldHint,
+                            ),
+                            textInputAction: TextInputAction.done,
+                            onFieldSubmitted:
+                                (_) async => await _loginCallback(
+                                  context,
+                                  localizations,
+                                ),
+                            maxLines: 1,
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return localizations.fieldShouldBeFilled;
+                              }
+                              return null;
+                            },
+                          ),
+                          ElevatedButton.icon(
+                            label: Text(localizations.sign_in),
+                            icon: const Icon(Icons.login),
+                            onPressed:
+                                () async => await _loginCallback(
+                                  context,
+                                  localizations,
+                                ),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 ),
@@ -128,15 +136,15 @@ class _LoginRouteState extends State<LoginRoute> {
     BuildContext context,
     AppLocalizations localizations,
   ) async {
-    final loginInfo = LoginRequest(
-      username: _usernameController.text,
-      password: _passwordController.text,
-    );
     if (_formKey.currentState!.validate()) {
-      Helpers.showCustomDialog(context, WaitDialog());
-      final networkInterface = NetworkInterface.instance();
+      final loginInfo = LoginRequest(
+        username: _usernameController.text,
+        password: _passwordController.text,
+      );
+      Helpers.showCustomDialog(context, const WaitDialog());
+      final instance = NetworkInterface.instance();
 
-      final loginResp = await networkInterface.login(loginInfo);
+      final loginResp = await instance.login(loginInfo);
 
       if (!context.mounted) return;
 
@@ -146,7 +154,7 @@ class _LoginRouteState extends State<LoginRoute> {
         return;
       }
 
-      final profileResp = await networkInterface.getProfile(loginResp.token);
+      final profileResp = await instance.getProfile(loginResp.token);
 
       if (!context.mounted) return;
 
@@ -174,6 +182,9 @@ class _LoginRouteState extends State<LoginRoute> {
       await Future.delayed(Duration(seconds: 1));
       if (!context.mounted) return;
       await context.read<Preferences>().setActiveUser(activeUser);
+      // IMPORTANT: Update the used token after the new value is set in preferences.
+      NetworkInterface.updateUsedToken();
+
       if (!context.mounted) return;
       context.pop();
       context.goNamed(MonitoringFullReportRoute.routingName);

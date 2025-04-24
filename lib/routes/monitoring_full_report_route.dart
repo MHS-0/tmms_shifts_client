@@ -11,7 +11,7 @@ import 'package:tmms_shifts_client/providers/sort_provider.dart';
 import 'package:tmms_shifts_client/widgets/data_fetch_error.dart';
 import 'package:tmms_shifts_client/widgets/date_picker_row.dart';
 import 'package:tmms_shifts_client/widgets/drawer.dart';
-import 'package:tmms_shifts_client/widgets/excel_export_button.dart';
+import 'package:tmms_shifts_client/widgets/horizontal_scrollable.dart';
 import 'package:tmms_shifts_client/widgets/station_selection_field.dart';
 
 class MonitoringFullReportRoute extends StatefulWidget {
@@ -37,8 +37,6 @@ class MonitoringFullReportRoute extends StatefulWidget {
 }
 
 class _MonitoringFullReportRouteState extends State<MonitoringFullReportRoute> {
-  final List<ScrollController> _mainScrollControllers = [];
-
   Future<GetMonitoringFullReportResponse> getData(BuildContext context) async {
     final instance = NetworkInterface.instance();
     final result = await instance.getMonitoringFullReport(
@@ -64,7 +62,6 @@ class _MonitoringFullReportRouteState extends State<MonitoringFullReportRoute> {
     final sortState = context.read<SortProvider>();
     if (user == null || user.stations.isEmpty) return Scaffold();
 
-    clearMainControllers();
     return SelectionArea(
       child: Scaffold(
         appBar: AppBar(title: Text(localizations.dashboard)),
@@ -114,8 +111,6 @@ class _MonitoringFullReportRouteState extends State<MonitoringFullReportRoute> {
     ActiveUser user,
   ) {
     return results.map((item) {
-      final controller = ScrollController();
-      _mainScrollControllers.add(controller);
       final stationOfItem =
           user.stations
               .where((entry) => entry.code == item.stationCode)
@@ -151,63 +146,57 @@ class _MonitoringFullReportRouteState extends State<MonitoringFullReportRoute> {
               ],
             ),
             children: [
-              Scrollbar(
-                thumbVisibility: true,
-                controller: controller,
-                child: SingleChildScrollView(
-                  controller: controller,
-                  scrollDirection: Axis.horizontal,
-                  child: LayoutBuilder(
-                    builder: (context, constraints) {
-                      final width = MediaQuery.of(context).size.width;
-                      // if (width >= 1200) {
-                      return DataTable(
-                        headingRowColor: WidgetStatePropertyAll(
-                          Theme.of(context).colorScheme.inversePrimary,
-                        ),
-                        columns: Helpers.getDataColumns(
-                          context,
-                          [
-                            localizations.shift,
-                            localizations.inputPressure,
-                            localizations.outputPressure,
-                            localizations.inputTemp,
-                            localizations.outputTemp,
-                            localizations.registeredDate,
-                            localizations.user,
-                          ],
-                          8,
-                          150,
-                        ),
-                        rows:
-                            item.shifts
-                                .map<DataRow>(
-                                  (shift) => DataRow(
-                                    cells: Helpers.getDataCells([
-                                      shift.shift,
-                                      shift.inputPressure,
-                                      shift.outputPressure,
-                                      shift.inputTemperature,
-                                      shift.outputTemperature,
-                                      shift.registeredDatetime != null
-                                          ? dateFormatterWithHour.format(
-                                            DateTime.parse(
-                                              shift.registeredDatetime!
-                                                  .toJalaliDateTime(),
-                                            ),
-                                          )
-                                          : "",
-                                      shift.user ?? "",
-                                    ]),
-                                  ),
-                                )
-                                .toList(),
-                      );
-                      // } else {
-                      //   return Container();
-                      // }
-                    },
-                  ),
+              HorizontalScrollable(
+                child: LayoutBuilder(
+                  builder: (context, constraints) {
+                    final width = MediaQuery.of(context).size.width;
+                    // if (width >= 1200) {
+                    return DataTable(
+                      headingRowColor: WidgetStatePropertyAll(
+                        Theme.of(context).colorScheme.inversePrimary,
+                      ),
+                      columns: Helpers.getDataColumns(
+                        context,
+                        [
+                          localizations.shift,
+                          localizations.inputPressure,
+                          localizations.outputPressure,
+                          localizations.inputTemp,
+                          localizations.outputTemp,
+                          localizations.registeredDate,
+                          localizations.user,
+                        ],
+                        8,
+                        150,
+                      ),
+                      rows:
+                          item.shifts
+                              .map<DataRow>(
+                                (shift) => DataRow(
+                                  cells: Helpers.getDataCells([
+                                    shift.shift,
+                                    shift.inputPressure,
+                                    shift.outputPressure,
+                                    shift.inputTemperature,
+                                    shift.outputTemperature,
+                                    shift.registeredDatetime != null
+                                        ? dateFormatterWithHour.format(
+                                          DateTime.parse(
+                                            shift.registeredDatetime!
+                                                .toJalaliDateTime(),
+                                          ),
+                                        )
+                                        : "",
+                                    shift.user ?? "",
+                                  ]),
+                                ),
+                              )
+                              .toList(),
+                    );
+                    // } else {
+                    //   return Container();
+                    // }
+                  },
                 ),
               ),
             ],
@@ -215,18 +204,5 @@ class _MonitoringFullReportRouteState extends State<MonitoringFullReportRoute> {
         ),
       );
     }).toList();
-  }
-
-  void clearMainControllers() {
-    for (final entry in _mainScrollControllers) {
-      entry.dispose();
-    }
-    _mainScrollControllers.clear();
-  }
-
-  @override
-  void dispose() {
-    clearMainControllers();
-    super.dispose();
   }
 }

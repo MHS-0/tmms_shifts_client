@@ -26,18 +26,31 @@ class NetworkInterface {
     contentTypeKey: applicationJsonValue,
     authHeaderKey: "",
   };
-  static final filledHeaderMap = {
-    contentTypeKey: applicationJsonValue,
-    authHeaderKey: "Token ${Preferences.instance().activeUser?.token}",
-  };
+  static late Map<String, dynamic> filledHeaderMap;
 
   static final Options authHeaderEmpty = Options(headers: emptyHeaderMap);
-  static final Options authHeaderWithToken = Options(headers: filledHeaderMap);
+  static late Options authHeaderWithToken;
 
   static final persianLocale = AppLocalizationsFa();
 
   /// The singleton instance of this class
   static NetworkInterface? _interface;
+
+  // Used after successfull authentication to update the token
+  // from the Preferences provider.
+  //
+  // It has to be called before the instance is usable because it initializes two
+  // otherwise null values of the class that are used for sending
+  // authenticated requests.
+  // Currently, it's called once when the instance is made through the factory
+  // function, and once after the login has been successfull.
+  static void updateUsedToken() {
+    filledHeaderMap = {
+      contentTypeKey: applicationJsonValue,
+      authHeaderKey: "Token ${Preferences.instance().activeUser?.token}",
+    };
+    authHeaderWithToken = Options(headers: filledHeaderMap);
+  }
 
   // TODO: Refactor this into something cleaner.
   Future<T?> sendRequest<T>(
@@ -101,13 +114,15 @@ class NetworkInterface {
     }, [(400, persianLocale.wrongUsernameAndPassword)]);
   }
 
-  // This function takes the token string directly instead of using preferences, becuase it might
+  // This function optionally takes the token string directly instead of using preferences, becuase it might
   // be used before OR after the active user is actually set through preferences.
-  Future<GetProfileResponse?> getProfile(String token) async {
+  Future<GetProfileResponse?> getProfile([String? token]) async {
     return await sendRequest(() async {
-      final Response<Map<String, dynamic>> resp = await dio.get(
-        "/user/profile/",
-        options: Options(
+      final Options options;
+      if (token == null) {
+        options = authHeaderWithToken;
+      } else {
+        options = Options(
           headers: emptyHeaderMap.map((k, v) {
             if (k == authHeaderKey) {
               return MapEntry(k, "Token $token");
@@ -115,7 +130,12 @@ class NetworkInterface {
               return MapEntry(k, v);
             }
           }),
-        ),
+        );
+      }
+
+      final Response<Map<String, dynamic>> resp = await dio.get(
+        "/user/profile/",
+        options: options,
       );
       final finalResp = GetProfileResponse.fromJson(resp.data!);
       return finalResp;
@@ -171,7 +191,7 @@ class NetworkInterface {
     StationsQuery? query,
   }) async {
     final Response<Map<String, dynamic>> resp = await dio.get(
-      "/pressure_and_temperature/last-action",
+      "/pressure_and_temperature/last-action/",
       options: authHeaderWithToken,
       queryParameters: query?.toJson(),
     );
@@ -179,10 +199,10 @@ class NetworkInterface {
     return finalResp;
   }
 
-  Future<bool?> destroyShiftData(int shift) async {
+  Future<bool?> destroyShiftData(int id) async {
     return await sendRequest(() async {
       await dio.delete(
-        "/pressure_and_temperature/shift/$shift",
+        "/pressure_and_temperature/shift/$id",
         options: authHeaderWithToken,
       );
       return true;
@@ -249,11 +269,14 @@ class NetworkInterface {
     return finalResp;
   }
 
-  Future<void> deleteCorrectorData(int shift) async {
-    await dio.delete(
-      "/meter_and_corrector/shift/$shift/",
-      options: authHeaderWithToken,
-    );
+  Future<bool?> deleteCorrectorData(int shift) async {
+    return await sendRequest(() async {
+      await dio.delete(
+        "/meter_and_corrector/shift/$shift/",
+        options: authHeaderWithToken,
+      );
+      return true;
+    });
   }
 
   Future<GetMeterAndCorrectorFullReportResponse?>
@@ -352,11 +375,14 @@ class NetworkInterface {
     });
   }
 
-  Future<void> deleteMeterChangeEventResponse() async {
-    await dio.delete(
-      "/equipment_replacement_events/meter/1/",
-      options: authHeaderWithToken,
-    );
+  Future<bool?> deleteMeterChangeEvent(int id) async {
+    return await sendRequest(() async {
+      await dio.delete(
+        "/equipment_replacement_events/meter/$id/",
+        options: authHeaderWithToken,
+      );
+      return true;
+    });
   }
 
   Future<GetMeterChangeEventLastActionResponse?> getMeterChangeLastAction(
@@ -364,7 +390,7 @@ class NetworkInterface {
   ) async {
     return await sendRequest(() async {
       final Response<Map<String, dynamic>> resp = await dio.get(
-        "/equipment_replacement_events/last-action/meter/",
+        "/equipment_replacement_events/last-action/meter",
         options: authHeaderWithToken,
         queryParameters: query.toJson(),
       );
@@ -407,7 +433,7 @@ class NetworkInterface {
   getCorrectorDataBulkLastAction(SingleStationQuery query) async {
     return await sendRequest(() async {
       final Response<Map<String, dynamic>> resp = await dio.get(
-        "/meter_and_corrector/bulk/last-action",
+        "/meter_and_corrector/bulk/last-action/",
         options: authHeaderWithToken,
         queryParameters: query.toJson(),
       );
@@ -420,7 +446,7 @@ class NetworkInterface {
   ) async {
     return await sendRequest(() async {
       final Response<Map<String, dynamic>> resp = await dio.get(
-        "/pressure_and_temperature/last-action",
+        "/pressure_and_temperature/last-action/",
         options: authHeaderWithToken,
         queryParameters: query.toJson(),
       );
@@ -551,7 +577,7 @@ class NetworkInterface {
   }) async {
     return await sendRequest(() async {
       final Response<Map<String, dynamic>> resp = await dio.get(
-        "/equipment_replacement_events/corrector",
+        "/equipment_replacement_events/corrector/",
         options: authHeaderWithToken,
         queryParameters: query?.toJson(),
       );
@@ -576,23 +602,29 @@ class NetworkInterface {
     });
   }
 
-  Future<void> deleteCorrectorChangeEvent() async {
-    await dio.delete(
-      "/equipment_replacement_events/corrector/1/",
-      options: authHeaderWithToken,
-    );
+  Future<bool?> deleteCorrectorChangeEvent(int id) async {
+    return await sendRequest(() async {
+      await dio.delete(
+        "/equipment_replacement_events/corrector/$id/",
+        options: authHeaderWithToken,
+      );
+      return true;
+    });
   }
 
-  Future<GetCorrectorChangeEventResponse> getCorrectorChangeEventLastAction({
-    StationsQuery? query,
-  }) async {
-    final Response<Map<String, dynamic>> resp = await dio.get(
-      "/equipment_replacement_events/last-action/corrector",
-      options: authHeaderWithToken,
-      queryParameters: query?.toJson(),
-    );
-    final finalResp = GetCorrectorChangeEventResponse.fromJson(resp.data!);
-    return finalResp;
+  Future<GetCorrectorChangeEventLastActionResponse?>
+  getCorrectorChangeEventLastAction(SingleStationQuery query) async {
+    return await sendRequest(() async {
+      final Response<Map<String, dynamic>> resp = await dio.get(
+        "/equipment_replacement_events/last-action/corrector",
+        options: authHeaderWithToken,
+        queryParameters: query.toJson(),
+      );
+      final finalResp = GetCorrectorChangeEventLastActionResponse.fromJson(
+        resp.data!,
+      );
+      return finalResp;
+    });
   }
 
   Future<void> removeCustomStationGroup() async {
@@ -647,6 +679,7 @@ class NetworkInterface {
       }
       _interface = NetworkInterface._privateConstructor(dioInstance);
     }
+    updateUsedToken();
     return _interface!;
   }
 }

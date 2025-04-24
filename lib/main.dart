@@ -106,6 +106,7 @@ final GoRouter _router = GoRouter(
             sortBy: sortBy,
           ),
           CorrectorReplacementEventsRoute.routingName,
+          ranProvider: true,
         );
       },
     ),
@@ -128,6 +129,7 @@ final GoRouter _router = GoRouter(
             sortBy: sortBy,
           ),
           CounterReplacementEventsRoute.routingName,
+          ranProvider: true,
         );
       },
     ),
@@ -192,7 +194,7 @@ final GoRouter _router = GoRouter(
       return "/login";
     }
     // Logout if session is expired. For example if the auth token has expired.
-    final result = await instance.getProfile(user.token);
+    final result = await instance.getProfile();
     if (result == null) {
       sharedLogger.info("User isn't logged in. Logging out...");
       await Preferences.instance().unsetActiveUser();

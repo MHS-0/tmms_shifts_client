@@ -22,6 +22,7 @@ const titleRowTextStyle = TextStyle(
   fontSize: titleRowsFontSize,
 );
 
+const offsetAll8p = EdgeInsets.all(8);
 const offsetAll16p = EdgeInsets.all(16);
 const offsetAll32p = EdgeInsets.all(32);
 

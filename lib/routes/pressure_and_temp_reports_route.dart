@@ -7,19 +7,23 @@ import 'package:tmms_shifts_client/data/backend_types.dart';
 import 'package:tmms_shifts_client/helpers.dart';
 import 'package:tmms_shifts_client/l18n/app_localizations.dart';
 import 'package:tmms_shifts_client/network_interface.dart';
+import 'package:tmms_shifts_client/providers/date_picker_provider.dart';
 import 'package:tmms_shifts_client/providers/preferences.dart';
 import 'package:tmms_shifts_client/providers/selected_stations_provider.dart';
 import 'package:tmms_shifts_client/providers/sort_provider.dart';
 import 'package:tmms_shifts_client/widgets/cancel_button.dart';
 import 'package:tmms_shifts_client/widgets/data_fetch_error.dart';
 import 'package:tmms_shifts_client/widgets/date_picker_row.dart';
+import 'package:tmms_shifts_client/widgets/date_picker_single_field.dart';
+import 'package:tmms_shifts_client/widgets/delete_button.dart';
 import 'package:tmms_shifts_client/widgets/drawer.dart';
-import 'package:tmms_shifts_client/widgets/error_alert_dialog.dart';
+import 'package:tmms_shifts_client/widgets/horizontal_scrollable.dart';
 import 'package:tmms_shifts_client/widgets/new_report_button.dart';
 import 'package:tmms_shifts_client/widgets/ok_button.dart';
 import 'package:tmms_shifts_client/widgets/single_station_selection_dropdown.dart';
 import 'package:tmms_shifts_client/widgets/station_selection_field.dart';
 import 'package:tmms_shifts_client/widgets/title_and_text_field_row.dart';
+import 'package:tmms_shifts_client/widgets/vertical_horizontal_scrollable.dart';
 
 class PressureAndTempReportsRoute extends StatefulWidget {
   static const routingName = "pressure_and_temp_reports_route";
@@ -55,9 +59,6 @@ class _PressureAndTempReportsRouteState
   final _inputTempController = TextEditingController();
   final _outputTempController = TextEditingController();
 
-  final List<ScrollController> _mainScrollControllers = [];
-  final List<ScrollController> _dialogScrollControllers = [];
-
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
@@ -86,7 +87,6 @@ class _PressureAndTempReportsRouteState
     final sortState = context.read<SortProvider>();
     if (user == null || user.stations.isEmpty) return Scaffold();
 
-    clearMainScrollControllers();
     return SelectionArea(
       child: Scaffold(
         appBar: AppBar(title: Text(localizations.reportPressureAndTemp)),
@@ -121,10 +121,9 @@ class _PressureAndTempReportsRouteState
                       selectedShift = null;
                       setupTextControllers();
                       selectedStationState.setSingleSelectedStation(null);
-                      await showEditDialogAndHandleResult(
+                      await Helpers.showEditDialogAndHandleResult(
                         context,
-                        selectedStationState,
-                        localizations,
+                        reportEditDialog(),
                       );
                     },
                   ),
@@ -150,7 +149,6 @@ class _PressureAndTempReportsRouteState
     ActiveUser user,
   ) {
     return results.map((item) {
-      final controller = ScrollController();
       final stationOfItem =
           user.stations
               .where((entry) => entry.code == item.stationCode)
@@ -165,10 +163,9 @@ class _PressureAndTempReportsRouteState
           setupTextControllers();
           selectedStationState.setSingleSelectedStation(item.stationCode);
 
-          await showEditDialogAndHandleResult(
+          await Helpers.showEditDialogAndHandleResult(
             context,
-            selectedStationState,
-            localizations,
+            reportEditDialog(),
           );
         },
         child: Padding(
@@ -197,63 +194,57 @@ class _PressureAndTempReportsRouteState
                 ],
               ),
               children: [
-                Scrollbar(
-                  thumbVisibility: true,
-                  controller: controller,
-                  child: SingleChildScrollView(
-                    controller: controller,
-                    scrollDirection: Axis.horizontal,
-                    child: LayoutBuilder(
-                      builder: (context, constraints) {
-                        final width = MediaQuery.of(context).size.width;
-                        // if (width >= 1200) {
-                        return DataTable(
-                          headingRowColor: WidgetStatePropertyAll(
-                            Theme.of(context).colorScheme.inversePrimary,
-                          ),
-                          columns: Helpers.getDataColumns(
-                            context,
-                            [
-                              localizations.shift,
-                              localizations.inputPressure,
-                              localizations.outputPressure,
-                              localizations.inputTemp,
-                              localizations.outputTemp,
-                              localizations.registeredDate,
-                              localizations.user,
-                            ],
-                            8,
-                            150,
-                          ),
-                          rows:
-                              item.shifts
-                                  .map<DataRow>(
-                                    (shift) => DataRow(
-                                      cells: Helpers.getDataCells([
-                                        shift.shift,
-                                        shift.inputPressure,
-                                        shift.outputPressure,
-                                        shift.inputTemperature,
-                                        shift.outputTemperature,
-                                        shift.registeredDatetime != null
-                                            ? dateFormatterWithHour.format(
-                                              DateTime.parse(
-                                                shift.registeredDatetime!
-                                                    .toJalaliDateTime(),
-                                              ),
-                                            )
-                                            : "",
-                                        shift.user ?? "",
-                                      ]),
-                                    ),
-                                  )
-                                  .toList(),
-                        );
-                        // } else {
-                        //   return Container();
-                        // }
-                      },
-                    ),
+                HorizontalScrollable(
+                  child: LayoutBuilder(
+                    builder: (context, constraints) {
+                      final width = MediaQuery.of(context).size.width;
+                      // if (width >= 1200) {
+                      return DataTable(
+                        headingRowColor: WidgetStatePropertyAll(
+                          Theme.of(context).colorScheme.inversePrimary,
+                        ),
+                        columns: Helpers.getDataColumns(
+                          context,
+                          [
+                            localizations.shift,
+                            localizations.inputPressure,
+                            localizations.outputPressure,
+                            localizations.inputTemp,
+                            localizations.outputTemp,
+                            localizations.registeredDate,
+                            localizations.user,
+                          ],
+                          8,
+                          150,
+                        ),
+                        rows:
+                            item.shifts
+                                .map<DataRow>(
+                                  (shift) => DataRow(
+                                    cells: Helpers.getDataCells([
+                                      shift.shift,
+                                      shift.inputPressure,
+                                      shift.outputPressure,
+                                      shift.inputTemperature,
+                                      shift.outputTemperature,
+                                      shift.registeredDatetime != null
+                                          ? dateFormatterWithHour.format(
+                                            DateTime.parse(
+                                              shift.registeredDatetime!
+                                                  .toJalaliDateTime(),
+                                            ),
+                                          )
+                                          : "",
+                                      shift.user ?? "",
+                                    ]),
+                                  ),
+                                )
+                                .toList(),
+                      );
+                      // } else {
+                      //   return Container();
+                      // }
+                    },
                   ),
                 ),
               ],
@@ -288,19 +279,24 @@ class _PressureAndTempReportsRouteState
     return await Helpers.returnWithErrorIfNeeded(result);
   }
 
-  Widget reportEditDialog(
-    SelectedStationsProvider selectedStationState,
-    AppLocalizations localizations,
-  ) {
-    return ChangeNotifierProvider.value(
-      value: selectedStationState,
-      key: const ObjectKey("Pressure and temp dialog provider"),
+  Widget reportEditDialog() {
+    final localizations = AppLocalizations.of(context)!;
+    final selectedStationState = context.read<SelectedStationsProvider>();
+    final datePickerState = context.read<DatePickerProvider>();
+
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider.value(
+          value: selectedStationState,
+          key: const ObjectKey("Pressure and temp dialog station provider"),
+        ),
+        ChangeNotifierProvider.value(
+          value: datePickerState,
+          key: const ObjectKey("Pressure and temp dialog date provider"),
+        ),
+      ],
       child: Consumer<SelectedStationsProvider>(
         builder: (context, value, _) {
-          clearDialogScrollControllers();
-          final scrollController = ScrollController();
-          _dialogScrollControllers.add(scrollController);
-
           // So that we can refresh it using the DataFetchError's refresh button
           // if needed.
           context.watch<Preferences>();
@@ -341,7 +337,7 @@ class _PressureAndTempReportsRouteState
                             localizations.stationCode,
                           ],
                           8,
-                          175,
+                          210,
                         ),
                         rows: [
                           DataRow(
@@ -368,87 +364,99 @@ class _PressureAndTempReportsRouteState
           return AlertDialog(
             title: Text(localizations.newReport),
             content: SizedBox(
-              width: 1200,
+              width: 1500,
               height: 800,
-              child: SingleChildScrollView(
-                child: Scrollbar(
-                  thumbVisibility: true,
-                  controller: scrollController,
-                  child: SingleChildScrollView(
-                    controller: scrollController,
-                    scrollDirection: Axis.horizontal,
-                    child: SizedBox(
-                      width: 1200,
-                      child: Form(
-                        key: _formKey,
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          spacing: 16,
-                          children: [
-                            if (lastActionFuture != null) ...[
-                              Text(localizations.lastAction),
-                              lastActionFuture,
-                              SizedBox(),
-                            ],
-                            if (_currentlyEditingReport == null)
-                              Helpers.titleAndWidgetRow(
-                                localizations.station,
-                                const SingleStationSelectionDropdown(),
-                              ),
-                            Helpers.titleAndWidgetRow(
-                              localizations.shift,
-                              DropdownMenu(
-                                initialSelection: selectedShift,
-                                onSelected: (shift) {
-                                  if (shift == null) return;
+              child: BothScrollable(
+                child: SizedBox(
+                  width: 1500,
+                  child: Form(
+                    key: _formKey,
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      spacing: 16,
+                      children: [
+                        if (lastActionFuture != null) ...[
+                          Text(localizations.lastAction),
+                          lastActionFuture,
+                          SizedBox(),
+                        ],
+                        if (_currentlyEditingReport == null) ...[
+                          Helpers.titleAndWidgetRow(
+                            "${localizations.station} :",
+                            const SingleStationSelectionDropdown(),
+                          ),
+                          const DatePickerSingleField(),
+                        ],
+                        Helpers.titleAndWidgetRow(
+                          "${localizations.shift} :",
+                          DropdownMenu(
+                            initialSelection: selectedShift,
+                            onSelected: (shift) {
+                              if (shift == null) return;
 
-                                  selectedShift = shift;
-                                  setupTextControllers();
-                                  setState(() {});
-                                },
-                                width: 300,
-                                hintText: localizations.shift,
-                                dropdownMenuEntries:
-                                    ["06", "12", "18", "24"].map((entry) {
-                                      return DropdownMenuEntry(
-                                        value: entry,
-                                        label: entry,
-                                      );
-                                    }).toList(),
-                              ),
-                            ),
-                            TitleAndTextFieldRow(
-                              title: localizations.inputPressure,
-                              controller: _inputPressureController,
-                              numbersOnly: true,
-                            ),
-                            TitleAndTextFieldRow(
-                              title: localizations.outputPressure,
-                              controller: _outputPressureController,
-                              numbersOnly: true,
-                            ),
-                            TitleAndTextFieldRow(
-                              title: localizations.inputTemp,
-                              controller: _inputTempController,
-                              numbersOnly: true,
-                            ),
-                            TitleAndTextFieldRow(
-                              title: localizations.outputTemp,
-                              controller: _outputTempController,
-                              numbersOnly: true,
-                            ),
-                            const SizedBox(height: 8),
-                          ],
+                              selectedShift = shift;
+                              setupTextControllers();
+                              setState(() {});
+                            },
+                            width: 300,
+                            hintText: localizations.shift,
+                            dropdownMenuEntries:
+                                ["06", "12", "18", "24"].map((entry) {
+                                  return DropdownMenuEntry(
+                                    value: entry,
+                                    label: entry,
+                                  );
+                                }).toList(),
+                          ),
                         ),
-                      ),
+                        TitleAndTextFieldRow(
+                          title: localizations.inputPressure,
+                          controller: _inputPressureController,
+                          numbersOnly: true,
+                        ),
+                        TitleAndTextFieldRow(
+                          title: localizations.outputPressure,
+                          controller: _outputPressureController,
+                          numbersOnly: true,
+                        ),
+                        TitleAndTextFieldRow(
+                          title: localizations.inputTemp,
+                          controller: _inputTempController,
+                          numbersOnly: true,
+                        ),
+                        TitleAndTextFieldRow(
+                          title: localizations.outputTemp,
+                          controller: _outputTempController,
+                          numbersOnly: true,
+                        ),
+                        const SizedBox(height: 8),
+                      ],
                     ),
                   ),
                 ),
               ),
             ),
             actions: [
+              if (context.read<Preferences>().activeUser!.isStaff &&
+                  _currentlyEditingReport != null)
+                DeleteButton(
+                  onPressed: () async {
+                    final instance = NetworkInterface.instance();
+                    final result = await instance.destroyShiftData(
+                      // FIXME!: Id should be included in responses. Ask backend.
+                      _currentlyEditingReport!.stationCode,
+                    );
+
+                    if (!context.mounted) return;
+                    if (result == null) {
+                      context.pop(instance.lastErrorUserFriendly);
+                    } else {
+                      context.pop();
+                    }
+                  },
+                ),
               OkButton(
                 onPressed: () async {
                   if (_formKey.currentState!.validate() &&
@@ -483,11 +491,12 @@ class _PressureAndTempReportsRouteState
                         2,
                       );
                     } else {
+                      final date = datePickerState.reportDate;
                       result = await instance.createShiftData(
                         CreateShiftDataRequest(
                           station: selectedStationState.singleSelectedStation!,
                           shift: selectedShift!,
-                          date: Jalali.now(),
+                          date: date,
                           inputPressure: inputPressure,
                           outputPressure: outputPressure,
                           inputTemperature: inputTemp,
@@ -511,46 +520,8 @@ class _PressureAndTempReportsRouteState
     );
   }
 
-  Future<void> showEditDialogAndHandleResult(
-    BuildContext context,
-    SelectedStationsProvider selectedStationState,
-    AppLocalizations localizations,
-  ) async {
-    final String? result = await Helpers.showCustomDialog(
-      context,
-      reportEditDialog(selectedStationState, localizations),
-      barrierDismissable: true,
-    );
-    clearDialogScrollControllers();
-    if (context.mounted && result != null) {
-      await Helpers.showCustomDialog(
-        context,
-        ErrorAlertDialog(result),
-        barrierDismissable: true,
-      );
-    } else if (context.mounted) {
-      context.read<Preferences>().refreshRoute();
-    }
-  }
-
-  void clearDialogScrollControllers() {
-    for (final entry in _dialogScrollControllers) {
-      entry.dispose();
-    }
-    _dialogScrollControllers.clear();
-  }
-
-  void clearMainScrollControllers() {
-    for (final entry in _mainScrollControllers) {
-      entry.dispose();
-    }
-    _mainScrollControllers.clear();
-  }
-
   @override
   void dispose() {
-    clearDialogScrollControllers();
-    clearMainScrollControllers();
     _inputPressureController.dispose();
     _outputPressureController.dispose();
     _inputTempController.dispose();

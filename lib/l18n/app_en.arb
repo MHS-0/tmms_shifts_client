@@ -105,5 +105,6 @@
   "byDateDesc": "By date (descending)",
   "byStationAsc": "By station (ascending)",
   "byStationDesc": "By station (descending)",
+  "delete": "Delete",
   "pageNotFound": "Page not found!"
 }

@@ -7,20 +7,25 @@ import 'package:tmms_shifts_client/data/backend_types.dart';
 import 'package:tmms_shifts_client/helpers.dart';
 import 'package:tmms_shifts_client/l18n/app_localizations.dart';
 import 'package:tmms_shifts_client/network_interface.dart';
+import 'package:tmms_shifts_client/providers/date_picker_provider.dart';
 import 'package:tmms_shifts_client/providers/preferences.dart';
+import 'package:tmms_shifts_client/providers/selected_ran_provider.dart';
 import 'package:tmms_shifts_client/providers/selected_stations_provider.dart';
 import 'package:tmms_shifts_client/providers/sort_provider.dart';
 import 'package:tmms_shifts_client/widgets/cancel_button.dart';
 import 'package:tmms_shifts_client/widgets/data_fetch_error.dart';
 import 'package:tmms_shifts_client/widgets/date_picker_row.dart';
+import 'package:tmms_shifts_client/widgets/date_picker_single_field.dart';
+import 'package:tmms_shifts_client/widgets/delete_button.dart';
 import 'package:tmms_shifts_client/widgets/drawer.dart';
-import 'package:tmms_shifts_client/widgets/error_alert_dialog.dart';
-import 'package:tmms_shifts_client/widgets/excel_export_button.dart';
+import 'package:tmms_shifts_client/widgets/horizontal_scrollable.dart';
 import 'package:tmms_shifts_client/widgets/new_report_button.dart';
 import 'package:tmms_shifts_client/widgets/ok_button.dart';
+import 'package:tmms_shifts_client/widgets/ran_radios_wrap.dart';
 import 'package:tmms_shifts_client/widgets/single_station_selection_dropdown.dart';
 import 'package:tmms_shifts_client/widgets/station_selection_field.dart';
 import 'package:tmms_shifts_client/widgets/title_and_text_field_row.dart';
+import 'package:tmms_shifts_client/widgets/vertical_horizontal_scrollable.dart';
 
 class CorrectorReplacementEventsRoute extends StatefulWidget {
   static const routingName = "CorrectorReplacementEventsRoute";
@@ -53,10 +58,6 @@ class _CorrectorReplacementEventsRouteState
   final _newMeterAmountController = TextEditingController();
   final _oldCorrectorAmountController = TextEditingController();
   final _newCorrectorAmountController = TextEditingController();
-  final _ranController = TextEditingController();
-
-  final List<ScrollController> _mainScrollControllers = [];
-  final List<ScrollController> _dialogScrollControllers = [];
 
   @override
   void didChangeDependencies() {
@@ -82,7 +83,6 @@ class _CorrectorReplacementEventsRouteState
     final sortState = context.read<SortProvider>();
     if (user == null || user.stations.isEmpty) return Scaffold();
 
-    clearMainScrollControllers();
     return SelectionArea(
       child: Scaffold(
         appBar: AppBar(title: Text(localizations.reportCorrectorChangeEvents)),
@@ -116,10 +116,9 @@ class _CorrectorReplacementEventsRouteState
                       _currentlyEditingReport = null;
                       setupTextControllers();
                       selectedStationState.setSingleSelectedStation(null);
-                      await showEditDialogAndHandleResult(
+                      await Helpers.showEditDialogAndHandleResult(
                         context,
-                        selectedStationState,
-                        localizations,
+                        reportEditDialog(),
                       );
                     },
                   ),
@@ -145,7 +144,6 @@ class _CorrectorReplacementEventsRouteState
     ActiveUser user,
   ) {
     return results.map((item) {
-      final controller = ScrollController();
       final stationOfItem =
           user.stations
               .where((entry) => entry.code == item.stationCode)
@@ -159,10 +157,9 @@ class _CorrectorReplacementEventsRouteState
           setupTextControllers();
           selectedStationState.setSingleSelectedStation(item.stationCode);
 
-          await showEditDialogAndHandleResult(
+          await Helpers.showEditDialogAndHandleResult(
             context,
-            selectedStationState,
-            localizations,
+            reportEditDialog(),
           );
         },
         child: Padding(
@@ -191,55 +188,47 @@ class _CorrectorReplacementEventsRouteState
                 ],
               ),
               children: [
-                Scrollbar(
-                  thumbVisibility: true,
-                  controller: controller,
-                  child: SingleChildScrollView(
-                    controller: controller,
-                    scrollDirection: Axis.horizontal,
-                    child: LayoutBuilder(
-                      builder: (context, constraints) {
-                        final width = MediaQuery.of(context).size.width;
-                        // if (width >= 1200) {
-                        return DataTable(
-                          headingRowColor: WidgetStatePropertyAll(
-                            Theme.of(context).colorScheme.inversePrimary,
-                          ),
-                          columns: Helpers.getDataColumns(
-                            context,
-                            [
-                              localizations.ranSequence,
-                              localizations.ran,
-                              localizations.oldMeterAmount,
-                              localizations.newMeterAmount,
-                              localizations.date,
-                              localizations.registeredDate,
-                              localizations.user,
-                            ],
-                            8,
-                            210,
-                          ),
-                          rows: [
-                            DataRow(
-                              cells: Helpers.getDataCells([
-                                item.ranSequence,
-                                item.ran,
-                                item.oldMeterAmount,
-                                item.newMeterAmount,
-                                Helpers.jalaliToDashDate(item.date),
-                                Helpers.jalaliToDashDate(
-                                  item.registeredDatetime,
-                                ),
-                                item.user ?? "",
-                              ]),
-                            ),
+                HorizontalScrollable(
+                  child: LayoutBuilder(
+                    builder: (context, constraints) {
+                      final width = MediaQuery.of(context).size.width;
+                      // if (width >= 1200) {
+                      return DataTable(
+                        headingRowColor: WidgetStatePropertyAll(
+                          Theme.of(context).colorScheme.inversePrimary,
+                        ),
+                        columns: Helpers.getDataColumns(
+                          context,
+                          [
+                            localizations.ranSequence,
+                            localizations.ran,
+                            localizations.oldMeterAmount,
+                            localizations.newMeterAmount,
+                            localizations.date,
+                            localizations.registeredDate,
+                            localizations.user,
                           ],
-                        );
-                        // } else {
-                        //   return Container();
-                        // }
-                      },
-                    ),
+                          8,
+                          210,
+                        ),
+                        rows: [
+                          DataRow(
+                            cells: Helpers.getDataCells([
+                              item.ranSequence,
+                              item.ran,
+                              item.oldMeterAmount,
+                              item.newMeterAmount,
+                              Helpers.jalaliToDashDate(item.date),
+                              Helpers.jalaliToDashDate(item.registeredDatetime),
+                              item.user ?? "",
+                            ]),
+                          ),
+                        ],
+                      );
+                      // } else {
+                      //   return Container();
+                      // }
+                    },
                   ),
                 ),
               ],
@@ -250,51 +239,38 @@ class _CorrectorReplacementEventsRouteState
     }).toList();
   }
 
-  Future<void> showEditDialogAndHandleResult(
-    BuildContext context,
-    SelectedStationsProvider selectedStationState,
-    AppLocalizations localizations,
-  ) async {
-    final String? result = await Helpers.showCustomDialog(
-      context,
-      reportEditDialog(selectedStationState, localizations),
-      barrierDismissable: true,
-    );
-    clearDialogScrollControllers();
-    if (context.mounted && result != null) {
-      await Helpers.showCustomDialog(
-        context,
-        ErrorAlertDialog(result),
-        barrierDismissable: true,
-      );
-    } else if (context.mounted) {
-      context.read<Preferences>().refreshRoute();
-    }
-  }
-
-  Future<GetMeterChangeEventLastActionResponse> getMeterChangeEventLastAction(
-    int stationCode,
-  ) async {
+  Future<GetCorrectorChangeEventLastActionResponse>
+  getCorrectorChangeEventLastAction(int stationCode) async {
     final instance = NetworkInterface.instance();
-    final result = await instance.getMeterChangeLastAction(
+    final result = await instance.getCorrectorChangeEventLastAction(
       SingleStationQuery(stationCode),
     );
     return await Helpers.returnWithErrorIfNeeded(result);
   }
 
-  Widget reportEditDialog(
-    SelectedStationsProvider selectedStationState,
-    AppLocalizations localizations,
-  ) {
-    return ChangeNotifierProvider.value(
-      value: selectedStationState,
-      key: const ObjectKey("Counter replacement dialog provider"),
+  Widget reportEditDialog() {
+    final selectedStationState = context.read<SelectedStationsProvider>();
+    final selectedRanState = context.read<SelectedRanProvider>();
+    final datePickerState = context.read<DatePickerProvider>();
+    final localizations = AppLocalizations.of(context)!;
+
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider.value(
+          value: selectedStationState,
+          key: const ObjectKey("Counter replacement dialog station provider"),
+        ),
+        ChangeNotifierProvider.value(
+          value: selectedRanState,
+          key: const ObjectKey("Counter replacement dialog ran provider"),
+        ),
+        ChangeNotifierProvider.value(
+          value: datePickerState,
+          key: const ObjectKey("Counter replacement dialog date provider"),
+        ),
+      ],
       child: Consumer<SelectedStationsProvider>(
         builder: (context, value, _) {
-          clearDialogScrollControllers();
-          final scrollController = ScrollController();
-          _dialogScrollControllers.add(scrollController);
-
           // So that we can refresh it using the DataFetchError's refresh button
           // if needed.
           context.watch<Preferences>();
@@ -304,8 +280,8 @@ class _CorrectorReplacementEventsRouteState
           FutureBuilder? lastActionFuture;
           if (singleStation != null) {
             lastActionFuture =
-                FutureBuilder<GetMeterChangeEventLastActionResponse>(
-                  future: getMeterChangeEventLastAction(singleStation),
+                FutureBuilder<GetCorrectorChangeEventLastActionResponse>(
+                  future: getCorrectorChangeEventLastAction(singleStation),
                   builder: (context, snapshot) {
                     if (snapshot.hasError) {
                       return DataFetchError(content: snapshot.error.toString());
@@ -358,70 +334,77 @@ class _CorrectorReplacementEventsRouteState
           return AlertDialog(
             title: Text(localizations.newReport),
             content: SizedBox(
-              width: 1200,
+              width: 1500,
               height: 800,
-              child: SingleChildScrollView(
-                child: Scrollbar(
-                  thumbVisibility: true,
-                  controller: scrollController,
-                  child: SingleChildScrollView(
-                    controller: scrollController,
-                    scrollDirection: Axis.horizontal,
-                    child: SizedBox(
-                      width: 1200,
-                      child: Form(
-                        key: _formKey,
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          spacing: 16,
-                          children: [
-                            if (lastActionFuture != null) ...[
-                              Text(localizations.lastAction),
-                              lastActionFuture,
-                              SizedBox(),
-                            ],
-                            if (_currentlyEditingReport == null)
-                              Helpers.titleAndWidgetRow(
-                                localizations.station,
-                                const SingleStationSelectionDropdown(),
-                              ),
-                            TitleAndTextFieldRow(
-                              title: localizations.ran,
-                              controller: _ranController,
-                              numbersOnly: true,
-                            ),
-                            TitleAndTextFieldRow(
-                              title: localizations.oldMeterAmount,
-                              controller: _oldMeterAmountController,
-                              numbersOnly: true,
-                            ),
-                            TitleAndTextFieldRow(
-                              title: localizations.newMeterAmount,
-                              controller: _newMeterAmountController,
-                              numbersOnly: true,
-                            ),
-                            TitleAndTextFieldRow(
-                              title: localizations.oldCorrectorAmount,
-                              controller: _oldCorrectorAmountController,
-                              numbersOnly: true,
-                            ),
-                            TitleAndTextFieldRow(
-                              title: localizations.newCorrectorAmount,
-                              controller: _newCorrectorAmountController,
-                              numbersOnly: true,
-                            ),
-                            const SizedBox(height: 8),
-                          ],
+              child: BothScrollable(
+                child: SizedBox(
+                  width: 1500,
+                  child: Form(
+                    key: _formKey,
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      spacing: 16,
+                      children: [
+                        if (lastActionFuture != null) ...[
+                          Text(localizations.lastAction),
+                          lastActionFuture,
+                          SizedBox(),
+                        ],
+                        if (_currentlyEditingReport == null) ...[
+                          Helpers.titleAndWidgetRow(
+                            "${localizations.station}:",
+                            const SingleStationSelectionDropdown(),
+                          ),
+                          const DatePickerSingleField(),
+                          const RanRadiosWrap(),
+                        ],
+                        TitleAndTextFieldRow(
+                          title: localizations.oldMeterAmount,
+                          controller: _oldMeterAmountController,
+                          numbersOnly: true,
                         ),
-                      ),
+                        TitleAndTextFieldRow(
+                          title: localizations.newMeterAmount,
+                          controller: _newMeterAmountController,
+                          numbersOnly: true,
+                        ),
+                        TitleAndTextFieldRow(
+                          title: localizations.oldCorrectorAmount,
+                          controller: _oldCorrectorAmountController,
+                          numbersOnly: true,
+                        ),
+                        TitleAndTextFieldRow(
+                          title: localizations.newCorrectorAmount,
+                          controller: _newCorrectorAmountController,
+                          numbersOnly: true,
+                        ),
+                        const SizedBox(height: 8),
+                      ],
                     ),
                   ),
                 ),
               ),
             ),
             actions: [
+              if (context.read<Preferences>().activeUser!.isStaff &&
+                  _currentlyEditingReport != null)
+                DeleteButton(
+                  onPressed: () async {
+                    final instance = NetworkInterface.instance();
+                    final result = await instance.deleteCorrectorChangeEvent(
+                      _currentlyEditingReport!.id,
+                    );
+
+                    if (!context.mounted) return;
+                    if (result == null) {
+                      context.pop(instance.lastErrorUserFriendly);
+                    } else {
+                      context.pop();
+                    }
+                  },
+                ),
               OkButton(
                 onPressed: () async {
                   if (_formKey.currentState!.validate() &&
@@ -435,7 +418,6 @@ class _CorrectorReplacementEventsRouteState
                     final newCorrector = int.parse(
                       _newCorrectorAmountController.text,
                     );
-                    final ran = int.parse(_ranController.text);
 
                     final Object? result;
 
@@ -457,6 +439,8 @@ class _CorrectorReplacementEventsRouteState
                         ),
                       );
                     } else {
+                      final ran = selectedRanState.selectedRan;
+                      final date = datePickerState.reportDate;
                       result = await instance.createCorrectorChangeEvent(
                         PostCreateCorrectorChangeEventRequest(
                           oldMeterAmount: oldMeter,
@@ -464,7 +448,7 @@ class _CorrectorReplacementEventsRouteState
                           oldCorrectorAmount: oldCorrector,
                           newCorrectorAmount: newCorrector,
                           ran: ran,
-                          date: Jalali.now(),
+                          date: date,
                         ),
                       );
                     }
@@ -493,32 +477,14 @@ class _CorrectorReplacementEventsRouteState
         _currentlyEditingReport?.oldCorrectorAmount.toString() ?? "";
     _newCorrectorAmountController.text =
         _currentlyEditingReport?.newCorrectorAmount.toString() ?? "";
-    _ranController.text = _currentlyEditingReport?.ran.toString() ?? "";
-  }
-
-  void clearDialogScrollControllers() {
-    for (final entry in _dialogScrollControllers) {
-      entry.dispose();
-    }
-    _dialogScrollControllers.clear();
-  }
-
-  void clearMainScrollControllers() {
-    for (final entry in _mainScrollControllers) {
-      entry.dispose();
-    }
-    _mainScrollControllers.clear();
   }
 
   @override
   void dispose() {
-    clearDialogScrollControllers();
-    clearMainScrollControllers();
     _oldCorrectorAmountController.dispose();
     _newCorrectorAmountController.dispose();
     _oldMeterAmountController.dispose();
     _newMeterAmountController.dispose();
-    _ranController.dispose();
     super.dispose();
   }
 }
