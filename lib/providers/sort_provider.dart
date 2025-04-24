@@ -14,8 +14,10 @@ enum SortSelection {
 
 class SortProvider extends ChangeNotifier {
   SortSelection get selectedSort => _selectedSort;
+  int? get selectedCustomSort => _selectedCustomSort;
 
   SortSelection _selectedSort;
+  int? _selectedCustomSort;
 
   static String sortSelectionToString(SortSelection sort) {
     final String result;
@@ -55,16 +57,25 @@ class SortProvider extends ChangeNotifier {
     return result;
   }
 
-  SortProvider([SortSelection sort = SortSelection.byDateDesc])
-    : _selectedSort = sort;
+  SortProvider([SortSelection sort = SortSelection.byDateDesc, int? customSort])
+    : _selectedSort = sort,
+      _selectedCustomSort = customSort;
 
-  factory SortProvider.fromQuery(String? query) {
+  factory SortProvider.fromQuery(String? query, String? customSortQuery) {
     final sort = query ?? byDateDescQueryValue;
-    return SortProvider(stringToSortSelection(sort));
+    return SortProvider(
+      stringToSortSelection(sort),
+      int.tryParse(customSortQuery ?? ""),
+    );
   }
 
   void setSelectedSort(SortSelection sort) {
     _selectedSort = sort;
+    notifyListeners();
+  }
+
+  void setSelectedCustomSort(int? id) {
+    _selectedCustomSort = id;
     notifyListeners();
   }
 }

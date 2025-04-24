@@ -116,8 +116,6 @@ class Preferences extends ChangeNotifier {
   /// The user's stored authorization token
   ActiveUser? _activeUser;
 
-  GetUsersCustomStationGroupResponseResultItem? _selectedCustomSort;
-
   /// The user's preferred theme mode.
   ///
   /// Use the [setTheme] method to set a new ThemeMode.
@@ -130,10 +128,6 @@ class Preferences extends ChangeNotifier {
 
   /// The user's stored authorization token
   ActiveUser? get activeUser => _activeUser;
-
-  // FIXME: Create new provider for this.
-  GetUsersCustomStationGroupResponseResultItem? get selectedCustomSort =>
-      _selectedCustomSort;
 
   /// Loads the user's preferences and sets the necessary instance variables. Should
   /// be called and awaited before the instance can be used.
@@ -243,19 +237,6 @@ class Preferences extends ChangeNotifier {
     await _sp.remove(activeUserKey);
     _activeUser = null;
     notifyListeners();
-  }
-
-  void setSelectedCustomSort(
-    GetUsersCustomStationGroupResponseResultItem? sort,
-  ) {
-    _selectedCustomSort = sort;
-    notifyListeners();
-  }
-
-  void setSelectedCustomSortNoNotify(
-    GetUsersCustomStationGroupResponseResultItem? sort,
-  ) {
-    _selectedCustomSort = sort;
   }
 
   /// Refresh anything that depends on Preferences.

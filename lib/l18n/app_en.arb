@@ -109,5 +109,6 @@
   "customSort": "Custom sort",
   "none": "None",
   "edit": "Edit",
+  "name": "Name",
   "pageNotFound": "Page not found!"
 }

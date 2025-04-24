@@ -263,14 +263,6 @@ final class Helpers {
     final sortBy = queries[sortByKey];
     final customSortId = queries[customSortKey];
 
-    if (customSortId != null) {
-      Preferences.instance().setSelectedCustomSortNoNotify(
-        Preferences.instance().activeUser?.customStationSort
-            ?.where((e) => e.id.toString() == customSortId)
-            .firstOrNull,
-      );
-    }
-
     return MaterialPage(
       child: MultiProvider(
         providers: [
@@ -288,7 +280,7 @@ final class Helpers {
             key: ObjectKey("$routingName DatePickerProvider"),
           ),
           ChangeNotifierProvider(
-            create: (_) => SortProvider.fromQuery(sortBy),
+            create: (_) => SortProvider.fromQuery(sortBy, customSortId),
             key: ObjectKey("$routingName SortProvider"),
           ),
           if (ranProvider)
@@ -623,5 +615,55 @@ final class Helpers {
     } else if (context.mounted) {
       context.read<Preferences>().refreshRoute();
     }
+  }
+
+  static Widget getStationGroupSelectionField(
+    BuildContext context, [
+    bool noneInsteadOfNew = true,
+  ]) {
+    final user = context.read<Preferences>().activeUser!;
+    final sortState = context.read<SortProvider>();
+    final selectedSort = sortState.selectedCustomSort;
+    final localizations = AppLocalizations.of(context)!;
+    final entries =
+        user.customStationSort?.map((item) {
+          final thisSortIsSelected =
+              (selectedSort != null && selectedSort == item.id);
+
+          return DropdownMenuEntry(
+            value: item.id,
+            label: item.title,
+            leadingIcon:
+                thisSortIsSelected ? selectedCheckIcon : unselectedCheckIcon,
+            labelWidget:
+                thisSortIsSelected ? Helpers.boldText(item.title) : null,
+          );
+        }).toList();
+
+    final selectionField = DropdownMenu<int?>(
+      initialSelection: selectedSort,
+      onSelected: (sort) {
+        sortState.setSelectedCustomSort(
+          user.customStationSort?.where((e) => e.id == sort).firstOrNull?.id,
+        );
+        if (sort == null) {
+          Helpers.removeQueryFromPath(context, customSortKey);
+        } else {
+          Helpers.addQueryToPath(context, customSortKey, sort.toString());
+        }
+      },
+      width: 300,
+      hintText: localizations.customSort,
+      dropdownMenuEntries: [
+        DropdownMenuEntry(
+          value: null,
+          label:
+              noneInsteadOfNew ? localizations.none : localizations.newReport,
+        ),
+        if (entries != null) ...entries,
+      ],
+    );
+
+    return selectionField;
   }
 }

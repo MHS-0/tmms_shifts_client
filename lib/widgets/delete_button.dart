@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 import 'package:tmms_shifts_client/l18n/app_localizations.dart';
 
 class DeleteButton extends StatelessWidget {
@@ -13,14 +12,12 @@ class DeleteButton extends StatelessWidget {
 
     return ElevatedButton(
       style: ButtonStyle(
-        backgroundColor: WidgetStatePropertyAll(Colors.redAccent),
+        backgroundColor: WidgetStatePropertyAll(
+          onPressed == null ? Colors.grey : Colors.redAccent,
+        ),
         foregroundColor: WidgetStatePropertyAll(Colors.white),
       ),
-      onPressed:
-          onPressed ??
-          () {
-            context.pop();
-          },
+      onPressed: onPressed,
       child: Text(localizations.delete),
     );
   }
