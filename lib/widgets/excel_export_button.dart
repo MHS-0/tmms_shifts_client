@@ -12,11 +12,13 @@ import 'package:tmms_shifts_client/widgets/error_alert_dialog.dart';
 class ExcelExportButton extends StatelessWidget {
   final List<Object?> data;
   final List<Station> stations;
+  final bool isMonitoring;
 
   const ExcelExportButton({
     super.key,
     required this.data,
     required this.stations,
+    this.isMonitoring = false,
   });
 
   @override
@@ -38,8 +40,7 @@ class ExcelExportButton extends StatelessWidget {
             onPressed: () async {
               try {
                 final Uint8List bytes;
-                if (data.runtimeType ==
-                    List<GetMonitoringFullReportResponseResultItem>) {
+                if (isMonitoring) {
                   bytes = await Helpers.exportToExcelBytesForMonitoring(
                     data as List<GetMonitoringFullReportResponseResultItem>,
                     stations,

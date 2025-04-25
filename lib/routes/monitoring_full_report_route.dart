@@ -92,7 +92,11 @@ class _MonitoringFullReportRouteState extends State<MonitoringFullReportRoute> {
                   const SizedBox(),
                   const StationSelectionField(),
                   const DatePickerRow(),
-                  Helpers.getExcelExportSortRow(results, user.stations),
+                  Helpers.getExcelExportSortRow(
+                    results,
+                    user.stations,
+                    isMonitoring: true,
+                  ),
                   const CustomStationSortField(),
                   const SizedBox(height: 16),
                   ..._getMonitoringFullReportCards(

@@ -549,8 +549,9 @@ final class Helpers {
 
   static Widget getExcelExportSortRow(
     List<Object?> data,
-    List<Station> stations,
-  ) {
+    List<Station> stations, {
+    bool isMonitoring = false,
+  }) {
     return Wrap(
       alignment: WrapAlignment.spaceBetween,
       runAlignment: WrapAlignment.center,
@@ -565,7 +566,11 @@ final class Helpers {
           width: 300,
           child: Align(
             alignment: Alignment.centerLeft,
-            child: ExcelExportButton(data: data, stations: stations),
+            child: ExcelExportButton(
+              data: data,
+              stations: stations,
+              isMonitoring: isMonitoring,
+            ),
           ),
         ),
       ],
