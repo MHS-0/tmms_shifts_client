@@ -49,6 +49,15 @@ class _MonitoringFullReportRouteState extends State<MonitoringFullReportRoute> {
         stationCodes: Helpers.serializeStringIntoIntList(widget.stationCodes),
       ),
     );
+
+    if (context.mounted && result != null) {
+      final sorted = Helpers.sortResults(
+        context.read<SortProvider>(),
+        context.read<Preferences>().activeUser!.stations,
+        result.results,
+      );
+      result.results = sorted;
+    }
     return await Helpers.returnWithErrorIfNeeded(result);
   }
 
@@ -62,7 +71,6 @@ class _MonitoringFullReportRouteState extends State<MonitoringFullReportRoute> {
   Widget build(BuildContext context) {
     final localizations = AppLocalizations.of(context)!;
     final user = context.watch<Preferences>().activeUser;
-    final sortState = context.watch<SortProvider>();
     if (user == null || user.stations.isEmpty) return Scaffold();
 
     return SelectionArea(
@@ -77,20 +85,14 @@ class _MonitoringFullReportRouteState extends State<MonitoringFullReportRoute> {
             } else if (!snapshot.hasData) {
               return centeredCircularProgressIndicator;
             } else {
-              final results = Helpers.sortResults(
-                sortState,
-                user.stations,
-                snapshot.data!.results,
-              );
+              final results = snapshot.data!.results;
               return ListView(
                 padding: offsetAll16p,
                 children: [
                   const SizedBox(),
                   const StationSelectionField(),
                   const DatePickerRow(),
-                  Helpers.getExcelExportSortRow(
-                    results.map((e) => e.toJson()).toList(),
-                  ),
+                  Helpers.getExcelExportSortRow(results, user.stations),
                   const CustomStationSortField(),
                   const SizedBox(height: 16),
                   ..._getMonitoringFullReportCards(
@@ -151,56 +153,47 @@ class _MonitoringFullReportRouteState extends State<MonitoringFullReportRoute> {
             ),
             children: [
               HorizontalScrollable(
-                child: LayoutBuilder(
-                  builder: (context, constraints) {
-                    final width = MediaQuery.of(context).size.width;
-                    // if (width >= 1200) {
-                    return DataTable(
-                      headingRowColor: WidgetStatePropertyAll(
-                        Theme.of(context).colorScheme.inversePrimary,
-                      ),
-                      columns: Helpers.getDataColumns(
-                        context,
-                        [
-                          localizations.shift,
-                          localizations.inputPressure,
-                          localizations.outputPressure,
-                          localizations.inputTemp,
-                          localizations.outputTemp,
-                          localizations.registeredDate,
-                          localizations.user,
-                        ],
-                        8,
-                        150,
-                      ),
-                      rows:
-                          item.shifts
-                              .map<DataRow>(
-                                (shift) => DataRow(
-                                  cells: Helpers.getDataCells([
-                                    shift.shift,
-                                    shift.inputPressure,
-                                    shift.outputPressure,
-                                    shift.inputTemperature,
-                                    shift.outputTemperature,
-                                    shift.registeredDatetime != null
-                                        ? dateFormatterWithHour.format(
-                                          DateTime.parse(
-                                            shift.registeredDatetime!
-                                                .toJalaliDateTime(),
-                                          ),
-                                        )
-                                        : "",
-                                    shift.user ?? "",
-                                  ]),
-                                ),
-                              )
-                              .toList(),
-                    );
-                    // } else {
-                    //   return Container();
-                    // }
-                  },
+                child: DataTable(
+                  headingRowColor: WidgetStatePropertyAll(
+                    Theme.of(context).colorScheme.inversePrimary,
+                  ),
+                  columns: Helpers.getDataColumns(
+                    context,
+                    [
+                      localizations.shift,
+                      localizations.inputPressure,
+                      localizations.outputPressure,
+                      localizations.inputTemp,
+                      localizations.outputTemp,
+                      localizations.registeredDate,
+                      localizations.user,
+                    ],
+                    8,
+                    150,
+                  ),
+                  rows:
+                      item.shifts
+                          .map<DataRow>(
+                            (shift) => DataRow(
+                              cells: Helpers.getDataCells([
+                                shift.shift,
+                                shift.inputPressure,
+                                shift.outputPressure,
+                                shift.inputTemperature,
+                                shift.outputTemperature,
+                                shift.registeredDatetime != null
+                                    ? dateFormatterWithHour.format(
+                                      DateTime.parse(
+                                        shift.registeredDatetime!
+                                            .toJalaliDateTime(),
+                                      ),
+                                    )
+                                    : "",
+                                shift.user ?? "",
+                              ]),
+                            ),
+                          )
+                          .toList(),
                 ),
               ),
             ],

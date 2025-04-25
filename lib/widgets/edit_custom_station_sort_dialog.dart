@@ -12,7 +12,6 @@ import 'package:tmms_shifts_client/widgets/cancel_button.dart';
 import 'package:tmms_shifts_client/widgets/delete_button.dart';
 import 'package:tmms_shifts_client/widgets/ok_button.dart';
 import 'package:tmms_shifts_client/widgets/title_and_text_field_row.dart';
-import 'package:tmms_shifts_client/widgets/vertical_scrollable.dart';
 
 class EditCustomStationSortDialog extends StatefulWidget {
   const EditCustomStationSortDialog({super.key});
@@ -24,7 +23,9 @@ class EditCustomStationSortDialog extends StatefulWidget {
 
 class _EditCustomStationSortDialogState
     extends State<EditCustomStationSortDialog> {
+  final _formKey = GlobalKey<FormState>();
   final textController = TextEditingController();
+
   List<Station> _orderedList = [];
   int? selectedId;
 
@@ -53,7 +54,7 @@ class _EditCustomStationSortDialogState
         builder: (context) {
           // So that we can refresh it using the DataFetchError's refresh button
           // if needed.
-          final user = context.watch<Preferences>().activeUser!;
+          final user = context.read<Preferences>().activeUser!;
           final sortState = context.read<SortProvider>();
           final localizations = AppLocalizations.of(context)!;
           final userStations = user.stations;
@@ -124,54 +125,57 @@ class _EditCustomStationSortDialogState
             content: SizedBox(
               width: 800,
               height: 800,
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                mainAxisAlignment: MainAxisAlignment.start,
-                spacing: 16,
-                children: [
-                  selectionField,
-                  TitleAndTextFieldRow(
-                    numbersOnly: false,
-                    controller: textController,
-                    title: localizations.name,
-                  ),
-                  ConstrainedBox(
-                    constraints: BoxConstraints.loose(
-                      Size(double.infinity, 400),
+              child: Form(
+                key: _formKey,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  spacing: 16,
+                  children: [
+                    selectionField,
+                    TitleAndTextFieldRow(
+                      numbersOnly: false,
+                      controller: textController,
+                      title: localizations.name,
                     ),
-                    child: ReorderableListView.builder(
-                      buildDefaultDragHandles: false,
-                      itemCount: _orderedList.length,
-                      itemBuilder: (context, index) {
-                        final station = _orderedList[index];
-                        return ReorderableDragStartListener(
-                          key: ValueKey(station.code),
-                          index: index,
-                          child: ListTile(
-                            leading: const Icon(Icons.list),
-                            title: Helpers.boldText(station.title),
-                            subtitle: Text(
-                              "${localizations.area}: ${station.area}",
+                    ConstrainedBox(
+                      constraints: BoxConstraints.loose(
+                        Size(double.infinity, 400),
+                      ),
+                      child: ReorderableListView.builder(
+                        buildDefaultDragHandles: false,
+                        itemCount: _orderedList.length,
+                        itemBuilder: (context, index) {
+                          final station = _orderedList[index];
+                          return ReorderableDragStartListener(
+                            key: ValueKey(station.code),
+                            index: index,
+                            child: ListTile(
+                              leading: const Icon(Icons.list),
+                              title: Helpers.boldText(station.title),
+                              subtitle: Text(
+                                "${localizations.area}: ${station.area}",
+                              ),
                             ),
-                          ),
-                        );
-                      },
-                      prototypeItem: ListTile(),
-                      onReorder: (oldIndex, newIndex) async {
-                        if (newIndex > oldIndex) {
-                          newIndex -= 1;
-                        }
-                        // await Future.delayed(const Duration(milliseconds: 300));
-                        setState(() {
-                          final item = _orderedList.removeAt(oldIndex);
-                          _orderedList.insert(newIndex, item);
-                        });
-                      },
+                          );
+                        },
+                        prototypeItem: ListTile(),
+                        onReorder: (oldIndex, newIndex) async {
+                          if (newIndex > oldIndex) {
+                            newIndex -= 1;
+                          }
+                          // await Future.delayed(const Duration(milliseconds: 300));
+                          setState(() {
+                            final item = _orderedList.removeAt(oldIndex);
+                            _orderedList.insert(newIndex, item);
+                          });
+                        },
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 8),
-                ],
+                    const SizedBox(height: 8),
+                  ],
+                ),
               ),
             ),
             actions: [
@@ -190,57 +194,57 @@ class _EditCustomStationSortDialogState
                             context.pop(instance.lastErrorUserFriendly);
                           } else {
                             context.pop();
-                            // FIXME: Update to new and current station groups!!!
                           }
                         }
                         : null,
               ),
               OkButton(
                 onPressed: () async {
-                  final id = selectedId;
+                  if (_formKey.currentState!.validate()) {
+                    final id = selectedId;
+                    final instance = NetworkInterface.instance();
 
-                  final instance = NetworkInterface.instance();
-
-                  Object? result;
-                  if (id != null) {
-                    // IMPORTANT:
-                    // FIXME: put/update method isn't present in postman. ask backend.
-                    // result = await instance.(
-                    //   PutUpdateCorrectorChangeEventRequest(
-                    //     id: item.id,
-                    //     oldMeterAmount: oldMeter,
-                    //     newMeterAmount: newMeter,
-                    //     ran: item.ran,
-                    //     date: item.date,
-                    //     oldCorrectorAmount: oldCorrector,
-                    //     newCorrectorAmount: newCorrector,
-                    //     ranSequence: item.ranSequence,
-                    //     user: item.user,
-                    //     registeredDatetime: item.registeredDatetime,
-                    //     stationCode: item.stationCode,
-                    //   ),
-                    // );
-                  } else {
-                    result = await instance.createNewStationsGroup(
-                      PostCreateNewStationGroupRequest(
-                        user: user.username,
-                        title: textController.text,
-                        stations:
-                            _orderedList.indexed
-                                .map(
-                                  (e) => StationGroupDataStructure(
-                                    priority: e.$1,
-                                    station: e.$2.code,
-                                  ),
-                                )
-                                .toList(),
-                      ),
-                    );
-                  }
-                  if (context.mounted && result == null) {
-                    context.pop(instance.lastErrorUserFriendly);
-                  } else if (context.mounted) {
-                    context.pop();
+                    Object? result;
+                    if (id != null) {
+                      // IMPORTANT:
+                      // FIXME: put/update method isn't present in postman. ask backend.
+                      // result = await instance.(
+                      //   PutUpdateCorrectorChangeEventRequest(
+                      //     id: item.id,
+                      //     oldMeterAmount: oldMeter,
+                      //     newMeterAmount: newMeter,
+                      //     ran: item.ran,
+                      //     date: item.date,
+                      //     oldCorrectorAmount: oldCorrector,
+                      //     newCorrectorAmount: newCorrector,
+                      //     ranSequence: item.ranSequence,
+                      //     user: item.user,
+                      //     registeredDatetime: item.registeredDatetime,
+                      //     stationCode: item.stationCode,
+                      //   ),
+                      // );
+                    } else {
+                      result = await instance.createNewStationsGroup(
+                        PostCreateNewStationGroupRequest(
+                          user: user.username,
+                          title: textController.text,
+                          stations:
+                              _orderedList.indexed
+                                  .map(
+                                    (e) => StationGroupDataStructure(
+                                      priority: e.$1,
+                                      station: e.$2.code,
+                                    ),
+                                  )
+                                  .toList(),
+                        ),
+                      );
+                    }
+                    if (context.mounted && result == null) {
+                      context.pop(instance.lastErrorUserFriendly);
+                    } else if (context.mounted) {
+                      context.pop();
+                    }
                   }
                 },
               ),

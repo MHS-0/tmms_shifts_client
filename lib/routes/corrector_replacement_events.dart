@@ -72,6 +72,13 @@ class _CorrectorReplacementEventsRouteState
     final result = await instance.getCorrectorChangeEventList(
       query: ToFromDateQuery(fromDate: widget.fromDate, toDate: widget.toDate),
     );
+    if (context.mounted && result != null) {
+      result.results = Helpers.sortResults(
+        context.read<SortProvider>(),
+        context.read<Preferences>().activeUser!.stations,
+        result.results,
+      );
+    }
     return await Helpers.returnWithErrorIfNeeded(result);
   }
 
@@ -95,11 +102,7 @@ class _CorrectorReplacementEventsRouteState
             } else if (!snapshot.hasData) {
               return centeredCircularProgressIndicator;
             } else {
-              final results = Helpers.sortResults(
-                sortState,
-                user.stations,
-                snapshot.data!.results,
-              );
+              final results = snapshot.data!.results;
 
               return ListView(
                 padding: offsetAll16p,
@@ -109,6 +112,7 @@ class _CorrectorReplacementEventsRouteState
                   const DatePickerRow(),
                   Helpers.getExcelExportSortRow(
                     results.map((e) => e.toJson()).toList(),
+                    user.stations,
                   ),
                   const SizedBox(height: 16),
                   NewReportButton(
@@ -269,16 +273,15 @@ class _CorrectorReplacementEventsRouteState
           key: const ObjectKey("Counter replacement dialog date provider"),
         ),
       ],
-      child: Consumer<SelectedStationsProvider>(
-        builder: (context, value, _) {
-          // So that we can refresh it using the DataFetchError's refresh button
-          // if needed.
-          context.watch<Preferences>();
-
+      child: Builder(
+        builder: (context) {
+          final selectedStationState =
+              context.watch<SelectedStationsProvider>();
           final singleStation = selectedStationState.singleSelectedStation;
 
           FutureBuilder? lastActionFuture;
           if (singleStation != null) {
+            final singleStation = selectedStationState.singleSelectedStation!;
             lastActionFuture =
                 FutureBuilder<GetCorrectorChangeEventLastActionResponse>(
                   future: getCorrectorChangeEventLastAction(singleStation),

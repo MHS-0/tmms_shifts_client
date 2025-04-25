@@ -32,7 +32,7 @@ class _MyDrawerState extends State<MyDrawer> {
   @override
   Widget build(BuildContext context) {
     final localizations = AppLocalizations.of(context)!;
-    final user = context.watch<Preferences>().activeUser;
+    final user = context.read<Preferences>().activeUser;
     if (user == null) return Drawer();
 
     return Drawer(

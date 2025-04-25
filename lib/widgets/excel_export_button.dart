@@ -1,20 +1,28 @@
+import 'dart:typed_data';
+
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:tmms_shifts_client/data/backend_types.dart';
 import 'package:tmms_shifts_client/helpers.dart';
 import 'package:tmms_shifts_client/l18n/app_localizations.dart';
 import 'package:tmms_shifts_client/providers/preferences.dart';
 import 'package:tmms_shifts_client/widgets/error_alert_dialog.dart';
 
 class ExcelExportButton extends StatelessWidget {
-  final List<Map<String, dynamic>> data;
+  final List<Object?> data;
+  final List<Station> stations;
 
-  const ExcelExportButton({super.key, required this.data});
+  const ExcelExportButton({
+    super.key,
+    required this.data,
+    required this.stations,
+  });
 
   @override
   Widget build(BuildContext context) {
     final localizations = AppLocalizations.of(context)!;
-    final user = context.watch<Preferences>().activeUser;
+    final user = context.read<Preferences>().activeUser;
     if (user == null || user.stations.isEmpty) return Container();
 
     return Padding(
@@ -29,10 +37,22 @@ class ExcelExportButton extends StatelessWidget {
             icon: Icon(Icons.calculate),
             onPressed: () async {
               try {
-                final bytes = await Helpers.exportToExcelBytes(
-                  data,
-                  localizations,
-                );
+                final Uint8List bytes;
+                if (data.runtimeType ==
+                    List<GetMonitoringFullReportResponseResultItem>) {
+                  bytes = await Helpers.exportToExcelBytesForMonitoring(
+                    data as List<GetMonitoringFullReportResponseResultItem>,
+                    stations,
+                    localizations,
+                  );
+                } else {
+                  // IMPORTANT:
+                  // FIXME
+                  bytes = await Helpers.exportToExcelBytes(
+                    data as List<Map<String, dynamic>>,
+                    localizations,
+                  );
+                }
                 await FilePicker.platform.saveFile(
                   fileName: "output.xlsx",
                   type: FileType.custom,

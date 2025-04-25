@@ -679,13 +679,13 @@ class GetMeterAndCorrectorFullReportResponse {
   final int count;
   final String? next;
   final String? previous;
-  final List<GetMeterAndCorrectorFullReportResponseResultItem> results;
+  List<GetMeterAndCorrectorFullReportResponseResultItem> results;
 
   factory GetMeterAndCorrectorFullReportResponse.fromJson(
     Map<String, dynamic> json,
   ) => _$GetMeterAndCorrectorFullReportResponseFromJson(json);
 
-  const GetMeterAndCorrectorFullReportResponse({
+  GetMeterAndCorrectorFullReportResponse({
     required this.count,
     this.next,
     this.previous,
@@ -760,12 +760,12 @@ class GetMonitoringFullReportResponse {
   final int count;
   final String? next;
   final String? previous;
-  final List<GetMonitoringFullReportResponseResultItem> results;
+  List<GetMonitoringFullReportResponseResultItem> results;
 
   factory GetMonitoringFullReportResponse.fromJson(Map<String, dynamic> json) =>
       _$GetMonitoringFullReportResponseFromJson(json);
 
-  const GetMonitoringFullReportResponse({
+  GetMonitoringFullReportResponse({
     required this.count,
     this.next,
     this.previous,
@@ -845,13 +845,13 @@ class GetPressureAndTemperatureFullReportResponse {
   final int count;
   final String? next;
   final String? previous;
-  final List<GetPressureAndTemperatureFullReportResponseResultItem> results;
+  List<GetPressureAndTemperatureFullReportResponseResultItem> results;
 
   factory GetPressureAndTemperatureFullReportResponse.fromJson(
     Map<String, dynamic> json,
   ) => _$GetPressureAndTemperatureFullReportResponseFromJson(json);
 
-  const GetPressureAndTemperatureFullReportResponse({
+  GetPressureAndTemperatureFullReportResponse({
     required this.count,
     this.next,
     this.previous,
@@ -1004,13 +1004,13 @@ class GetMeterChangeEventsListResponse {
   final int count;
   final String? next;
   final String? previous;
-  final List<GetMeterChangeEventResponse> results;
+  List<GetMeterChangeEventResponse> results;
 
   factory GetMeterChangeEventsListResponse.fromJson(
     Map<String, dynamic> json,
   ) => _$GetMeterChangeEventsListResponseFromJson(json);
 
-  const GetMeterChangeEventsListResponse({
+  GetMeterChangeEventsListResponse({
     required this.count,
     this.next,
     this.previous,
@@ -1760,13 +1760,13 @@ class GetCorrectorChangeEventListResponse {
   final int count;
   final Object? next;
   final Object? previous;
-  final List<GetCorrectorChangeEventResponse> results;
+  List<GetCorrectorChangeEventResponse> results;
 
   factory GetCorrectorChangeEventListResponse.fromJson(
     Map<String, dynamic> json,
   ) => _$GetCorrectorChangeEventListResponseFromJson(json);
 
-  const GetCorrectorChangeEventListResponse({
+  GetCorrectorChangeEventListResponse({
     required this.count,
     this.next,
     this.previous,

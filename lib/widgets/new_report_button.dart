@@ -11,7 +11,7 @@ class NewReportButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final localizations = AppLocalizations.of(context)!;
-    context.watch<Preferences>();
+    context.read<Preferences>();
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 48),
       child: Align(

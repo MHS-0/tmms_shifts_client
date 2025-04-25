@@ -29,7 +29,7 @@ final class Helpers {
     );
     queries.remove(name);
     final routeName = routerState.name!;
-    context.goNamed(routeName, queryParameters: queries);
+    context.replaceNamed(routeName, queryParameters: queries);
   }
 
   /// Add a query to the current path shown in the Browser's
@@ -41,7 +41,7 @@ final class Helpers {
     );
     queries[name] = value;
     final routeName = routerState.name!;
-    context.goNamed(routeName, queryParameters: queries);
+    context.replaceNamed(routeName, queryParameters: queries);
   }
 
   /// Convert from a [Jalali] class to a formatted string
@@ -353,6 +353,153 @@ final class Helpers {
     );
   }
 
+  static Future<Uint8List> exportToExcelBytesForMonitoring(
+    List<GetMonitoringFullReportResponseResultItem> data,
+    List<Station> stations,
+    AppLocalizations localizations,
+  ) async {
+    try {
+      var excel = Excel.createExcel();
+      final Sheet sheet = excel['Sheet1'];
+
+      if (data.isEmpty) {
+        return Future.error(localizations.dataIsEmpty);
+      }
+
+      List<String> headers = [
+        localizations.stationName,
+        localizations.outOfService,
+        localizations.inputPressureAt6,
+        localizations.outputPressureAt6,
+        localizations.inputTempAt6,
+        localizations.outputTempAt6,
+        localizations.inputPressureAt12,
+        localizations.outputPressureAt12,
+        localizations.inputTempAt12,
+        localizations.outputTempAt12,
+        localizations.inputPressureAt18,
+        localizations.outputPressureAt18,
+        localizations.inputTempAt18,
+        localizations.outputTempAt18,
+        localizations.inputPressureAt24,
+        localizations.outputPressureAt24,
+        localizations.inputTempAt24,
+        localizations.outputTempAt24,
+        localizations.gasConsumptionM2,
+        localizations.gasConsumptionAverageM2,
+      ];
+      for (final header in headers.indexed) {
+        final headerCell = sheet.cell(
+          CellIndex.indexByColumnRow(columnIndex: header.$1, rowIndex: 0),
+        );
+        headerCell.value = TextCellValue(header.$2);
+        headerCell.cellStyle = CellStyle(
+          bold: true,
+          backgroundColorHex: ExcelColor.blueAccent,
+        );
+      }
+
+      for (final value in data.indexed) {
+        final rowData = value.$2;
+        final station =
+            stations.where((e) => e.code == value.$2.stationCode).firstOrNull;
+        if (station != null) {
+          sheet
+              .cell(
+                CellIndex.indexByColumnRow(
+                  columnIndex: 0,
+                  rowIndex: value.$1 + 1,
+                ),
+              )
+              .value = TextCellValue("${station.typeName} | ${station.title}");
+        }
+        sheet
+            .cell(
+              CellIndex.indexByColumnRow(
+                columnIndex: 1,
+                rowIndex: value.$1 + 1,
+              ),
+            )
+            .value = BoolCellValue(false);
+        for (int i = 0; i < 4; i++) {
+          final shift =
+              rowData.shifts
+                  .where((e) => e.shift == ((i * 6) + 6).toString())
+                  .firstOrNull;
+          if (shift == null) continue;
+
+          sheet
+              .cell(
+                CellIndex.indexByColumnRow(
+                  columnIndex: 2 + (i * 4),
+                  rowIndex: value.$1 + 1,
+                ),
+              )
+              .value = IntCellValue(shift.inputPressure);
+          sheet
+              .cell(
+                CellIndex.indexByColumnRow(
+                  columnIndex: 3 + (i * 4),
+                  rowIndex: value.$1 + 1,
+                ),
+              )
+              .value = IntCellValue(shift.outputPressure);
+          sheet
+              .cell(
+                CellIndex.indexByColumnRow(
+                  columnIndex: 4 + (i * 4),
+                  rowIndex: value.$1 + 1,
+                ),
+              )
+              .value = IntCellValue(shift.inputTemperature);
+          sheet
+              .cell(
+                CellIndex.indexByColumnRow(
+                  columnIndex: 5 + (i * 4),
+                  rowIndex: value.$1 + 1,
+                ),
+              )
+              .value = IntCellValue(shift.outputTemperature);
+        }
+
+        final consumption = rowData.consumption;
+        final averageConsumption = rowData.averageConsumption;
+
+        if (consumption != null) {
+          sheet
+              .cell(
+                CellIndex.indexByColumnRow(
+                  columnIndex: 18,
+                  rowIndex: value.$1 + 1,
+                ),
+              )
+              .value = IntCellValue(consumption);
+        }
+
+        if (averageConsumption != null) {
+          sheet
+              .cell(
+                CellIndex.indexByColumnRow(
+                  columnIndex: 19,
+                  rowIndex: value.$1 + 1,
+                ),
+              )
+              .value = IntCellValue(averageConsumption);
+        }
+      }
+
+      final List<int>? fileBytes = excel.encode();
+
+      if (fileBytes == null) {
+        return Future.error(localizations.dataEncodeError);
+      }
+
+      return Uint8List.fromList(fileBytes);
+    } catch (e) {
+      return Future.error("${localizations.dataEncodeError}:\n$e");
+    }
+  }
+
   static Future<Uint8List> exportToExcelBytes(
     List<Map<String, dynamic>> data,
     AppLocalizations localizations,
@@ -400,7 +547,10 @@ final class Helpers {
     }
   }
 
-  static Widget getExcelExportSortRow(List<Map<String, dynamic>> data) {
+  static Widget getExcelExportSortRow(
+    List<Object?> data,
+    List<Station> stations,
+  ) {
     return Wrap(
       alignment: WrapAlignment.spaceBetween,
       runAlignment: WrapAlignment.center,
@@ -415,7 +565,7 @@ final class Helpers {
           width: 300,
           child: Align(
             alignment: Alignment.centerLeft,
-            child: ExcelExportButton(data: data),
+            child: ExcelExportButton(data: data, stations: stations),
           ),
         ),
       ],
@@ -496,99 +646,98 @@ final class Helpers {
       return [];
     }
 
-    if (state.selectedCustomSort == null) {
-      switch (state.selectedSort) {
-        case SortSelection.byDateAsc:
-          pressureAndTempList?.sort(
-            (a, b) => a.date.julianDayNumber.compareTo(b.date.julianDayNumber),
-          );
-          monitoringList?.sort(
-            (a, b) => a.date.julianDayNumber.compareTo(b.date.julianDayNumber),
-          );
-          meterCorrectorList?.sort(
-            (a, b) => a.date.julianDayNumber.compareTo(b.date.julianDayNumber),
-          );
-          meterChangeList?.sort(
-            (a, b) => a.date.julianDayNumber.compareTo(b.date.julianDayNumber),
-          );
-          correctorChangeList?.sort(
-            (a, b) => a.date.julianDayNumber.compareTo(b.date.julianDayNumber),
-          );
-          break;
-        case SortSelection.byStationAlphabeticAsc:
-          pressureAndTempList?.sort(
-            (a, b) => stationCodeTitleMap[a.stationCode]!.compareTo(
-              stationCodeTitleMap[b.stationCode]!,
-            ),
-          );
-          monitoringList?.sort(
-            (a, b) => stationCodeTitleMap[a.stationCode]!.compareTo(
-              stationCodeTitleMap[b.stationCode]!,
-            ),
-          );
-          meterCorrectorList?.sort(
-            (a, b) => stationCodeTitleMap[a.stationCode]!.compareTo(
-              stationCodeTitleMap[b.stationCode]!,
-            ),
-          );
-          meterChangeList?.sort(
-            (a, b) => stationCodeTitleMap[a.stationCode]!.compareTo(
-              stationCodeTitleMap[b.stationCode]!,
-            ),
-          );
-          correctorChangeList?.sort(
-            (a, b) => stationCodeTitleMap[a.stationCode]!.compareTo(
-              stationCodeTitleMap[b.stationCode]!,
-            ),
-          );
-          break;
-        case SortSelection.byStationAlphabeticDesc:
-          pressureAndTempList?.sort(
-            (a, b) => stationCodeTitleMap[b.stationCode]!.compareTo(
-              stationCodeTitleMap[a.stationCode]!,
-            ),
-          );
-          monitoringList?.sort(
-            (a, b) => stationCodeTitleMap[b.stationCode]!.compareTo(
-              stationCodeTitleMap[a.stationCode]!,
-            ),
-          );
-          meterCorrectorList?.sort(
-            (a, b) => stationCodeTitleMap[b.stationCode]!.compareTo(
-              stationCodeTitleMap[a.stationCode]!,
-            ),
-          );
-          meterChangeList?.sort(
-            (a, b) => stationCodeTitleMap[b.stationCode]!.compareTo(
-              stationCodeTitleMap[a.stationCode]!,
-            ),
-          );
-          correctorChangeList?.sort(
-            (a, b) => stationCodeTitleMap[b.stationCode]!.compareTo(
-              stationCodeTitleMap[a.stationCode]!,
-            ),
-          );
-          break;
-        default:
-          pressureAndTempList?.sort(
-            (a, b) => b.date.julianDayNumber.compareTo(a.date.julianDayNumber),
-          );
-          monitoringList?.sort(
-            (a, b) => b.date.julianDayNumber.compareTo(a.date.julianDayNumber),
-          );
-          meterCorrectorList?.sort(
-            (a, b) => b.date.julianDayNumber.compareTo(a.date.julianDayNumber),
-          );
-          meterChangeList?.sort(
-            (a, b) => b.date.julianDayNumber.compareTo(a.date.julianDayNumber),
-          );
-          correctorChangeList?.sort(
-            (a, b) => b.date.julianDayNumber.compareTo(a.date.julianDayNumber),
-          );
-          break;
-      }
-    } else {
-      print(1);
+    switch (state.selectedSort) {
+      case SortSelection.byDateAsc:
+        pressureAndTempList?.sort(
+          (a, b) => a.date.julianDayNumber.compareTo(b.date.julianDayNumber),
+        );
+        monitoringList?.sort(
+          (a, b) => a.date.julianDayNumber.compareTo(b.date.julianDayNumber),
+        );
+        meterCorrectorList?.sort(
+          (a, b) => a.date.julianDayNumber.compareTo(b.date.julianDayNumber),
+        );
+        meterChangeList?.sort(
+          (a, b) => a.date.julianDayNumber.compareTo(b.date.julianDayNumber),
+        );
+        correctorChangeList?.sort(
+          (a, b) => a.date.julianDayNumber.compareTo(b.date.julianDayNumber),
+        );
+        break;
+      case SortSelection.byStationAlphabeticAsc:
+        pressureAndTempList?.sort(
+          (a, b) => stationCodeTitleMap[a.stationCode]!.compareTo(
+            stationCodeTitleMap[b.stationCode]!,
+          ),
+        );
+        monitoringList?.sort(
+          (a, b) => stationCodeTitleMap[a.stationCode]!.compareTo(
+            stationCodeTitleMap[b.stationCode]!,
+          ),
+        );
+        meterCorrectorList?.sort(
+          (a, b) => stationCodeTitleMap[a.stationCode]!.compareTo(
+            stationCodeTitleMap[b.stationCode]!,
+          ),
+        );
+        meterChangeList?.sort(
+          (a, b) => stationCodeTitleMap[a.stationCode]!.compareTo(
+            stationCodeTitleMap[b.stationCode]!,
+          ),
+        );
+        correctorChangeList?.sort(
+          (a, b) => stationCodeTitleMap[a.stationCode]!.compareTo(
+            stationCodeTitleMap[b.stationCode]!,
+          ),
+        );
+        break;
+      case SortSelection.byStationAlphabeticDesc:
+        pressureAndTempList?.sort(
+          (a, b) => stationCodeTitleMap[b.stationCode]!.compareTo(
+            stationCodeTitleMap[a.stationCode]!,
+          ),
+        );
+        monitoringList?.sort(
+          (a, b) => stationCodeTitleMap[b.stationCode]!.compareTo(
+            stationCodeTitleMap[a.stationCode]!,
+          ),
+        );
+        meterCorrectorList?.sort(
+          (a, b) => stationCodeTitleMap[b.stationCode]!.compareTo(
+            stationCodeTitleMap[a.stationCode]!,
+          ),
+        );
+        meterChangeList?.sort(
+          (a, b) => stationCodeTitleMap[b.stationCode]!.compareTo(
+            stationCodeTitleMap[a.stationCode]!,
+          ),
+        );
+        correctorChangeList?.sort(
+          (a, b) => stationCodeTitleMap[b.stationCode]!.compareTo(
+            stationCodeTitleMap[a.stationCode]!,
+          ),
+        );
+        break;
+      default:
+        pressureAndTempList?.sort(
+          (a, b) => b.date.julianDayNumber.compareTo(a.date.julianDayNumber),
+        );
+        monitoringList?.sort(
+          (a, b) => b.date.julianDayNumber.compareTo(a.date.julianDayNumber),
+        );
+        meterCorrectorList?.sort(
+          (a, b) => b.date.julianDayNumber.compareTo(a.date.julianDayNumber),
+        );
+        meterChangeList?.sort(
+          (a, b) => b.date.julianDayNumber.compareTo(a.date.julianDayNumber),
+        );
+        correctorChangeList?.sort(
+          (a, b) => b.date.julianDayNumber.compareTo(a.date.julianDayNumber),
+        );
+        break;
+    }
+
+    if (state.selectedCustomSort != null) {
       final sortList = state.selectedCustomSort!;
       final userCustomSortList =
           Preferences.instance().activeUser?.customStationSort
@@ -599,27 +748,42 @@ final class Helpers {
       userCustomSortList?.sort((a, b) => a.priority.compareTo(b.priority));
       if (userCustomSortList == null) return [];
 
-      monitoringList?.sort((a, b) {
-        final aPriority =
-            userCustomSortList
-                .where((e) => e.station == a.stationCode)
-                .firstOrNull
-                ?.priority;
-        final bPriority =
-            userCustomSortList
-                .where((e) => e.station == b.stationCode)
-                .firstOrNull
-                ?.priority;
+      // FIXME: Maybe a better algorithm can be used?
+      // TODO:
+      final List<GetMonitoringFullReportResponseResultItem>
+      orderedMonitoringList = [];
 
-        if (aPriority != null && bPriority != null) {
-          return aPriority.compareTo(bPriority);
-        }
-        if (aPriority != null) return aPriority;
-        if (bPriority != null) return bPriority;
+      for (final entry in userCustomSortList) {
+        orderedMonitoringList.addAll(
+          monitoringList?.where((e) => e.stationCode == entry.station) ?? [],
+        );
+        monitoringList?.removeWhere((e) => e.stationCode == entry.station);
+      }
+      orderedMonitoringList.addAll(monitoringList ?? []);
+      monitoringList = orderedMonitoringList;
 
-        // else, put at the bottom of the sorted list.
-        return 99999;
-      });
+      // monitoringList?.sort((a, b) {
+      //   final aPriority =
+      //       userCustomSortList
+      //           .where((e) => e.station == a.stationCode)
+      //           .firstOrNull
+      //           ?.priority;
+      //   final bPriority =
+      //       userCustomSortList
+      //           .where((e) => e.station == b.stationCode)
+      //           .firstOrNull
+      //           ?.priority;
+
+      //   if (aPriority != null && bPriority != null) {
+      //     print(8);
+      //     return aPriority.compareTo(bPriority);
+      //   }
+      //   if (aPriority != null) return aPriority;
+      //   if (bPriority != null) return bPriority;
+
+      //   // else, put at the bottom of the sorted list.
+      //   return 99999;
+      // });
     }
 
     if (pressureAndTempList != null) return pressureAndTempList as List<T>;
@@ -642,13 +806,14 @@ final class Helpers {
       dialog,
       barrierDismissable: barrierDismissable,
     );
-    if (context.mounted && result != null) {
+    if (!context.mounted) return;
+    if (result != null && result != cancelledMessage) {
       await Helpers.showCustomDialog(
         context,
         ErrorAlertDialog(result),
         barrierDismissable: barrierDismissable,
       );
-    } else if (context.mounted) {
+    } else if (result == null) {
       context.read<Preferences>().refreshRoute();
     }
   }
@@ -679,6 +844,7 @@ final class Helpers {
     final selectionField = DropdownMenu<int?>(
       initialSelection: selectedSort,
       onSelected: (sort) {
+        if (selectedSort == sort) return;
         sortState.setSelectedCustomSort(
           user.customStationSort?.where((e) => e.id == sort).firstOrNull?.id,
         );

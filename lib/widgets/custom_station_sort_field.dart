@@ -14,7 +14,7 @@ class CustomStationSortField extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final localizations = AppLocalizations.of(context)!;
-    final preferences = context.watch<Preferences>();
+    final preferences = context.read<Preferences>();
     final sortState = context.watch<SortProvider>();
     final user = preferences.activeUser;
     if (user == null) return Container();
@@ -52,7 +52,7 @@ class CustomStationSortField extends StatelessWidget {
                     if (result != null) {
                       preferences.activeUser!
                           .updateFromNewGetCustomStationGroup(result);
-                      await preferences.setActiveUser(user);
+                      await preferences.setActiveUserNoNotify(user);
                       sortState.setSelectedCustomSort(null);
                       if (!context.mounted) return;
                       Helpers.removeQueryFromPath(context, customSortKey);

@@ -15,10 +15,10 @@ class StationSelectionField extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final localizations = AppLocalizations.of(context)!;
-    final user = context.watch<Preferences>().activeUser;
+    final user = context.read<Preferences>().activeUser;
     if (user == null || user.stations.isEmpty) return Container();
 
-    final selectedStationsState = context.watch<SelectedStationsProvider>();
+    final selectedStationsState = context.read<SelectedStationsProvider>();
     final selectedStations = selectedStationsState.selectedStations;
     return Center(
       child: SizedBox(

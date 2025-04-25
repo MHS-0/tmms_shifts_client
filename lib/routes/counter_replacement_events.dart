@@ -74,6 +74,15 @@ class _CounterReplacementEventsRouteState
         stationCodes: Helpers.serializeStringIntoIntList(widget.stationCodes),
       ),
     );
+
+    if (context.mounted && result != null) {
+      result.results = Helpers.sortResults(
+        context.read<SortProvider>(),
+        context.read<Preferences>().activeUser!.stations,
+        result.results,
+      );
+    }
+
     return await Helpers.returnWithErrorIfNeeded(result);
   }
 
@@ -82,7 +91,6 @@ class _CounterReplacementEventsRouteState
     final localizations = AppLocalizations.of(context)!;
     final user = context.watch<Preferences>().activeUser;
     final selectedStationState = context.read<SelectedStationsProvider>();
-    final sortState = context.read<SortProvider>();
     if (user == null || user.stations.isEmpty) return Scaffold();
 
     return SelectionArea(
@@ -97,11 +105,7 @@ class _CounterReplacementEventsRouteState
             } else if (!snapshot.hasData) {
               return centeredCircularProgressIndicator;
             } else {
-              final results = Helpers.sortResults(
-                sortState,
-                user.stations,
-                snapshot.data!.results,
-              );
+              final results = snapshot.data!.results;
 
               return ListView(
                 padding: offsetAll16p,
@@ -111,6 +115,7 @@ class _CounterReplacementEventsRouteState
                   const DatePickerRow(),
                   Helpers.getExcelExportSortRow(
                     results.map((e) => e.toJson()).toList(),
+                    user.stations,
                   ),
                   const SizedBox(height: 16),
                   NewReportButton(
@@ -271,11 +276,12 @@ class _CounterReplacementEventsRouteState
           key: const ObjectKey("Counter replacement dialog date provider"),
         ),
       ],
-      child: Consumer<SelectedStationsProvider>(
-        builder: (context, value, _) {
-          // So that we can refresh it using the DataFetchError's refresh button
-          // if needed.
-          context.watch<Preferences>();
+      child: Builder(
+        builder: (context) {
+          final selectedStationState =
+              context.watch<SelectedStationsProvider>();
+          final selectedRanState = context.watch<SelectedRanProvider>();
+          final datePickerState = context.watch<DatePickerProvider>();
 
           final singleStation = selectedStationState.singleSelectedStation;
 
@@ -401,6 +407,11 @@ class _CounterReplacementEventsRouteState
                 onPressed: () async {
                   if (_formKey.currentState!.validate() &&
                       selectedStationState.singleSelectedStation != null) {
+                    final selectedStationState =
+                        context.read<SelectedStationsProvider>();
+                    final selectedRanState =
+                        context.read<SelectedRanProvider>();
+                    final datePickerState = context.read<DatePickerProvider>();
                     final instance = NetworkInterface.instance();
                     final oldMeter = int.parse(_oldMeterAmountController.text);
                     final newMeter = int.parse(_newMeterAmountController.text);

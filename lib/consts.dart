@@ -36,6 +36,8 @@ const centeredCircularProgressIndicator = Center(
 
 final sharedLogger = Logger("Shared Logger");
 
+const cancelledMessage = "CANCELLED";
+
 final dateFormatterWithHour = DateFormat("HH:mm yyyy-MM-dd");
 final dateFormatter = DateFormat("dd-MM-yyyy");
 

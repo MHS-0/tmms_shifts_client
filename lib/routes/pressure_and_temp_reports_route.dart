@@ -76,6 +76,14 @@ class _PressureAndTempReportsRouteState
         stationCodes: Helpers.serializeStringIntoIntList(widget.stationCodes),
       ),
     );
+
+    if (context.mounted && result != null) {
+      result.results = Helpers.sortResults(
+        context.read<SortProvider>(),
+        context.read<Preferences>().activeUser!.stations,
+        result.results,
+      );
+    }
     return await Helpers.returnWithErrorIfNeeded(result);
   }
 
@@ -99,11 +107,7 @@ class _PressureAndTempReportsRouteState
             } else if (!snapshot.hasData) {
               return centeredCircularProgressIndicator;
             } else {
-              final results = Helpers.sortResults(
-                sortState,
-                user.stations,
-                snapshot.data!.results,
-              );
+              final results = snapshot.data!.results;
 
               return ListView(
                 padding: offsetAll16p,
@@ -113,6 +117,7 @@ class _PressureAndTempReportsRouteState
                   const DatePickerRow(),
                   Helpers.getExcelExportSortRow(
                     results.map((e) => e.toJson()).toList(),
+                    user.stations,
                   ),
                   const SizedBox(height: 16),
                   NewReportButton(
@@ -295,12 +300,15 @@ class _PressureAndTempReportsRouteState
           key: const ObjectKey("Pressure and temp dialog date provider"),
         ),
       ],
-      child: Consumer<SelectedStationsProvider>(
-        builder: (context, value, _) {
+      child: Builder(
+        builder: (context) {
           // So that we can refresh it using the DataFetchError's refresh button
           // if needed.
-          context.watch<Preferences>();
+          // context.watch<Preferences>();
 
+          final selectedStationState =
+              context.watch<SelectedStationsProvider>();
+          final datePickerState = context.watch<DatePickerProvider>();
           final singleStation = selectedStationState.singleSelectedStation;
 
           FutureBuilder? lastActionFuture;
@@ -462,6 +470,9 @@ class _PressureAndTempReportsRouteState
                   if (_formKey.currentState!.validate() &&
                       selectedShift != null &&
                       selectedStationState.singleSelectedStation != null) {
+                    final selectedStationState =
+                        context.read<SelectedStationsProvider>();
+                    final datePickerState = context.read<DatePickerProvider>();
                     final instance = NetworkInterface.instance();
                     final inputPressure = int.parse(
                       _inputPressureController.text,

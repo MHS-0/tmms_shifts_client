@@ -19,7 +19,7 @@ class _SingleStationSelectionDropdownState
   @override
   Widget build(BuildContext context) {
     final localizations = AppLocalizations.of(context)!;
-    final user = context.watch<Preferences>().activeUser;
+    final user = context.read<Preferences>().activeUser;
     final selectedStationState = context.watch<SelectedStationsProvider>();
     final selectedStation = selectedStationState.singleSelectedStation;
     if (user == null) return Container();

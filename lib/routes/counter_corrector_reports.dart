@@ -65,6 +65,15 @@ class _CounterCorrectorReportsRouteState
         stationCodes: Helpers.serializeStringIntoIntList(widget.stationCodes),
       ),
     );
+
+    if (context.mounted && result != null) {
+      result.results = Helpers.sortResults(
+        context.read<SortProvider>(),
+        context.read<Preferences>().activeUser!.stations,
+        result.results,
+      );
+    }
+
     return await Helpers.returnWithErrorIfNeeded(result);
   }
 
@@ -78,7 +87,7 @@ class _CounterCorrectorReportsRouteState
   Widget build(BuildContext context) {
     final localizations = AppLocalizations.of(context)!;
     final user = context.watch<Preferences>().activeUser;
-    final selectedStationState = context.watch<SelectedStationsProvider>();
+    final selectedStationState = context.read<SelectedStationsProvider>();
     final sortState = context.read<SortProvider>();
     if (user == null || user.stations.isEmpty) return Scaffold();
 
@@ -94,11 +103,7 @@ class _CounterCorrectorReportsRouteState
             } else if (!snapshot.hasData) {
               return centeredCircularProgressIndicator;
             } else {
-              final results = Helpers.sortResults(
-                sortState,
-                user.stations,
-                snapshot.data!.results,
-              );
+              final results = snapshot.data!.results;
 
               return ListView(
                 padding: offsetAll16p,
@@ -108,6 +113,7 @@ class _CounterCorrectorReportsRouteState
                   const DatePickerRow(),
                   Helpers.getExcelExportSortRow(
                     results.map((e) => e.toJson()).toList(),
+                    user.stations,
                   ),
                   const SizedBox(height: 16),
                   NewReportButton(
@@ -142,15 +148,13 @@ class _CounterCorrectorReportsRouteState
   }
 
   Widget reportEditDialog() {
-    final user = context.read<Preferences>().activeUser!;
-    final selectedStationState = context.read<SelectedStationsProvider>();
     final datePickerState = context.read<DatePickerProvider>();
     final localizations = AppLocalizations.of(context)!;
 
     return MultiProvider(
       providers: [
         ChangeNotifierProvider.value(
-          value: selectedStationState,
+          value: context.read<SelectedStationsProvider>(),
           key: const ObjectKey("Counter And Corrector dialog station provider"),
         ),
         ChangeNotifierProvider.value(
@@ -158,8 +162,11 @@ class _CounterCorrectorReportsRouteState
           key: const ObjectKey("Counter And Corrector dialog date provider"),
         ),
       ],
-      child: Consumer<SelectedStationsProvider>(
-        builder: (context, value, _) {
+      child: Builder(
+        builder: (context) {
+          final selectedStationState =
+              context.watch<SelectedStationsProvider>();
+          final user = context.watch<Preferences>().activeUser!;
           final title = Text(localizations.newReport);
           final singleStation = selectedStationState.singleSelectedStation;
 
@@ -346,6 +353,9 @@ class _CounterCorrectorReportsRouteState
                 ),
               OkButton(
                 onPressed: () async {
+                  final selectedStationState =
+                      context.read<SelectedStationsProvider>();
+                  final user = context.read<Preferences>().activeUser!;
                   if (_formKey.currentState!.validate() &&
                       _textControllers.isNotEmpty) {
                     final List<Ran3> rans = [];

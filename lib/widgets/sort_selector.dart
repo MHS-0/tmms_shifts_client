@@ -4,22 +4,15 @@ import 'package:tmms_shifts_client/consts.dart';
 import 'package:tmms_shifts_client/data/backend_types.dart';
 import 'package:tmms_shifts_client/helpers.dart';
 import 'package:tmms_shifts_client/l18n/app_localizations.dart';
-import 'package:tmms_shifts_client/providers/preferences.dart';
 import 'package:tmms_shifts_client/providers/sort_provider.dart';
 
-class SortSelector extends StatefulWidget {
+class SortSelector extends StatelessWidget {
   const SortSelector({super.key});
 
   @override
-  State<SortSelector> createState() => _SortSelectorState();
-}
-
-class _SortSelectorState extends State<SortSelector> {
-  @override
   Widget build(BuildContext context) {
     final localizations = AppLocalizations.of(context)!;
-    final preferences = context.watch<Preferences>();
-    final sortState = context.watch<SortProvider>();
+    final sortState = context.read<SortProvider>();
     final selectedSort = sortState.selectedSort;
 
     final isByDateAscSelected = selectedSort == SortSelection.byDateAsc;
@@ -41,7 +34,7 @@ class _SortSelectorState extends State<SortSelector> {
             DropdownMenu(
               initialSelection: selectedSort,
               onSelected: (sort) {
-                if (sort == null) return;
+                if (sort == null || selectedSort == sort) return;
                 sortState.setSelectedSort(sort);
                 Helpers.addQueryToPath(
                   context,

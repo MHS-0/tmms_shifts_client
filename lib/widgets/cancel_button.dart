@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:tmms_shifts_client/consts.dart';
 import 'package:tmms_shifts_client/l18n/app_localizations.dart';
 
 class CancelButton extends StatelessWidget {
@@ -12,7 +13,7 @@ class CancelButton extends StatelessWidget {
     return FilledButton(
       child: Text(localizations.cancelButtonText),
       onPressed: () {
-        context.pop();
+        context.pop(cancelledMessage);
       },
     );
   }
