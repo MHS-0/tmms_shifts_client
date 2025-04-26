@@ -1159,13 +1159,16 @@ class PostCreateCorrectorBulkRequest {
 class Ran3 {
   @JsonKey(name: 'meter_amount')
   final String meterAmount;
-  @JsonKey(name: 'correction_amount')
-  final String correctionAmount;
+  @JsonKey(name: 'corrector_amount')
+  final String correctorAmount;
+  @JsonKey(name: 'corrector_meter_amount')
+  final String correctorMeterAmount;
   final String ran;
 
   const Ran3({
     required this.meterAmount,
-    required this.correctionAmount,
+    required this.correctorAmount,
+    required this.correctorMeterAmount,
     required this.ran,
   });
 
@@ -1176,7 +1179,8 @@ class Ran3 {
 
 @JsonSerializable(explicitToJson: true)
 class PostCreateCorrectorBulkResponse {
-  final int station;
+  @JsonKey(name: 'station_code')
+  final int stationCode;
   @JsonKey(
     fromJson: Helpers.parseJalaliFromIso8601,
     toJson: Helpers.serializeJalaliIntoIso8601,
@@ -1185,7 +1189,7 @@ class PostCreateCorrectorBulkResponse {
   final List<Ran4> rans;
 
   const PostCreateCorrectorBulkResponse({
-    required this.station,
+    required this.stationCode,
     required this.date,
     required this.rans,
   });
@@ -1201,8 +1205,8 @@ class PostCreateCorrectorBulkResponse {
 class Ran4 {
   @JsonKey(name: 'meter_amount')
   final int meterAmount;
-  @JsonKey(name: 'correction_amount')
-  final int correctionAmount;
+  @JsonKey(name: 'corrector_amount')
+  final int correctorAmount;
   @JsonKey(name: 'ran_sequence')
   final int ranSequence;
   final int ran;
@@ -1210,7 +1214,7 @@ class Ran4 {
   const Ran4({
     required this.ranSequence,
     required this.meterAmount,
-    required this.correctionAmount,
+    required this.correctorAmount,
     required this.ran,
   });
 
@@ -1238,7 +1242,8 @@ class PutUpdateCorrectorBulkRequest {
 
 @JsonSerializable(explicitToJson: true)
 class PutUpdateCorrectorBulkResponse {
-  final int station;
+  @JsonKey(name: 'station_code')
+  final int stationCode;
   @JsonKey(
     fromJson: Helpers.parseJalaliFromIso8601,
     toJson: Helpers.serializeJalaliIntoIso8601,
@@ -1248,7 +1253,7 @@ class PutUpdateCorrectorBulkResponse {
   final String? user;
 
   const PutUpdateCorrectorBulkResponse({
-    required this.station,
+    required this.stationCode,
     required this.date,
     required this.rans,
     this.user,

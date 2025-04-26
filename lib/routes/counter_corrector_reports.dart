@@ -121,7 +121,7 @@ class _CounterCorrectorReportsRouteState
                       _currentlyEditingReport = null;
                       selectedStationState.setSingleSelectedStation(null);
 
-                      Helpers.showEditDialogAndHandleResult(
+                      await Helpers.showEditDialogAndHandleResult(
                         context,
                         reportEditDialog(),
                       );
@@ -237,6 +237,7 @@ class _CounterCorrectorReportsRouteState
           const correctorTag = "Corrector";
           const correctorMeterTag = "CorrectorMeter";
 
+          clearDialogControllers();
           for (final ran in stationRans) {
             final String? meterContent =
                 _currentlyEditingReport?.rans
@@ -378,7 +379,8 @@ class _CounterCorrectorReportsRouteState
                         Ran3(
                           ran: ran.code.toString(),
                           meterAmount: meterAmount,
-                          correctionAmount: correctorAmount,
+                          correctorAmount: correctorAmount,
+                          correctorMeterAmount: correctorMeterAmount,
                         ),
                       );
                     }
@@ -524,5 +526,18 @@ class _CounterCorrectorReportsRouteState
         ),
       );
     }).toList();
+  }
+
+  void clearDialogControllers() {
+    for (final entry in _textControllers) {
+      entry.$3.dispose();
+    }
+    _textControllers.clear();
+  }
+
+  @override
+  void dispose() {
+    clearDialogControllers();
+    super.dispose();
   }
 }
