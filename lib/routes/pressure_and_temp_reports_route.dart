@@ -497,9 +497,7 @@ class _PressureAndTempReportsRouteState
                           inputTemperature: inputTemp,
                           outputTemperature: outputTemp,
                         ),
-                        // FIXME: This should be the shift id, but right now, it's not provided in the response
-                        // Should ask for it to be included if possible.
-                        2,
+                        shift.id,
                       );
                     } else {
                       final date = datePickerState.reportDate;

@@ -864,6 +864,7 @@ class GetPressureAndTemperatureFullReportResponse {
 
 @JsonSerializable(explicitToJson: true)
 class GetPressureAndTemperatureFullReportResponseResultItem {
+  final int id;
   @JsonKey(name: 'station_code')
   final int stationCode;
   @JsonKey(
@@ -878,6 +879,7 @@ class GetPressureAndTemperatureFullReportResponseResultItem {
   ) => _$GetPressureAndTemperatureFullReportResponseResultItemFromJson(json);
 
   const GetPressureAndTemperatureFullReportResponseResultItem({
+    required this.id,
     required this.stationCode,
     required this.date,
     required this.shifts,
