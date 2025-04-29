@@ -732,6 +732,7 @@ class GetMeterAndCorrectorFullReportResponseResultItem {
 
 @JsonSerializable(explicitToJson: true)
 class Ran2 {
+  final int? id;
   @JsonKey(name: 'meter_amount')
   final int meterAmount;
   @JsonKey(name: 'corrector_amount')
@@ -743,6 +744,7 @@ class Ran2 {
   final int ran;
 
   const Ran2({
+    required this.id,
     required this.meterAmount,
     required this.correctorAmount,
     required this.correctorMeterAmount,
@@ -785,7 +787,7 @@ class GetMonitoringFullReportResponseResultItem {
     toJson: Helpers.jalaliToDashDate,
   )
   final Jalali date;
-  final List<Shift> shifts;
+  final List<ShiftMonitoring> shifts;
   final int? consumption;
   @JsonKey(name: 'average_consumption')
   final int? averageConsumption;
@@ -808,6 +810,7 @@ class GetMonitoringFullReportResponseResultItem {
 
 @JsonSerializable(explicitToJson: true)
 class Shift {
+  final int id;
   @JsonKey(name: 'input_pressure')
   final int inputPressure;
   @JsonKey(name: 'output_pressure')
@@ -828,6 +831,7 @@ class Shift {
   factory Shift.fromJson(Map<String, dynamic> json) => _$ShiftFromJson(json);
 
   const Shift({
+    required this.id,
     required this.inputPressure,
     required this.outputPressure,
     required this.inputTemperature,
@@ -838,6 +842,41 @@ class Shift {
   });
 
   Map<String, dynamic> toJson() => _$ShiftToJson(this);
+}
+
+@JsonSerializable(explicitToJson: true)
+class ShiftMonitoring {
+  @JsonKey(name: 'input_pressure')
+  final int inputPressure;
+  @JsonKey(name: 'output_pressure')
+  final int outputPressure;
+  @JsonKey(name: 'input_temperature')
+  final int inputTemperature;
+  @JsonKey(name: 'output_temperature')
+  final int outputTemperature;
+  @JsonKey(
+    name: 'registered_datetime',
+    fromJson: Helpers.parseJalaliFromIso8601NullAware,
+    toJson: Helpers.serializeJalaliIntoIso8601NullAware,
+  )
+  final Jalali? registeredDatetime;
+  final String? user;
+  final String shift;
+
+  factory ShiftMonitoring.fromJson(Map<String, dynamic> json) =>
+      _$ShiftMonitoringFromJson(json);
+
+  const ShiftMonitoring({
+    required this.inputPressure,
+    required this.outputPressure,
+    required this.inputTemperature,
+    required this.outputTemperature,
+    this.registeredDatetime,
+    this.user,
+    required this.shift,
+  });
+
+  Map<String, dynamic> toJson() => _$ShiftMonitoringToJson(this);
 }
 
 @JsonSerializable(explicitToJson: true)
@@ -864,7 +903,6 @@ class GetPressureAndTemperatureFullReportResponse {
 
 @JsonSerializable(explicitToJson: true)
 class GetPressureAndTemperatureFullReportResponseResultItem {
-  final int id;
   @JsonKey(name: 'station_code')
   final int stationCode;
   @JsonKey(
@@ -879,7 +917,6 @@ class GetPressureAndTemperatureFullReportResponseResultItem {
   ) => _$GetPressureAndTemperatureFullReportResponseResultItemFromJson(json);
 
   const GetPressureAndTemperatureFullReportResponseResultItem({
-    required this.id,
     required this.stationCode,
     required this.date,
     required this.shifts,

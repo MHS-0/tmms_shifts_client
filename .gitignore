@@ -50,3 +50,4 @@ app.*.map.json
 # Custom
 /untranslatedText.txt
 /flutter/
+/certs/

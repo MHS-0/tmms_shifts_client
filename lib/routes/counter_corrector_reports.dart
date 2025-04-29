@@ -339,17 +339,20 @@ class _CounterCorrectorReportsRouteState
                 DeleteButton(
                   onPressed: () async {
                     final instance = NetworkInterface.instance();
-                    final result = await instance.deleteCorrectorData(
-                      // FIXME!: Id should be included in responses. Ask backend.
-                      _currentlyEditingReport!.stationCode,
-                    );
 
-                    if (!context.mounted) return;
-                    if (result == null) {
-                      context.pop(instance.lastErrorUserFriendly);
-                    } else {
-                      context.pop();
+                    for (final entry in _currentlyEditingReport!.rans) {
+                      final result = await instance.deleteCorrectorData(
+                        entry.id!,
+                      );
+
+                      if (!context.mounted) return;
+                      if (result == null) {
+                        context.pop(instance.lastErrorUserFriendly);
+                        return;
+                      }
                     }
+
+                    context.pop();
                   },
                 ),
               OkButton(

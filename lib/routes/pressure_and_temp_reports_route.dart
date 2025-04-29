@@ -452,17 +452,18 @@ class _PressureAndTempReportsRouteState
                 DeleteButton(
                   onPressed: () async {
                     final instance = NetworkInterface.instance();
-                    final result = await instance.destroyShiftData(
-                      // FIXME!: Id should be included in responses. Ask backend.
-                      _currentlyEditingReport!.stationCode,
-                    );
+                    bool? result;
 
-                    if (!context.mounted) return;
-                    if (result == null) {
-                      context.pop(instance.lastErrorUserFriendly);
-                    } else {
-                      context.pop();
+                    for (final entry in _currentlyEditingReport!.shifts) {
+                      result = await instance.destroyShiftData(entry.id);
+
+                      if (!context.mounted) return;
+                      if (result == null) {
+                        context.pop(instance.lastErrorUserFriendly);
+                        return;
+                      }
                     }
+                    context.pop();
                   },
                 ),
               OkButton(
@@ -483,7 +484,7 @@ class _PressureAndTempReportsRouteState
                     final inputTemp = int.parse(_inputTempController.text);
                     final outputTemp = int.parse(_outputTempController.text);
 
-                    final Object? result;
+                    Object? result;
 
                     if (_currentlyEditingReport != null) {
                       final shift = _currentlyEditingReport!;
@@ -497,7 +498,10 @@ class _PressureAndTempReportsRouteState
                           inputTemperature: inputTemp,
                           outputTemperature: outputTemp,
                         ),
-                        shift.id,
+                        _currentlyEditingReport!.shifts
+                            .where((e) => e.shift == selectedShift!)
+                            .firstOrNull!
+                            .id,
                       );
                     } else {
                       final date = datePickerState.reportDate;

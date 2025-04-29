@@ -368,6 +368,7 @@ final class Helpers {
 
       List<String> headers = [
         localizations.stationName,
+        localizations.date,
         localizations.outOfService,
         localizations.inputPressureAt6,
         localizations.outputPressureAt6,
@@ -413,10 +414,20 @@ final class Helpers {
               )
               .value = TextCellValue("${station.typeName} | ${station.title}");
         }
+
         sheet
             .cell(
               CellIndex.indexByColumnRow(
                 columnIndex: 1,
+                rowIndex: value.$1 + 1,
+              ),
+            )
+            .value = TextCellValue(value.$2.date.toJalaliDateTime());
+
+        sheet
+            .cell(
+              CellIndex.indexByColumnRow(
+                columnIndex: 2,
                 rowIndex: value.$1 + 1,
               ),
             )
@@ -431,7 +442,7 @@ final class Helpers {
           sheet
               .cell(
                 CellIndex.indexByColumnRow(
-                  columnIndex: 2 + (i * 4),
+                  columnIndex: 3 + (i * 4),
                   rowIndex: value.$1 + 1,
                 ),
               )
@@ -439,7 +450,7 @@ final class Helpers {
           sheet
               .cell(
                 CellIndex.indexByColumnRow(
-                  columnIndex: 3 + (i * 4),
+                  columnIndex: 4 + (i * 4),
                   rowIndex: value.$1 + 1,
                 ),
               )
@@ -447,7 +458,7 @@ final class Helpers {
           sheet
               .cell(
                 CellIndex.indexByColumnRow(
-                  columnIndex: 4 + (i * 4),
+                  columnIndex: 5 + (i * 4),
                   rowIndex: value.$1 + 1,
                 ),
               )
@@ -455,7 +466,7 @@ final class Helpers {
           sheet
               .cell(
                 CellIndex.indexByColumnRow(
-                  columnIndex: 5 + (i * 4),
+                  columnIndex: 6 + (i * 4),
                   rowIndex: value.$1 + 1,
                 ),
               )
@@ -469,7 +480,7 @@ final class Helpers {
           sheet
               .cell(
                 CellIndex.indexByColumnRow(
-                  columnIndex: 18,
+                  columnIndex: 19,
                   rowIndex: value.$1 + 1,
                 ),
               )
@@ -480,7 +491,7 @@ final class Helpers {
           sheet
               .cell(
                 CellIndex.indexByColumnRow(
-                  columnIndex: 19,
+                  columnIndex: 20,
                   rowIndex: value.$1 + 1,
                 ),
               )
