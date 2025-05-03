@@ -293,10 +293,10 @@ packages:
     dependency: "direct main"
     description:
       name: flex_color_picker
-      sha256: c083b79f1c57eaeed9f464368be376951230b3cb1876323b784626152a86e480
+      sha256: "8f753a1a026a13ea5cc5eddbae3ceb886f2537569ab2e5208efb1e3bb5af72ff"
       url: "https://pub.dev"
     source: hosted
-    version: "3.7.0"
+    version: "3.7.1"
   flex_color_scheme:
     dependency: "direct main"
     description:
@@ -704,10 +704,10 @@ packages:
     dependency: "direct main"
     description:
       name: provider
-      sha256: "489024f942069c2920c844ee18bb3d467c69e48955a4f32d1677f71be103e310"
+      sha256: "4abbd070a04e9ddc287673bf5a030c7ca8b685ff70218720abab8b092f53dd84"
       url: "https://pub.dev"
     source: hosted
-    version: "6.1.4"
+    version: "6.1.5"
   pub_semver:
     dependency: transitive
     description:
@@ -728,10 +728,10 @@ packages:
     dependency: "direct main"
     description:
       name: shamsi_date
-      sha256: "4614789ed11bfffe5ba0aa157a20f2857ab6328528401766e0d924e453c866bd"
+      sha256: b6c79ff34ddfb1e9e4761347f18e30afdd7d16cc3db77defd5a40e2d93894c51
       url: "https://pub.dev"
     source: hosted
-    version: "1.0.4"
+    version: "1.1.0"
   shared_preferences:
     dependency: "direct main"
     description:

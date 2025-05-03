@@ -31,8 +31,9 @@ const selectedCheckIcon = Icon(Icons.check_circle, color: Colors.lightGreen);
 const unselectedCheckIcon = Icon(Icons.circle_outlined, color: Colors.red);
 
 const centeredCircularProgressIndicator = Center(
-  child: CircularProgressIndicator(),
+  child: SizedBox(width: 50, height: 50, child: CircularProgressIndicator()),
 );
+const emptySizedBox = SizedBox();
 
 final sharedLogger = Logger("Shared Logger");
 

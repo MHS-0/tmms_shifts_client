@@ -43,18 +43,22 @@ class _MyDrawerState extends State<MyDrawer> {
                 () => navigateIfNotCurrentPage(
                   MonitoringFullReportRoute.routingName,
                 ),
-            child: DrawerHeader(
-              decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.inversePrimary,
-              ),
-              child: Center(
+            child: SizedBox(
+              child: DrawerHeader(
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.inversePrimary,
+                ),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
+                  mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Image.asset(iconAssetPath, width: 75, height: 75),
-                    Text(
-                      localizations.longTitle,
-                      style: const TextStyle(fontSize: 20),
+                    SizedBox(
+                      height: 40,
+                      child: Text(
+                        localizations.longTitle,
+                        style: const TextStyle(fontSize: 20),
+                      ),
                     ),
                   ],
                 ),

@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 import 'package:persian_datetime_picker/persian_datetime_picker.dart';
 import 'package:provider/provider.dart';
 import 'package:tmms_shifts_client/consts.dart';
@@ -11,19 +10,13 @@ import 'package:tmms_shifts_client/providers/date_picker_provider.dart';
 import 'package:tmms_shifts_client/providers/preferences.dart';
 import 'package:tmms_shifts_client/providers/selected_stations_provider.dart';
 import 'package:tmms_shifts_client/providers/sort_provider.dart';
-import 'package:tmms_shifts_client/widgets/cancel_button.dart';
-import 'package:tmms_shifts_client/widgets/data_fetch_error.dart';
+import 'package:tmms_shifts_client/widgets/data_fetch_future_builder.dart';
 import 'package:tmms_shifts_client/widgets/date_picker_row.dart';
-import 'package:tmms_shifts_client/widgets/date_picker_single_field.dart';
-import 'package:tmms_shifts_client/widgets/delete_button.dart';
 import 'package:tmms_shifts_client/widgets/drawer.dart';
 import 'package:tmms_shifts_client/widgets/horizontal_scrollable.dart';
 import 'package:tmms_shifts_client/widgets/new_report_button.dart';
-import 'package:tmms_shifts_client/widgets/ok_button.dart';
-import 'package:tmms_shifts_client/widgets/single_station_selection_dropdown.dart';
+import 'package:tmms_shifts_client/widgets/pressure_and_temp_report_edit_dialog.dart';
 import 'package:tmms_shifts_client/widgets/station_selection_field.dart';
-import 'package:tmms_shifts_client/widgets/title_and_text_field_row.dart';
-import 'package:tmms_shifts_client/widgets/vertical_horizontal_scrollable.dart';
 
 class PressureAndTempReportsRoute extends StatefulWidget {
   static const routingName = "pressure_and_temp_reports_route";
@@ -48,17 +41,6 @@ class PressureAndTempReportsRoute extends StatefulWidget {
 
 class _PressureAndTempReportsRouteState
     extends State<PressureAndTempReportsRoute> {
-  final _formKey = GlobalKey<FormState>();
-
-  String? selectedShift;
-  GetPressureAndTemperatureFullReportResponseResultItem?
-  _currentlyEditingReport;
-
-  final _inputPressureController = TextEditingController();
-  final _outputPressureController = TextEditingController();
-  final _inputTempController = TextEditingController();
-  final _outputTempController = TextEditingController();
-
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
@@ -92,55 +74,45 @@ class _PressureAndTempReportsRouteState
     final localizations = AppLocalizations.of(context)!;
     final user = context.watch<Preferences>().activeUser;
     final selectedStationState = context.read<SelectedStationsProvider>();
-    final sortState = context.read<SortProvider>();
     if (user == null || user.stations.isEmpty) return Scaffold();
 
     return SelectionArea(
       child: Scaffold(
         appBar: AppBar(title: Text(localizations.reportPressureAndTemp)),
         drawer: const MyDrawer(),
-        body: FutureBuilder(
+        body: DataFetchFutureBuilder(
           future: getPressureAndTempReports(context),
-          builder: (context, snapshot) {
-            if (snapshot.hasError) {
-              return DataFetchError(content: snapshot.error.toString());
-            } else if (!snapshot.hasData) {
-              return centeredCircularProgressIndicator;
-            } else {
-              final results = snapshot.data!.results;
+          builder: (context, data) {
+            final results = data.results;
 
-              return ListView(
-                padding: offsetAll16p,
-                children: [
-                  const SizedBox(),
-                  const StationSelectionField(),
-                  const DatePickerRow(),
-                  Helpers.getExcelExportSortRow(
-                    results.map((e) => e.toJson()).toList(),
-                    user.stations,
-                  ),
-                  const SizedBox(height: 16),
-                  NewReportButton(
-                    onPressed: () async {
-                      _currentlyEditingReport = null;
-                      selectedShift = null;
-                      setupTextControllers();
-                      selectedStationState.setSingleSelectedStation(null);
-                      await Helpers.showEditDialogAndHandleResult(
-                        context,
-                        reportEditDialog(),
-                      );
-                    },
-                  ),
-                  ..._getPressureAndTempReportCards(
-                    context,
-                    results,
-                    localizations,
-                    user,
-                  ),
-                ],
-              );
-            }
+            return ListView(
+              padding: offsetAll16p,
+              children: [
+                const SizedBox(),
+                const StationSelectionField(),
+                const DatePickerRow(),
+                Helpers.getExcelExportSortRow(
+                  results.map((e) => e.toJson()).toList(),
+                  user.stations,
+                ),
+                const SizedBox(height: 16),
+                NewReportButton(
+                  onPressed: () async {
+                    selectedStationState.setSingleSelectedStation(null);
+                    await Helpers.showEditDialogAndHandleResult(
+                      context,
+                      reportEditDialog(),
+                    );
+                  },
+                ),
+                ..._getPressureAndTempReportCards(
+                  context,
+                  results,
+                  localizations,
+                  user,
+                ),
+              ],
+            );
           },
         ),
       ),
@@ -161,16 +133,12 @@ class _PressureAndTempReportsRouteState
 
       return InkWell(
         onTap: () async {
-          _currentlyEditingReport = item;
-          selectedShift = item.shifts.firstOrNull?.shift ?? "06";
-
           final selectedStationState = context.read<SelectedStationsProvider>();
-          setupTextControllers();
           selectedStationState.setSingleSelectedStation(item.stationCode);
 
           await Helpers.showEditDialogAndHandleResult(
             context,
-            reportEditDialog(),
+            reportEditDialog(item),
           );
         },
         child: Padding(
@@ -260,285 +228,23 @@ class _PressureAndTempReportsRouteState
     }).toList();
   }
 
-  void setupTextControllers() {
-    Shift? shift;
-    if (selectedShift != null) {
-      shift =
-          _currentlyEditingReport?.shifts
-              .where((item) => item.shift.contains(selectedShift!))
-              .firstOrNull;
-    }
-    _inputPressureController.text = shift?.inputPressure.toString() ?? "";
-    _outputPressureController.text = shift?.outputPressure.toString() ?? "";
-    _inputTempController.text = shift?.inputTemperature.toString() ?? "";
-    _outputTempController.text = shift?.outputTemperature.toString() ?? "";
-  }
-
-  Future<GetShiftDataBulkLastActionResponse> getShiftDataLastAction(
-    int stationCode,
-  ) async {
-    final instance = NetworkInterface.instance();
-    final result = await instance.getShiftDataBulkLastAction(
-      SingleStationQuery(stationCode),
-    );
-    return await Helpers.returnWithErrorIfNeeded(result);
-  }
-
-  Widget reportEditDialog() {
-    final localizations = AppLocalizations.of(context)!;
-    final selectedStationState = context.read<SelectedStationsProvider>();
-    final datePickerState = context.read<DatePickerProvider>();
-
+  Widget reportEditDialog([
+    GetPressureAndTemperatureFullReportResponseResultItem? item,
+  ]) {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider.value(
-          value: selectedStationState,
+          value: context.read<SelectedStationsProvider>(),
           key: const ObjectKey("Pressure and temp dialog station provider"),
         ),
         ChangeNotifierProvider.value(
-          value: datePickerState,
+          value: context.read<DatePickerProvider>(),
           key: const ObjectKey("Pressure and temp dialog date provider"),
         ),
       ],
       child: Builder(
-        builder: (context) {
-          // So that we can refresh it using the DataFetchError's refresh button
-          // if needed.
-          // context.watch<Preferences>();
-
-          final selectedStationState =
-              context.watch<SelectedStationsProvider>();
-          final datePickerState = context.watch<DatePickerProvider>();
-          final singleStation = selectedStationState.singleSelectedStation;
-
-          FutureBuilder? lastActionFuture;
-          if (singleStation != null) {
-            lastActionFuture =
-                FutureBuilder<GetShiftDataBulkLastActionResponse>(
-                  future: getShiftDataLastAction(singleStation),
-                  builder: (context, snapshot) {
-                    if (snapshot.hasError) {
-                      return DataFetchError(content: snapshot.error.toString());
-                    } else if (!snapshot.hasData) {
-                      return SizedBox(
-                        height: 50,
-                        width: 50,
-                        child: centeredCircularProgressIndicator,
-                      );
-                    } else {
-                      final shift = snapshot.data!;
-
-                      return DataTable(
-                        headingRowColor: WidgetStatePropertyAll(
-                          Theme.of(context).colorScheme.inversePrimary,
-                        ),
-                        columns: Helpers.getDataColumns(
-                          context,
-                          [
-                            localizations.shift,
-                            localizations.date,
-                            localizations.registeredDate,
-                            localizations.inputPressure,
-                            localizations.outputPressure,
-                            localizations.inputTemp,
-                            localizations.outputTemp,
-                            localizations.stationCode,
-                          ],
-                          8,
-                          210,
-                        ),
-                        rows: [
-                          DataRow(
-                            cells: Helpers.getDataCells([
-                              shift.shift,
-                              Helpers.jalaliToDashDate(shift.date),
-                              Helpers.serializeJalaliIntoIso8601(
-                                shift.registeredDatetime,
-                              ),
-                              shift.inputPressure,
-                              shift.outputPressure,
-                              shift.inputTemperature,
-                              shift.outputTemperature,
-                              shift.station,
-                            ]),
-                          ),
-                        ],
-                      );
-                    }
-                  },
-                );
-          }
-
-          return AlertDialog(
-            title: Text(localizations.newReport),
-            content: SizedBox(
-              width: 1500,
-              height: 800,
-              child: BothScrollable(
-                child: SizedBox(
-                  width: 1500,
-                  child: Form(
-                    key: _formKey,
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      spacing: 16,
-                      children: [
-                        if (lastActionFuture != null) ...[
-                          Text(localizations.lastAction),
-                          lastActionFuture,
-                          SizedBox(),
-                        ],
-                        if (_currentlyEditingReport == null) ...[
-                          Helpers.titleAndWidgetRow(
-                            "${localizations.station} :",
-                            const SingleStationSelectionDropdown(),
-                          ),
-                          const DatePickerSingleField(),
-                        ],
-                        Helpers.titleAndWidgetRow(
-                          "${localizations.shift} :",
-                          DropdownMenu(
-                            initialSelection: selectedShift,
-                            onSelected: (shift) {
-                              if (shift == null) return;
-
-                              selectedShift = shift;
-                              setupTextControllers();
-                              setState(() {});
-                            },
-                            width: 300,
-                            hintText: localizations.shift,
-                            dropdownMenuEntries:
-                                ["06", "12", "18", "24"].map((entry) {
-                                  return DropdownMenuEntry(
-                                    value: entry,
-                                    label: entry,
-                                  );
-                                }).toList(),
-                          ),
-                        ),
-                        TitleAndTextFieldRow(
-                          title: localizations.inputPressure,
-                          controller: _inputPressureController,
-                          numbersOnly: true,
-                        ),
-                        TitleAndTextFieldRow(
-                          title: localizations.outputPressure,
-                          controller: _outputPressureController,
-                          numbersOnly: true,
-                        ),
-                        TitleAndTextFieldRow(
-                          title: localizations.inputTemp,
-                          controller: _inputTempController,
-                          numbersOnly: true,
-                        ),
-                        TitleAndTextFieldRow(
-                          title: localizations.outputTemp,
-                          controller: _outputTempController,
-                          numbersOnly: true,
-                        ),
-                        const SizedBox(height: 8),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-            ),
-            actions: [
-              if (context.read<Preferences>().activeUser!.isStaff &&
-                  _currentlyEditingReport != null)
-                DeleteButton(
-                  onPressed: () async {
-                    final instance = NetworkInterface.instance();
-                    bool? result;
-
-                    for (final entry in _currentlyEditingReport!.shifts) {
-                      result = await instance.destroyShiftData(entry.id);
-
-                      if (!context.mounted) return;
-                      if (result == null) {
-                        context.pop(instance.lastErrorUserFriendly);
-                        return;
-                      }
-                    }
-                    context.pop();
-                  },
-                ),
-              OkButton(
-                onPressed: () async {
-                  if (_formKey.currentState!.validate() &&
-                      selectedShift != null &&
-                      selectedStationState.singleSelectedStation != null) {
-                    final selectedStationState =
-                        context.read<SelectedStationsProvider>();
-                    final datePickerState = context.read<DatePickerProvider>();
-                    final instance = NetworkInterface.instance();
-                    final inputPressure = int.parse(
-                      _inputPressureController.text,
-                    );
-                    final outputPressure = int.parse(
-                      _outputPressureController.text,
-                    );
-                    final inputTemp = int.parse(_inputTempController.text);
-                    final outputTemp = int.parse(_outputTempController.text);
-
-                    Object? result;
-
-                    if (_currentlyEditingReport != null) {
-                      final shift = _currentlyEditingReport!;
-                      result = await instance.updateShiftData(
-                        UpdateShiftDataRequest(
-                          station: shift.stationCode,
-                          shift: selectedShift!,
-                          date: shift.date,
-                          inputPressure: inputPressure,
-                          outputPressure: outputPressure,
-                          inputTemperature: inputTemp,
-                          outputTemperature: outputTemp,
-                        ),
-                        _currentlyEditingReport!.shifts
-                            .where((e) => e.shift == selectedShift!)
-                            .firstOrNull!
-                            .id,
-                      );
-                    } else {
-                      final date = datePickerState.reportDate;
-                      result = await instance.createShiftData(
-                        CreateShiftDataRequest(
-                          station: selectedStationState.singleSelectedStation!,
-                          shift: selectedShift!,
-                          date: date,
-                          inputPressure: inputPressure,
-                          outputPressure: outputPressure,
-                          inputTemperature: inputTemp,
-                          outputTemperature: outputTemp,
-                        ),
-                      );
-                    }
-                    if (context.mounted && result == null) {
-                      context.pop(instance.lastErrorUserFriendly);
-                    } else if (context.mounted) {
-                      context.pop();
-                    }
-                  }
-                },
-              ),
-              const CancelButton(),
-            ],
-          );
-        },
+        builder: (_) => PressureAndTempReportEditDialog(entry: item),
       ),
     );
-  }
-
-  @override
-  void dispose() {
-    _inputPressureController.dispose();
-    _outputPressureController.dispose();
-    _inputTempController.dispose();
-    _outputTempController.dispose();
-    super.dispose();
   }
 }

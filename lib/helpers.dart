@@ -189,7 +189,7 @@ final class Helpers {
     return output;
   }
 
-  static Future<String?> showCustomDialog(
+  static Future<T?> showCustomDialog<T>(
     BuildContext context,
     Widget widget, {
     bool barrierDismissable = false,
@@ -197,7 +197,7 @@ final class Helpers {
     return await showDialog(
       barrierDismissible: barrierDismissable,
       context: context,
-      builder: (context) => widget,
+      builder: (_) => widget,
     );
   }
 

@@ -50,7 +50,7 @@ const loginPath = '/login';
 
 /// The route configuration.
 final GoRouter _router = GoRouter(
-  routes: <RouteBase>[
+  routes: [
     GoRoute(
       path: monitoringFullReportPath,
       name: MonitoringFullReportRoute.routingName,
@@ -181,12 +181,12 @@ final GoRouter _router = GoRouter(
     ),
   ],
   redirect: (context, state) async {
+    final statePath = state.uri.path;
     final user = context.read<Preferences>().activeUser;
     final loggedIn = user != null;
 
     final instance = NetworkInterface.instance();
 
-    final statePath = state.uri.path;
     final queryParameters = state.uri.queryParameters.map(
       (k, v) => MapEntry(k, v),
     );

@@ -130,5 +130,7 @@
   "outputTempAt24": "Output temp at 24",
   "gasConsumptionM2": "Gas consumption (cubic meter)",
   "gasConsumptionAverageM2": "Average gas consumption (cubic meter)",
+  "warning": "Warning!",
+  "inputDataInconsistentWithAverageData": "Input data is inconsistent with teh average data!\nDo you want to submit the input anyways?",
   "pageNotFound": "Page not found!"
 }

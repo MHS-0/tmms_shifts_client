@@ -130,5 +130,7 @@
   "outputTempAt24": "دمای خروجی ساعت 24",
   "gasConsumptionM2": "گاز مصرفی (متر مکعب استاندارد)",
   "gasConsumptionAverageM2": "میانگین هفته گاز مصرفی (متر مکعب استاندارد)",
+  "warning": "هشدار!",
+  "inputDataInconsistentWithAverageData": "داده های ورودی با میانگین داده های قبلی مطابقت ندارند!\nآیا میخواهید با این حال این ورودی ثبت شود؟",
   "pageNotFound": "صفحه مورد نظر یافت نشد!"
 }

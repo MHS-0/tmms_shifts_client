@@ -171,6 +171,10 @@ class Preferences extends ChangeNotifier {
       } else {
         _activeUser = previousUser;
       }
+    } else {
+      // Set it to null for testing purposes where we might call load()
+      // multiple times with different preset SharedPreferences values.
+      _activeUser = null;
     }
   }
 

@@ -170,6 +170,8 @@ class _CounterCorrectorReportsRouteState
           final title = Text(localizations.newReport);
           final singleStation = selectedStationState.singleSelectedStation;
 
+          GetCorrectorDataBulkLastActionResponse? lastAction;
+
           FutureBuilder? lastActionFuture;
           if (singleStation != null) {
             lastActionFuture =
@@ -185,6 +187,7 @@ class _CounterCorrectorReportsRouteState
                         child: centeredCircularProgressIndicator,
                       );
                     } else {
+                      lastAction = snapshot.data;
                       return DataTable(
                         headingRowColor: WidgetStatePropertyAll(
                           Theme.of(context).colorScheme.inversePrimary,
@@ -300,7 +303,6 @@ class _CounterCorrectorReportsRouteState
               ),
             ]);
           }
-
           return AlertDialog(
             title: title,
             content: SizedBox(
@@ -357,11 +359,12 @@ class _CounterCorrectorReportsRouteState
                 ),
               OkButton(
                 onPressed: () async {
-                  final selectedStationState =
-                      context.read<SelectedStationsProvider>();
-                  final user = context.read<Preferences>().activeUser!;
                   if (_formKey.currentState!.validate() &&
                       _textControllers.isNotEmpty) {
+                    final selectedStationState =
+                        context.read<SelectedStationsProvider>();
+                    final user = context.read<Preferences>().activeUser!;
+
                     final List<Ran3> rans = [];
                     for (final ran in stationRans) {
                       final list =
@@ -390,19 +393,91 @@ class _CounterCorrectorReportsRouteState
 
                     final instance = NetworkInterface.instance();
                     final Object? result;
+                    final Jalali date;
+                    final Station? station;
+
+                    if (_currentlyEditingReport != null) {
+                      date = _currentlyEditingReport!.date;
+                      station =
+                          user.stations
+                              .where(
+                                (e) =>
+                                    e.code ==
+                                    _currentlyEditingReport!.stationCode,
+                              )
+                              .firstOrNull;
+                    } else {
+                      date = datePickerState.reportDate;
+                      station =
+                          user.stations
+                              .where(
+                                (e) =>
+                                    e.code ==
+                                    selectedStationState.singleSelectedStation,
+                              )
+                              .firstOrNull;
+                    }
+
+                    // TODO:
+                    // Maybe add minDailyConsumption too?
+                    if (lastAction != null &&
+                        station != null &&
+                        station.maxDailyConsumption != null) {
+                      final action = lastAction!;
+                      final dayDifference = date.distanceFrom(action.date);
+                      int oldConsumption = 0;
+                      int newConsumption = 0;
+
+                      for (final entry in action.rans) {
+                        oldConsumption += entry.correctorAmount;
+                      }
+
+                      for (final entry in rans) {
+                        // FIXME???
+                        // The text is *almost* guaranteed to be a correct number input,
+                        // but framework bugs could happen at some point, so for now,
+                        // add 0 if conversion to int fails.
+                        newConsumption +=
+                            int.tryParse(entry.correctorAmount) ?? 0;
+                      }
+
+                      if ((newConsumption - oldConsumption) >
+                          (station.maxDailyConsumption! * dayDifference)) {
+                        final String? result = await Helpers.showCustomDialog(
+                          context,
+                          AlertDialog(
+                            title: Text(localizations.warning),
+                            icon: const Icon(Icons.warning),
+                            content: Text(
+                              localizations
+                                  .inputDataInconsistentWithAverageData,
+                            ),
+                            actions: [
+                              OkButton(
+                                onPressed: () {
+                                  context.pop("OK");
+                                },
+                              ),
+                              const CancelButton(),
+                            ],
+                          ),
+                        );
+
+                        if (result != "OK") {
+                          // Go back to the edit dialog without sending any data
+                          return;
+                        }
+                        // Otherwise just continue from here and submit the user input data.
+                      }
+                    }
+
                     if (_currentlyEditingReport != null) {
                       result = await instance.putUpdateCorrectorBulk(
-                        PutUpdateCorrectorBulkRequest(
-                          date: _currentlyEditingReport!.date,
-                          rans: rans,
-                        ),
+                        PutUpdateCorrectorBulkRequest(date: date, rans: rans),
                       );
                     } else {
                       result = await instance.createCorrectorBulk(
-                        PostCreateCorrectorBulkRequest(
-                          date: datePickerState.reportDate,
-                          rans: rans,
-                        ),
+                        PostCreateCorrectorBulkRequest(date: date, rans: rans),
                       );
                     }
                     if (context.mounted && result == null) {

@@ -310,7 +310,7 @@ class NetworkInterface {
 
   Future<GetPressureAndTemperatureFullReportResponse?>
   getPressureAndTemperatureFullReport({ToFromDateStationsQuery? query}) async {
-    return sendRequest(() async {
+    return await sendRequest(() async {
       final Response<Map<String, dynamic>> resp = await dio.get(
         "/reports/pressure_and_temperature/full_report",
         options: authHeaderWithToken,
