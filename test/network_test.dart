@@ -81,6 +81,7 @@ Future<void> setupForTests() async {
   // TODO: Do it cleaner.
   globalNetworkInterface.dio;
 
+  /// Login and Logout mocks
   dioAdapter.onPost(
     "/user/login/",
     (server) {
@@ -94,10 +95,12 @@ Future<void> setupForTests() async {
     server.reply(204, null, delay: customDelay);
   }, headers: NetworkInterface.filledHeaderMap);
 
+  /// Get Profile mocks
   dioAdapter.onGet("/user/profile/", (server) {
     server.reply(200, _mockProfileRespJson, delay: customDelay);
   }, headers: NetworkInterface.filledHeaderMap);
 
+  /// Pressure and temperature mocks.
   dioAdapter.onPost(
     "/pressure_and_temperature/shift/",
     (server) {
@@ -146,6 +149,20 @@ Future<void> setupForTests() async {
     headers: NetworkInterface.filledHeaderMap,
   );
 
+  dioAdapter.onGet(
+    "/reports/pressure_and_temperature/full_report",
+    (server) {
+      server.reply(
+        200,
+        _mockPressureAndTempFullReportRespJson,
+        delay: customDelay,
+      );
+    },
+    queryParameters: mockToFromDateStationsQueryEmptyStationsJson,
+    headers: NetworkInterface.filledHeaderMap,
+  );
+
+  /// Meter and corrector mocks.
   dioAdapter.onPost(
     "/meter_and_corrector/shift/",
     (server) {
@@ -191,26 +208,10 @@ Future<void> setupForTests() async {
     headers: NetworkInterface.filledHeaderMap,
   );
 
-  dioAdapter.onGet("/user/profile/", (server) {
-    server.reply(200, _mockProfileRespJson, delay: customDelay);
-  }, headers: NetworkInterface.filledHeaderMap);
-
+  /// Station groups' mocks.
   dioAdapter.onGet("/reports/station_groups/", (server) {
     server.reply(200, _mockUserstationGroupsRespJson, delay: customDelay);
   }, headers: NetworkInterface.filledHeaderMap);
-
-  dioAdapter.onGet(
-    "/reports/pressure_and_temperature/full_report",
-    (server) {
-      server.reply(
-        200,
-        _mockPressureAndTempFullReportRespJson,
-        delay: customDelay,
-      );
-    },
-    queryParameters: mockToFromDateStationsQueryEmptyStationsJson,
-    headers: NetworkInterface.filledHeaderMap,
-  );
 }
 
 void main() {
