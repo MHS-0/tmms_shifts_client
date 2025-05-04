@@ -404,14 +404,22 @@ class NetworkInterface {
   Future<PostCreateCorrectorBulkResponse?> createCorrectorBulk(
     PostCreateCorrectorBulkRequest data,
   ) async {
-    return await sendRequest(() async {
-      final Response<Map<String, dynamic>> resp = await dio.post(
-        "/meter_and_corrector/bulk/",
-        options: authHeaderWithToken,
-        data: data.toJson(),
-      );
-      return PostCreateCorrectorBulkResponse.fromJson(resp.data!);
-    });
+    return await sendRequest(
+      () async {
+        final Response<Map<String, dynamic>> resp = await dio.post(
+          "/meter_and_corrector/bulk/",
+          options: authHeaderWithToken,
+          data: data.toJson(),
+        );
+        return PostCreateCorrectorBulkResponse.fromJson(resp.data!);
+      },
+      [
+        (
+          500,
+          "خطا در ثبت اطلاعات!\nبرای *به روزرسانی* داده های یک روز از ثبت جدید استفاده نکنید!",
+        ),
+      ],
+    );
   }
 
   Future<PutUpdateCorrectorBulkResponse?> putUpdateCorrectorBulk(

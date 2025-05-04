@@ -421,6 +421,9 @@ class _CounterCorrectorReportsRouteState
                     // TODO:
                     // Maybe add minDailyConsumption too?
                     if (lastAction != null &&
+                        // Only show warning if last action is from at least 1 day in the past,
+                        // otherwise, don't show it regardless.
+                        lastAction!.date.distanceFrom(date) > 0 &&
                         station != null &&
                         station.maxDailyConsumption != null) {
                       final action = lastAction!;
