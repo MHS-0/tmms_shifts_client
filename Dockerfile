@@ -1,15 +1,9 @@
-FROM nginx
+From fischerscode/flutter AS build
+
 RUN apt-get update
 RUN apt-get install -y curl git unzip nginx
 COPY . /app
 WORKDIR /app
-# Download the Flutter framework so that we can use flutter and dart commands.
-# 
-# This usually takes a long time, so for iterative purposes, just copy and paste the flutter sdk folder
-# on your system into the root directory of this project (alongside this same Dockerfile) and then comment
-# the line below.
-RUN git clone --branch stable --single-branch https://www.github.com/flutter/flutter.git 
-ENV PATH "/app/flutter/bin:${PATH}"
 
 # Build the flutter project for web
 RUN flutter clean
@@ -17,6 +11,16 @@ RUN flutter pub get
 RUN flutter gen-l10n
 RUN dart run build_runner build
 RUN flutter build web
+
+FROM nginx AS runtime
+# Download the Flutter framework so that we can use flutter and dart commands.
+# 
+# This usually takes a long time, so for iterative purposes, just copy and paste the flutter sdk folder
+# on your system into the root directory of this project (alongside this same Dockerfile) and then comment
+# the line below.
+# RUN git clone --branch stable --single-branch https://www.github.com/flutter/flutter.git 
+# ENV PATH "/app/flutter/bin:${PATH}"
+COPY --from=build . /app
 
 # Remove the default nginx stuff and replace it with our Flutter web app
 RUN rm -rf /usr/share/nginx/html

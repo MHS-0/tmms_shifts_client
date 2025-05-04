@@ -215,7 +215,7 @@ class _CounterCorrectorReportsRouteState
                                       ran.ranSequence,
                                       ran.ran,
                                       ran.meterAmount,
-                                      ran.correctorMeterAmount,
+                                      ran.correctorAmount,
                                     ]),
                                   ),
                                 )
@@ -423,7 +423,7 @@ class _CounterCorrectorReportsRouteState
                     if (lastAction != null &&
                         // Only show warning if last action is from at least 1 day in the past,
                         // otherwise, don't show it regardless.
-                        lastAction!.date.distanceFrom(date) > 0 &&
+                        // lastAction!.date.distanceFrom(date) > 0 &&
                         station != null &&
                         station.maxDailyConsumption != null) {
                       final action = lastAction!;
@@ -450,7 +450,11 @@ class _CounterCorrectorReportsRouteState
                           context,
                           AlertDialog(
                             title: Text(localizations.warning),
-                            icon: const Icon(Icons.warning),
+                            icon: const Icon(
+                              Icons.warning,
+                              color: Colors.red,
+                              size: 40,
+                            ),
                             content: Text(
                               localizations
                                   .inputDataInconsistentWithAverageData,
