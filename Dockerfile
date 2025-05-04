@@ -1,4 +1,4 @@
-From fischerscode/flutter AS build
+From instrumentisto/flutter:3.29.3 AS build
 
 RUN apt-get update
 RUN apt-get install -y curl git unzip nginx
@@ -20,7 +20,7 @@ FROM nginx AS runtime
 # the line below.
 # RUN git clone --branch stable --single-branch https://www.github.com/flutter/flutter.git 
 # ENV PATH "/app/flutter/bin:${PATH}"
-COPY --from=build . /app
+COPY --from=build /app /app
 
 # Remove the default nginx stuff and replace it with our Flutter web app
 RUN rm -rf /usr/share/nginx/html
