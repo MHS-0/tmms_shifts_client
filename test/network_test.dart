@@ -6,32 +6,219 @@ import 'package:collection/collection.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http_mock_adapter/http_mock_adapter.dart';
+import 'package:persian_datetime_picker/persian_datetime_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tmms_shifts_client/data/backend_types.dart';
+import 'package:tmms_shifts_client/helpers.dart';
 import 'package:tmms_shifts_client/network_interface.dart';
 import 'package:tmms_shifts_client/providers/preferences.dart';
+
+const customDelay = Duration(milliseconds: 0);
 
 final globalDio = Dio(
   BaseOptions(extra: {"withCredentials": true}, preserveHeaderCase: true),
 );
 final globalNetworkInterface = NetworkInterface.instance(dio: globalDio);
+final dioAdapter = DioAdapter(dio: globalDio);
+final yesterday = Helpers.jalaliToDashDate(Jalali.now().addDays(-1));
+final today = Helpers.jalaliToDashDate(Jalali.now());
+final mockToFromDateStationsQueryEmptyStations = ToFromDateStationsQuery(
+  fromDate: Helpers.jalaliToDashDate(Jalali.now().addDays(-1)),
+  toDate: Helpers.jalaliToDashDate(Jalali.now()),
+);
+final mockToFromDateStationsQueryEmptyStationsJson =
+    mockToFromDateStationsQueryEmptyStations.toJson();
+
+final mockToFromDateQuery = ToFromDateQuery(
+  fromDate: Helpers.jalaliToDashDate(Jalali.now().addDays(-1)),
+  toDate: Helpers.jalaliToDashDate(Jalali.now()),
+);
+final mockToFromDateQueryJson =
+    mockToFromDateStationsQueryEmptyStations.toJson();
+
+final _mockLoginReq = MockData.mockLoginRequest;
+final _mockLoginRespJson = MockData.mockLoginResponse.toJson();
+final _mockMonitoringFullReportRespJson =
+    MockData.mockGetMonitoringFullReportResponse.toJson();
+final _mockProfileRespJson = MockData.mockGetProfileResponse.toJson();
+final _mockUserstationGroupsRespJson =
+    MockData.mockGetUsersCustomStationsGroupResponse.toJson();
+final _mockPressureAndTempFullReportRespJson =
+    MockData.mockGetPressureAndTemperatureFullReportResponse.toJson();
+final _mockCreateShiftDataReq = MockData.mockCreateShiftDataRequest;
+final _mockCreateShiftDataRespJson =
+    MockData.mockCreateShiftDataResponse.toJson();
+final _mockUpdateShiftDataReq = MockData.mockUpdateShiftDataRequest;
+final _mockUpdateShiftDataRespJson =
+    MockData.mockUpdateShiftDataResponse.toJson();
+final _mockGetShiftDataRespJson = MockData.mockGetShiftDataResponse.toJson();
+final _mockGetShiftLastActionRespJson =
+    MockData.mockGetShiftLastActionResponse.toJson();
+final _mockGetShiftDataListRespJson =
+    MockData.mockGetShiftsDataListResponse.toJson();
+final _mockCreateCorrectorReq = MockData.mockCreateCorrectorRequest;
+final _mockCreateCorrectorRespJson =
+    MockData.mockCreateCorrectorResponse.toJson();
+final _mockUpdateCorrectorReq = MockData.mockUpdateCorrectorRequest;
+final _mockUpdateCorrectorRespJson =
+    MockData.mockUpdateCorrectorResponse.toJson();
+final _mockGetCorrectorDataRespJson =
+    MockData.mockGetCorrectorDataResponse.toJson();
+final _mockGetCorrectorDataListRespJson =
+    MockData.mockGetCorrectorDataListResponse.toJson();
+
+/// Adds an active user entry to SharedPreferences
+/// and mocks every endpoint used throughout our tests with the
+/// [MockData] entries.
+Future<void> setupForTests() async {
+  SharedPreferences.resetStatic();
+  SharedPreferences.setMockInitialValues({
+    activeUserKey: jsonEncode(MockData.mockActiveUser),
+  });
+  await Preferences.instance().load();
+  NetworkInterface.updateUsedToken();
+  // To initialize the Dio instance.
+  // TODO: Do it cleaner.
+  globalNetworkInterface.dio;
+
+  dioAdapter.onPost(
+    "/user/login/",
+    (server) {
+      server.reply(200, _mockLoginRespJson, delay: customDelay);
+    },
+    data: _mockLoginReq.toJson(),
+    headers: NetworkInterface.emptyHeaderMap,
+  );
+
+  dioAdapter.onPost("/user/logout", (server) {
+    server.reply(204, null, delay: customDelay);
+  }, headers: NetworkInterface.filledHeaderMap);
+
+  dioAdapter.onGet("/user/profile/", (server) {
+    server.reply(200, _mockProfileRespJson, delay: customDelay);
+  }, headers: NetworkInterface.filledHeaderMap);
+
+  dioAdapter.onPost(
+    "/pressure_and_temperature/shift/",
+    (server) {
+      server.reply(200, _mockCreateShiftDataRespJson, delay: customDelay);
+    },
+    data: _mockCreateShiftDataReq.toJson(),
+    headers: NetworkInterface.filledHeaderMap,
+  );
+
+  dioAdapter.onPut(
+    "/pressure_and_temperature/shift/3/",
+    (server) {
+      server.reply(200, _mockUpdateShiftDataRespJson, delay: customDelay);
+    },
+    data: _mockUpdateShiftDataReq.toJson(),
+    headers: NetworkInterface.filledHeaderMap,
+  );
+
+  dioAdapter.onGet(
+    "/pressure_and_temperature/shift/3/",
+    (server) {
+      server.reply(200, _mockGetShiftDataRespJson, delay: customDelay);
+    },
+    headers: NetworkInterface.filledHeaderMap,
+  );
+
+  dioAdapter.onGet(
+    "/pressure_and_temperature/last-action/",
+    (server) {
+      server.reply(200, _mockGetShiftLastActionRespJson, delay: customDelay);
+    },
+    queryParameters: {"station_codes": "12345"},
+    headers: NetworkInterface.filledHeaderMap,
+  );
+
+  dioAdapter.onDelete("/pressure_and_temperature/shift/3", (server) {
+    server.reply(204, null, delay: customDelay);
+  }, headers: NetworkInterface.filledHeaderMap);
+
+  dioAdapter.onGet(
+    "/pressure_and_temperature/shift",
+    (server) {
+      server.reply(200, _mockGetShiftDataListRespJson, delay: customDelay);
+    },
+    queryParameters: mockToFromDateStationsQueryEmptyStationsJson,
+    headers: NetworkInterface.filledHeaderMap,
+  );
+
+  dioAdapter.onPost(
+    "/meter_and_corrector/shift/",
+    (server) {
+      server.reply(200, _mockCreateCorrectorRespJson, delay: customDelay);
+    },
+    data: _mockCreateCorrectorReq.toJson(),
+    headers: NetworkInterface.filledHeaderMap,
+  );
+
+  dioAdapter.onPut(
+    "/meter_and_corrector/shift/3/",
+    (server) {
+      server.reply(200, _mockUpdateCorrectorRespJson, delay: customDelay);
+    },
+    data: _mockUpdateCorrectorReq.toJson(),
+    headers: NetworkInterface.filledHeaderMap,
+  );
+
+  dioAdapter.onGet("/meter_and_corrector/shift/3/", (server) {
+    server.reply(200, _mockGetCorrectorDataRespJson, delay: customDelay);
+  }, headers: NetworkInterface.filledHeaderMap);
+
+  dioAdapter.onDelete("/meter_and_corrector/shift/3/", (server) {
+    server.reply(204, null, delay: customDelay);
+  }, headers: NetworkInterface.filledHeaderMap);
+
+  dioAdapter.onGet(
+    "/meter_and_corrector/shift",
+    (server) {
+      server.reply(200, _mockGetCorrectorDataListRespJson, delay: customDelay);
+    },
+    queryParameters: mockToFromDateQueryJson,
+    headers: NetworkInterface.filledHeaderMap,
+  );
+
+  dioAdapter.onGet(
+    "/reports/monitoring/full_report",
+    (server) {
+      server.reply(200, _mockMonitoringFullReportRespJson, delay: customDelay);
+    },
+    queryParameters:
+        ToFromDateStationsQuery(fromDate: yesterday, toDate: today).toJson(),
+    headers: NetworkInterface.filledHeaderMap,
+  );
+
+  dioAdapter.onGet("/user/profile/", (server) {
+    server.reply(200, _mockProfileRespJson, delay: customDelay);
+  }, headers: NetworkInterface.filledHeaderMap);
+
+  dioAdapter.onGet("/reports/station_groups/", (server) {
+    server.reply(200, _mockUserstationGroupsRespJson, delay: customDelay);
+  }, headers: NetworkInterface.filledHeaderMap);
+
+  dioAdapter.onGet(
+    "/reports/pressure_and_temperature/full_report",
+    (server) {
+      server.reply(
+        200,
+        _mockPressureAndTempFullReportRespJson,
+        delay: customDelay,
+      );
+    },
+    queryParameters: mockToFromDateStationsQueryEmptyStationsJson,
+    headers: NetworkInterface.filledHeaderMap,
+  );
+}
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
   group("Network and backend related (requests and responses)", () {
-    const customDelay = Duration(milliseconds: 0);
-    final dioAdapter = DioAdapter(dio: globalDio);
-
     setUpAll(() async {
-      SharedPreferences.resetStatic();
-      SharedPreferences.setMockInitialValues({
-        activeUserKey: jsonEncode(MockData.mockActiveUser),
-      });
-      await Preferences.instance().load();
-      // To initialize the Dio instance.
-      // TODO: Do it cleaner.
-      globalNetworkInterface.dio;
+      await setupForTests();
     });
 
     test("Default values/consts", () async {
@@ -53,310 +240,143 @@ void main() {
     });
 
     test("Login", () async {
-      final req = MockData.mockLoginRequest;
-      final respJson = MockData.mockLoginResponse.toJson();
-      dioAdapter.onPost(
-        "/user/login/",
-        (server) {
-          server.reply(200, respJson, delay: customDelay);
-        },
-        data: req.toJson(),
-        headers: NetworkInterface.emptyHeaderMap,
+      final respDeserialized = await globalNetworkInterface.login(
+        _mockLoginReq,
       );
-
-      final respDeserialized = await globalNetworkInterface.login(req);
       assert(
-        DeepCollectionEquality().equals(respDeserialized!.toJson(), respJson),
+        DeepCollectionEquality().equals(
+          respDeserialized!.toJson(),
+          _mockLoginRespJson,
+        ),
       );
     });
 
     test("Logout", () async {
-      dioAdapter.onPost("/user/logout", (server) {
-        server.reply(204, null, delay: customDelay);
-      }, headers: NetworkInterface.filledHeaderMap);
-
       await globalNetworkInterface.logout();
     });
 
     test("Get Profile", () async {
-      final respJson = MockData.mockGetProfileResponse.toJson();
-      dioAdapter.onGet("/user/profile/", (server) {
-        server.reply(200, respJson, delay: customDelay);
-      }, headers: NetworkInterface.filledHeaderMap);
-
       final respDeserialized = await globalNetworkInterface.getProfile(
         MockData.mockLoginResponse.token,
       );
       assert(
-        DeepCollectionEquality().equals(respDeserialized!.toJson(), respJson),
+        DeepCollectionEquality().equals(
+          respDeserialized!.toJson(),
+          _mockProfileRespJson,
+        ),
       );
     });
 
     test("Create Shift Data", () async {
-      final req = MockData.mockCreateShiftDataRequest;
-      final respJson = MockData.mockCreateShiftDataResponse.toJson();
-      dioAdapter.onPost(
-        "/pressure_and_temperature/shift/",
-        (server) {
-          server.reply(200, respJson, delay: customDelay);
-        },
-        data: req.toJson(),
-        headers: NetworkInterface.filledHeaderMap,
-      );
-
       final respDeserialized = await globalNetworkInterface.createShiftData(
-        req,
+        _mockCreateShiftDataReq,
       );
       assert(
-        DeepCollectionEquality().equals(respDeserialized!.toJson(), respJson),
+        DeepCollectionEquality().equals(
+          respDeserialized!.toJson(),
+          _mockCreateShiftDataRespJson,
+        ),
       );
     });
 
     test("Update Shift Data", () async {
-      final req = MockData.mockUpdateShiftDataRequest;
-      final respJson = MockData.mockUpdateShiftDataResponse.toJson();
-      dioAdapter.onPut(
-        "/pressure_and_temperature/shift/3/",
-        (server) {
-          server.reply(200, respJson, delay: customDelay);
-        },
-        data: req.toJson(),
-        headers: NetworkInterface.filledHeaderMap,
-      );
-
       final respDeserialized = await globalNetworkInterface.updateShiftData(
-        req,
+        _mockUpdateShiftDataReq,
         3,
       );
       assert(
-        DeepCollectionEquality().equals(respDeserialized!.toJson(), respJson),
+        DeepCollectionEquality().equals(
+          respDeserialized!.toJson(),
+          _mockUpdateShiftDataRespJson,
+        ),
       );
     });
 
     test("Get Shift Data", () async {
-      final respJson = MockData.mockGetShiftDataResponse.toJson();
-      dioAdapter.onGet(
-        "/pressure_and_temperature/shift/3/",
-        (server) {
-          server.reply(200, respJson, delay: customDelay);
-        },
-        headers: NetworkInterface.filledHeaderMap,
-      );
-
       final respDeserialized = await globalNetworkInterface.getShiftData(3);
       assert(
-        DeepCollectionEquality().equals(respDeserialized.toJson(), respJson),
+        DeepCollectionEquality().equals(
+          respDeserialized.toJson(),
+          _mockGetShiftDataRespJson,
+        ),
       );
     });
 
     test("Get Shift Last Action", () async {
-      final respJson = MockData.mockGetShiftLastActionResponse.toJson();
-      dioAdapter.onGet(
-        "/pressure_and_temperature/last-action/",
-        (server) {
-          server.reply(200, respJson, delay: customDelay);
-        },
-        headers: NetworkInterface.filledHeaderMap,
-      );
-
-      final respDeserialized =
-          await globalNetworkInterface.getShiftLastAction();
-      assert(
-        DeepCollectionEquality().equals(respDeserialized.toJson(), respJson),
-      );
-
-      dioAdapter.onGet(
-        "/pressure_and_temperature/last-action/",
-        (server) {
-          server.reply(200, respJson, delay: customDelay);
-        },
-        queryParameters: {"station_codes": "12345"},
-        headers: NetworkInterface.filledHeaderMap,
-      );
-
-      final respDeserialized2 = await globalNetworkInterface.getShiftLastAction(
+      final respDeserialized = await globalNetworkInterface.getShiftLastAction(
         query: StationsQuery(stationCodes: [12345]),
       );
       assert(
-        DeepCollectionEquality().equals(respDeserialized2.toJson(), respJson),
+        DeepCollectionEquality().equals(
+          respDeserialized.toJson(),
+          _mockGetShiftLastActionRespJson,
+        ),
       );
     });
 
     test("Destroy Shift Data", () async {
-      dioAdapter.onDelete(
-        "/pressure_and_temperature/shift/3",
-        (server) {
-          server.reply(204, null, delay: customDelay);
-        },
-        headers: NetworkInterface.filledHeaderMap,
-      );
-
       await globalNetworkInterface.destroyShiftData(3);
     });
 
     test("Get Shifts Data List", () async {
-      final respJson = MockData.mockGetShiftsDataListResponse.toJson();
-      dioAdapter.onGet(
-        "/pressure_and_temperature/shift",
-        (server) {
-          server.reply(200, respJson, delay: customDelay);
-        },
-        queryParameters: {
-          "from_date": "1402-01-01",
-          "to_date": "1403-02-02",
-          "station_codes": "3123,432",
-        },
-        headers: NetworkInterface.filledHeaderMap,
-      );
-
       final respDeserialized = await globalNetworkInterface.getShiftsDataList(
-        query: ToFromDateStationsQuery(
-          fromDate: "1402-01-01",
-          toDate: "1403-02-02",
-          stationCodes: [3123, 432],
+        query: mockToFromDateStationsQueryEmptyStations,
+      );
+      assert(
+        DeepCollectionEquality().equals(
+          respDeserialized!.toJson(),
+          _mockGetShiftDataListRespJson,
         ),
-      );
-      assert(
-        DeepCollectionEquality().equals(respDeserialized!.toJson(), respJson),
-      );
-
-      dioAdapter.onGet(
-        "/pressure_and_temperature/shift",
-        (server) {
-          server.reply(200, respJson, delay: customDelay);
-        },
-        queryParameters: {"from_date": "1402-01-01"},
-        headers: NetworkInterface.filledHeaderMap,
-      );
-
-      final respDeserialized2 = await globalNetworkInterface.getShiftsDataList(
-        query: ToFromDateStationsQuery(fromDate: "1402-01-01"),
-      );
-      assert(
-        DeepCollectionEquality().equals(respDeserialized2!.toJson(), respJson),
-      );
-
-      dioAdapter.onGet(
-        "/pressure_and_temperature/shift",
-        (server) {
-          server.reply(200, respJson, delay: customDelay);
-        },
-        headers: NetworkInterface.filledHeaderMap,
-      );
-
-      final respDeserialized3 =
-          await globalNetworkInterface.getShiftsDataList();
-      assert(
-        DeepCollectionEquality().equals(respDeserialized3!.toJson(), respJson),
       );
     });
 
     test("Create Corrector", () async {
-      final req = MockData.mockCreateCorrectorRequest;
-      final respJson = MockData.mockCreateCorrectorResponse.toJson();
-      dioAdapter.onPost(
-        "/meter_and_corrector/shift/",
-        (server) {
-          server.reply(200, respJson, delay: customDelay);
-        },
-        data: req.toJson(),
-        headers: NetworkInterface.filledHeaderMap,
-      );
-
       final respDeserialized = await globalNetworkInterface.createCorrector(
-        req,
+        _mockCreateCorrectorReq,
       );
       assert(
-        DeepCollectionEquality().equals(respDeserialized.toJson(), respJson),
+        DeepCollectionEquality().equals(
+          respDeserialized.toJson(),
+          _mockCreateCorrectorRespJson,
+        ),
       );
     });
 
     test("Update Corrector", () async {
-      final req = MockData.mockUpdateCorrectorRequest;
-      final respJson = MockData.mockUpdateCorrectorResponse.toJson();
-      dioAdapter.onPut(
-        "/meter_and_corrector/shift/3/",
-        (server) {
-          server.reply(200, respJson, delay: customDelay);
-        },
-        data: req.toJson(),
-        headers: NetworkInterface.filledHeaderMap,
-      );
-
       final respDeserialized = await globalNetworkInterface.updateCorrector(
-        req,
+        _mockUpdateCorrectorReq,
         3,
       );
       assert(
-        DeepCollectionEquality().equals(respDeserialized.toJson(), respJson),
+        DeepCollectionEquality().equals(
+          respDeserialized.toJson(),
+          _mockUpdateCorrectorRespJson,
+        ),
       );
     });
 
     test("Get Corrector Data", () async {
-      final respJson = MockData.mockGetCorrectorDataResponse.toJson();
-      dioAdapter.onGet("/meter_and_corrector/shift/3/", (server) {
-        server.reply(200, respJson, delay: customDelay);
-      }, headers: NetworkInterface.filledHeaderMap);
-
       final respDeserialized = await globalNetworkInterface.getCorrectorData(3);
       assert(
-        DeepCollectionEquality().equals(respDeserialized.toJson(), respJson),
+        DeepCollectionEquality().equals(
+          respDeserialized.toJson(),
+          _mockGetCorrectorDataRespJson,
+        ),
       );
     });
 
     test("Get Corrector List Data", () async {
-      final respJson = MockData.mockGetCorrectorDataListResponse.toJson();
-      dioAdapter.onGet(
-        "/meter_and_corrector/shift",
-        (server) {
-          server.reply(200, respJson, delay: customDelay);
-        },
-        queryParameters: {"from_date": "1402-01-01", "to_date": "1403-02-02"},
-        headers: NetworkInterface.filledHeaderMap,
-      );
-
       final respDeserialized = await globalNetworkInterface
-          .getCorrectorDataList(
-            query: ToFromDateQuery(
-              toDate: "1403-02-02",
-              fromDate: "1402-01-01",
-            ),
-          );
+          .getCorrectorDataList(query: mockToFromDateQuery);
       assert(
-        DeepCollectionEquality().equals(respDeserialized.toJson(), respJson),
-      );
-
-      dioAdapter.onGet(
-        "/meter_and_corrector/shift",
-        (server) {
-          server.reply(200, respJson, delay: customDelay);
-        },
-        queryParameters: {"from_date": "1402-01-01"},
-        headers: NetworkInterface.filledHeaderMap,
-      );
-
-      final respDeserialized2 = await globalNetworkInterface
-          .getCorrectorDataList(query: ToFromDateQuery(fromDate: "1402-01-01"));
-      assert(
-        DeepCollectionEquality().equals(respDeserialized2.toJson(), respJson),
-      );
-
-      dioAdapter.onGet("/meter_and_corrector/shift", (server) {
-        server.reply(200, respJson, delay: customDelay);
-      }, headers: NetworkInterface.filledHeaderMap);
-
-      final respDeserialized3 =
-          await globalNetworkInterface.getCorrectorDataList();
-      assert(
-        DeepCollectionEquality().equals(respDeserialized3.toJson(), respJson),
+        DeepCollectionEquality().equals(
+          respDeserialized.toJson(),
+          _mockGetCorrectorDataListRespJson,
+        ),
       );
     });
 
     test("Destroy Corrector Data", () async {
-      dioAdapter.onDelete("/meter_and_corrector/shift/3/", (server) {
-        server.reply(204, null, delay: customDelay);
-      }, headers: NetworkInterface.filledHeaderMap);
-
       await globalNetworkInterface.deleteCorrectorData(3);
     });
   });
